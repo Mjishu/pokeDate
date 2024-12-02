@@ -15,7 +15,6 @@
 </script>
 
 <div class="content" use:trapFocus>
-  <button onclick={() => dislikedCard()}>&lt</button>
   <img
     src="./images/dog.webp"
     alt=""
@@ -23,7 +22,10 @@
     class:liked={isLiked}
     class:disliked={isLiked == false}
   />
-  <button onclick={() => likedCard()}>&gt</button>
+  <div class="liked-buttons">
+    <button onclick={() => dislikedCard()}>&lt</button>
+    <button onclick={() => likedCard()}>&gt</button>
+  </div>
   <button onclick={() => console.log($state.snapshot(isLiked))}
     >State of isLiked</button
   >
@@ -32,25 +34,41 @@
 <style>
   .content {
     display: flex;
+    flex-direction: column;
+    gap: 1rem;
   }
+
+  .liked-buttons {
+    display: flex;
+    gap: 5%;
+  }
+  .liked-buttons button {
+    width: 47.5%;
+  }
+
   .card {
     margin: 0;
     padding: 0;
     border-radius: 5px;
+    width: 20rem;
+    transform: translateX(0);
     border: none;
+    opacity: 1;
     transition:
-      width 2s,
-      height 2s;
+      width 2s ease-in-out,
+      transform 1.25s ease-in-out,
+      opacity 1s ease-out 500ms;
   }
 
   .card.liked {
-    transform: translateX(1);
+    transform: translate3d(25rem, 5rem, 0) rotateZ(35deg);
     border: 1px solid green;
-    width: 50rem;
+    opacity: 0.1;
   }
 
   .card.disliked {
-    transform: translateX(-1);
+    transform: translate3d(-25rem, 5rem, 0) rotateZ(-35deg);
     border: 1px solid red;
+    opacity: 0.1;
   }
 </style>
