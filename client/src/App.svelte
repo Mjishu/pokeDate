@@ -1,28 +1,56 @@
 <script lang="ts">
-  import { likedCard, dislikedCard } from "./helpers/card";
   import { trapFocus } from "./helpers/actions.svelte";
 
-  function onKeyDown(e) {
-    switch (e.keyCode) {
-      case 37:
-        likedCard();
-        break;
-      case 39:
-        dislikedCard();
-        break;
-    }
+  let isLiked = $state();
+
+  export function likedCard() {
+    isLiked = true;
+    console.log("You liked this card!");
+  }
+
+  export function dislikedCard() {
+    isLiked = false;
+    console.log("Youd disliked this card");
   }
 </script>
 
 <div class="content" use:trapFocus>
-  <div>This is the images!</div>
+  <button onclick={() => dislikedCard()}>&lt</button>
+  <img
+    src="./images/dog.webp"
+    alt=""
+    class="card"
+    class:liked={isLiked}
+    class:disliked={isLiked == false}
+  />
+  <button onclick={() => likedCard()}>&gt</button>
+  <button onclick={() => console.log($state.snapshot(isLiked))}
+    >State of isLiked</button
+  >
 </div>
-
-<img src="./images/dog.webp" alt="" />
 
 <style>
   .content {
     display: flex;
-    flex-direction: column;
+  }
+  .card {
+    margin: 0;
+    padding: 0;
+    border-radius: 5px;
+    border: none;
+    transition:
+      width 2s,
+      height 2s;
+  }
+
+  .card.liked {
+    transform: translateX(1);
+    border: 1px solid green;
+    width: 50rem;
+  }
+
+  .card.disliked {
+    transform: translateX(-1);
+    border: 1px solid red;
   }
 </style>
