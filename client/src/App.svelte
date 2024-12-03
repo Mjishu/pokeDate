@@ -1,16 +1,17 @@
 <script lang="ts">
+  import { cardResponse } from "./helpers/card";
   import { trapFocus } from "./helpers/actions.svelte";
 
-  let isLiked = $state();
+  let isLiked = $state<boolean | undefined>();
 
-  export function likedCard() {
+  async function likedCard() {
     isLiked = true;
-    console.log("You liked this card!");
+    await cardResponse(isLiked, "01");
   }
 
-  export function dislikedCard() {
+  async function dislikedCard() {
     isLiked = false;
-    console.log("Youd disliked this card");
+    await cardResponse(isLiked, "01");
   }
 </script>
 
