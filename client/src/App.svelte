@@ -1,8 +1,24 @@
 <script lang="ts">
-  import { cardResponse } from "./helpers/card";
+  import { cardResponse, getRandomCard } from "./helpers/card";
   import { trapFocus } from "./helpers/actions.svelte";
+  import { onMount } from "svelte";
+
+  type Card = {
+    id: string;
+    animal_id: string;
+    organization_id: string;
+    image_src: string;
+    liked: boolean;
+  };
 
   let isLiked = $state<boolean | undefined>();
+  let cardInfo = $state<Card | undefined>(undefined);
+  let isLoading = $state(true);
+
+  onMount(async () => {
+    cardInfo = await getRandomCard();
+    isLoading = false;
+  });
 
   async function likedCard() {
     isLiked = true;
@@ -15,22 +31,26 @@
   }
 </script>
 
-<div class="content" use:trapFocus>
-  <img
-    src="./images/dog.webp"
-    alt=""
-    class="card"
-    class:liked={isLiked}
-    class:disliked={isLiked == false}
-  />
-  <div class="liked-buttons">
-    <button onclick={() => dislikedCard()}>&lt</button>
-    <button onclick={() => likedCard()}>&gt</button>
+{#if isLoading}
+  <div>Loading...</div>
+{:else}
+  <div class="content" use:trapFocus>
+    <img
+      src={cardInfo?.image_src}
+      alt="animal"
+      class="card"
+      class:liked={isLiked}
+      class:disliked={isLiked == false}
+    />
+    <div class="liked-buttons">
+      <button onclick={() => dislikedCard()}>&lt</button>
+      <button onclick={() => likedCard()}>&gt</button>
+    </div>
+    <button onclick={() => console.log($state.snapshot(isLiked))}
+      >State of isLiked</button
+    >
   </div>
-  <button onclick={() => console.log($state.snapshot(isLiked))}
-    >State of isLiked</button
-  >
-</div>
+{/if}
 
 <style>
   .content {

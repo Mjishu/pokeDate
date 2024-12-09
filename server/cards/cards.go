@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math/rand"
 	"net/http"
 )
 
@@ -17,6 +18,8 @@ type Card struct {
 
 var data = []Card{
 	Card{Id: "001", Animal_id: "001", Organization_id: "001", Image_src: "./images/dog.webp"},
+	Card{Id: "002", Animal_id: "002", Organization_id: "002", Image_src: "./images/dog.webp"},
+	Card{Id: "003", Animal_id: "003", Organization_id: "003", Image_src: "./images/dog.webp"},
 }
 
 func CardsController(w http.ResponseWriter, r *http.Request) {
@@ -30,11 +33,20 @@ func CardsController(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
 	switch r.Method {
+
+	//* GET
 	case http.MethodGet:
-		fmt.Println(("Post was called"))
+		w.Header().Set("Content-Type", "application/json")
+
+		random := rand.Intn(len(data))
+		w.WriteHeader(http.StatusOK)
+		if err := json.NewEncoder(w).Encode(data[random]); err != nil {
+			http.Error(w, "unable to encode response", http.StatusInternalServerError)
+		}
+		return
+	//* POST
 	case http.MethodPost:
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Println("Get was called")
 		id := GetIdFromBody("id", w, r)
 
 		for _, card := range data {
