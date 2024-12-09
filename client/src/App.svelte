@@ -6,12 +6,12 @@
 
   async function likedCard() {
     isLiked = true;
-    await cardResponse(isLiked, "01");
+    await cardResponse(isLiked, "001");
   }
 
   async function dislikedCard() {
     isLiked = false;
-    await cardResponse(isLiked, "01");
+    await cardResponse(isLiked, "001");
   }
 </script>
 
@@ -63,13 +63,11 @@
 
   .card.liked {
     transform: translate3d(25rem, 5rem, 0) rotateZ(35deg);
-    border: 1px solid green;
     opacity: 0.1;
   }
 
   .card.disliked {
     transform: translate3d(-25rem, 5rem, 0) rotateZ(-35deg);
-    border: 1px solid red;
     opacity: 0.1;
   }
 </style>
