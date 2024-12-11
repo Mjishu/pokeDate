@@ -2,9 +2,11 @@
   import { cardResponse, getRandomCard } from "./helpers/card";
   import { trapFocus } from "./helpers/actions.svelte";
   import { onMount } from "svelte";
+  import CardComponent from "./components/CardComponent.svelte";
 
   type Animal = {
     id: string;
+    name: string;
     species: string;
     date_of_birth: string;
     sex: string;
@@ -25,19 +27,23 @@
   let cardInfo = $state<Card | undefined>(undefined);
   let isLoading = $state(true);
 
-  onMount(async () => {
+  async function newCard() {
     cardInfo = await getRandomCard();
     isLoading = false;
-  });
+  }
+
+  onMount(newCard);
 
   async function likedCard() {
     isLiked = true;
     await cardResponse(isLiked, "001");
+    newCard();
   }
 
   async function dislikedCard() {
     isLiked = false;
     await cardResponse(isLiked, "001");
+    newCard();
   }
 </script>
 
@@ -45,13 +51,7 @@
   <div>Loading...</div>
 {:else}
   <div class="content" use:trapFocus>
-    <img
-      src={cardInfo?.animal_info.image_src}
-      alt="animal"
-      class="card"
-      class:liked={isLiked}
-      class:disliked={isLiked == false}
-    />
+    <CardComponent card_info={cardInfo} {isLiked} />
     <div class="liked-buttons">
       <button onclick={() => dislikedCard()}>&lt</button>
       <button onclick={() => likedCard()}>&gt</button>
@@ -75,29 +75,5 @@
   }
   .liked-buttons button {
     width: 47.5%;
-  }
-
-  .card {
-    margin: 0;
-    padding: 0;
-    border-radius: 5px;
-    width: 20rem;
-    transform: translateX(0);
-    border: none;
-    opacity: 1;
-    transition:
-      width 2s ease-in-out,
-      transform 1.25s ease-in-out,
-      opacity 1s ease-out 500ms;
-  }
-
-  .card.liked {
-    transform: translate3d(25rem, 5rem, 0) rotateZ(35deg);
-    opacity: 0.1;
-  }
-
-  .card.disliked {
-    transform: translate3d(-25rem, 5rem, 0) rotateZ(-35deg);
-    opacity: 0.1;
   }
 </style>

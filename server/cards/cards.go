@@ -18,6 +18,7 @@ type Card struct {
 
 type Animal struct {
 	Id            string `json:"id"`
+	Name          string `json:"name"`
 	Species       string `json:"species"`
 	Date_of_birth string `json:"date_of_birth"`
 	Sex           string `json:"sex"`
@@ -26,12 +27,13 @@ type Animal struct {
 }
 
 var animalData = []Animal{
-	{Id: "001", Species: "dog", Date_of_birth: "2020/04/23", Sex: "female", Available: true, Image_src: "./images/dog.webp"},
+	{Id: "001", Name: "Nilah", Species: "dog", Date_of_birth: "2020/04/23", Sex: "female", Available: true, Image_src: "./images/dog.webp"},
+	{Id: "002", Name: "fortuna", Species: "cat", Date_of_birth: "2023/09/02", Sex: "male", Available: false, Image_src: "./images/cat.jpg"},
 }
 
 var data = []Card{
 	{Id: "001", Animal_id: "001", Organization_id: "001", Animal_info: animalData[0]},
-	{Id: "002", Animal_id: "002", Organization_id: "002", Animal_info: animalData[0]},
+	{Id: "002", Animal_id: "002", Organization_id: "002", Animal_info: animalData[1]},
 	{Id: "003", Animal_id: "003", Organization_id: "003", Animal_info: animalData[0]},
 }
 
