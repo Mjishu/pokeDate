@@ -26,24 +26,35 @@
   let isLiked = $state<boolean | undefined>();
   let cardInfo = $state<Card | undefined>(undefined);
   let isLoading = $state(true);
+  let cardDone = $state(false);
 
   async function newCard() {
     cardInfo = await getRandomCard();
     isLoading = false;
+    isLiked = undefined;
+    cardDone = false;
   }
 
-  onMount(newCard);
+  onMount(async () => {
+    await newCard();
+  });
 
   async function likedCard() {
     isLiked = true;
     await cardResponse(isLiked, "001");
-    newCard();
+    setTimeout(async () => {
+      cardDone = true;
+      await newCard();
+    }, 1300);
   }
 
   async function dislikedCard() {
     isLiked = false;
     await cardResponse(isLiked, "001");
-    newCard();
+    setTimeout(async () => {
+      cardDone = true;
+      await newCard();
+    }, 1300);
   }
 </script>
 
@@ -51,7 +62,7 @@
   <div>Loading...</div>
 {:else}
   <div class="content" use:trapFocus>
-    <CardComponent card_info={cardInfo} {isLiked} />
+    <CardComponent card_info={cardInfo} {isLiked} {cardDone} />
     <div class="liked-buttons">
       <button onclick={() => dislikedCard()}>&lt</button>
       <button onclick={() => likedCard()}>&gt</button>

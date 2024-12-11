@@ -4,8 +4,9 @@
 
 <div
       class="card"
-      class:liked={props.isLiked}
+      class:liked={props.isLiked == true}
       class:disliked={props.isLiked == false}
+      class:cardDone={props.cardDone}
 >
       <img
             src={props.card_info.animal_info.image_src}
@@ -35,10 +36,14 @@
             transform: translateX(0);
             opacity: 1;
             transition:
-                  width 2s ease-in-out,
                   transform 1.25s ease-in-out,
                   opacity 1s ease-out 500ms;
             overflow-y: scroll;
+      }
+      .cardDone {
+            transition: none !important;
+            transform: translate3d(0, 0, 0) rotateZ(0) !important;
+            opacity: 1 !important;
       }
       .card img {
             width: auto;
