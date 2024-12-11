@@ -12,14 +12,27 @@ type Card struct {
 	Id              string `json:"id"`
 	Animal_id       string `josn:"animal_id"`
 	Organization_id string `json:"organization_id"`
-	Image_src       string `json:"image_src"`
 	Liked           bool   `json:"liked"`
+	Animal_info     Animal `json:"animal_info"`
+}
+
+type Animal struct {
+	Id            string `json:"id"`
+	Species       string `json:"species"`
+	Date_of_birth string `json:"date_of_birth"`
+	Sex           string `json:"sex"`
+	Available     bool   `json:"available"`
+	Image_src     string `json:"image_src"`
+}
+
+var animalData = []Animal{
+	{Id: "001", Species: "dog", Date_of_birth: "2020/04/23", Sex: "female", Available: true, Image_src: "./images/dog.webp"},
 }
 
 var data = []Card{
-	Card{Id: "001", Animal_id: "001", Organization_id: "001", Image_src: "./images/dog.webp"},
-	Card{Id: "002", Animal_id: "002", Organization_id: "002", Image_src: "./images/dog.webp"},
-	Card{Id: "003", Animal_id: "003", Organization_id: "003", Image_src: "./images/dog.webp"},
+	{Id: "001", Animal_id: "001", Organization_id: "001", Animal_info: animalData[0]},
+	{Id: "002", Animal_id: "002", Organization_id: "002", Animal_info: animalData[0]},
+	{Id: "003", Animal_id: "003", Organization_id: "003", Animal_info: animalData[0]},
 }
 
 func CardsController(w http.ResponseWriter, r *http.Request) {

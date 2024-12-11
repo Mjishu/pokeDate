@@ -3,12 +3,22 @@
   import { trapFocus } from "./helpers/actions.svelte";
   import { onMount } from "svelte";
 
+  type Animal = {
+    id: string;
+    species: string;
+    date_of_birth: string;
+    sex: string;
+    available: boolean;
+    image_src: string;
+  };
+
   type Card = {
     id: string;
     animal_id: string;
     organization_id: string;
     image_src: string;
     liked: boolean;
+    animal_info: Animal;
   };
 
   let isLiked = $state<boolean | undefined>();
@@ -36,7 +46,7 @@
 {:else}
   <div class="content" use:trapFocus>
     <img
-      src={cardInfo?.image_src}
+      src={cardInfo?.animal_info.image_src}
       alt="animal"
       class="card"
       class:liked={isLiked}
