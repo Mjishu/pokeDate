@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	"github.com/mjishu/pokeDate/cards"
+	"github.com/mjishu/pokeDate/database"
 )
 
 func main() {
@@ -13,6 +14,8 @@ func main() {
 
 	mux.HandleFunc("/", index)
 	mux.HandleFunc("/cards", cards.CardsController)
+
+	database.Database()
 
 	port := ":8080"
 
