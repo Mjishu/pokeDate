@@ -8,14 +8,6 @@ import (
 	"net/http"
 )
 
-type Card struct {
-	Id              string `json:"id"`
-	Animal_id       string `josn:"animal_id"`
-	Organization_id string `json:"organization_id"`
-	Liked           bool   `json:"liked"`
-	Animal_info     Animal `json:"animal_info"`
-}
-
 type Animal struct {
 	Id            string `json:"id"`
 	Name          string `json:"name"`
@@ -24,6 +16,14 @@ type Animal struct {
 	Sex           string `json:"sex"`
 	Available     bool   `json:"available"`
 	Image_src     string `json:"image_src"`
+}
+
+type Card struct {
+	Id              string `json:"id"`
+	Animal_id       string `josn:"animal_id"`
+	Organization_id string `json:"organization_id"`
+	Liked           bool   `json:"liked"`
+	Animal_info     Animal `json:"animal_info"`
 }
 
 var animalData = []Animal{

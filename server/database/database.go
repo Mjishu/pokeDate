@@ -18,25 +18,17 @@ type Location struct {
 }
 
 func Database() {
-	dbpool, err := pgxpool.New(context.Background(), getDatabaseURL())
+	ctx := context.Background()
+	dbpool, err := pgxpool.New(ctx, getDatabaseURL())
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect to database %v\n", err)
 		os.Exit(1)
 	}
 	defer dbpool.Close()
 
-	var location Location
-	err = dbpool.QueryRow(context.Background(), "SELECT * FROM locations").Scan(
-		&location.Id,
-		&location.Name,
-		&location.Location_type,
-		&location.Parent_id,
-	)
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "QueryRow failed!: %v\n", err)
-		os.Exit(1)
-	}
-	fmt.Println(location)
+	callSchemas(ctx, dbpool)
+	PopulateDB(ctx, dbpool)
+	// getLocations(ctx, dbpool)
 }
 
 func getDatabaseURL() string {
