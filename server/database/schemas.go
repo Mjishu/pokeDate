@@ -44,7 +44,6 @@ func createAnimals(ctx context.Context, pool *pgxpool.Pool) {
 			sex sex_enum NOT NULL,
 			price FLOAT,
 			available BOOLEAN NOT NULL,
-			image_src TEXT,
 			animal_type VARCHAR(50) NOT NULL
 		);
 	`
@@ -108,3 +107,7 @@ func queryFail(err error) {
 	}
 	fmt.Println("Table 'users' created successfully")
 }
+
+// ! TODO: ADD animal_shots_join, organization_animals, animal_images
+
+// ! less todo: add messages, conversation, conversation_member

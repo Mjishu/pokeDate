@@ -14,17 +14,17 @@
     image_src: string;
   };
 
-  type Card = {
-    id: string;
-    animal_id: string;
-    organization_id: string;
-    image_src: string;
-    liked: boolean;
-    animal_info: Animal;
-  };
+  // type Card = {
+  //   id: string;
+  //   animal_id: string;
+  //   organization_id: string;
+  //   image_src: string;
+  //   liked: boolean;
+  //   animal_info: Animal;
+  // };
 
   let isLiked = $state<boolean | undefined>();
-  let cardInfo = $state<Card | undefined>(undefined);
+  let cardInfo = $state<Animal | undefined>(undefined);
   let isLoading = $state(true);
   let cardDone = $state(false);
 

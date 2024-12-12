@@ -2,22 +2,24 @@ package database
 
 import (
 	"context"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type Animal struct {
-	Id            string `json:"id"`
-	Name          string `json:"name"`
-	Species       string `json:"species"`
-	Date_of_birth string `json:"date_of_birth"`
-	Sex           string `json:"sex"`
-	Available     bool   `json:"available"`
-	Image_src     string `json:"image_src"`
+	Id            string
+	Name          string
+	Species       string
+	Date_of_birth time.Time
+	Sex           string
+	Price         *float32
+	Available     bool
+	Animal_type   string
 }
 
 func PopulateDB(ctx context.Context, pool *pgxpool.Pool) {
-	makeAnimals(ctx, pool)
+	// makeAnimals(ctx, pool)
 }
 
 func makeAnimals(ctx context.Context, pool *pgxpool.Pool) {

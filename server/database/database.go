@@ -17,13 +17,18 @@ type Location struct {
 	Parent_id     *int
 }
 
-func Database() {
+func createConnection() (context.Context, *pgxpool.Pool) {
 	ctx := context.Background()
 	dbpool, err := pgxpool.New(ctx, getDatabaseURL())
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect to database %v\n", err)
 		os.Exit(1)
 	}
+	return ctx, dbpool
+}
+
+func Database() {
+	ctx, dbpool := createConnection()
 	defer dbpool.Close()
 
 	callSchemas(ctx, dbpool)

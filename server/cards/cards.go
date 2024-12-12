@@ -4,8 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"math/rand"
 	"net/http"
+
+	"github.com/mjishu/pokeDate/database"
 )
 
 type Animal struct {
@@ -53,9 +54,10 @@ func CardsController(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		w.Header().Set("Content-Type", "application/json")
 
-		random := rand.Intn(len(data))
+		animal := database.GetRandomAnimal()
+
 		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(data[random]); err != nil {
+		if err := json.NewEncoder(w).Encode(animal); err != nil {
 			http.Error(w, "unable to encode response", http.StatusInternalServerError)
 		}
 		return
@@ -64,17 +66,14 @@ func CardsController(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		id := GetIdFromBody("id", w, r)
 
-		for _, card := range data {
-			if card.Id == id {
-				w.WriteHeader(http.StatusOK)
-				if err := json.NewEncoder(w).Encode(card); err != nil {
-					http.Error(w, "unable to encode response", http.StatusInternalServerError)
-				}
-				return
-			}
+		animal := database.GetAnimals(id)
+
+		w.WriteHeader(http.StatusOK)
+		if err := json.NewEncoder(w).Encode(animal); err != nil {
+			http.Error(w, "unable to encode response", http.StatusInternalServerError)
 		}
+		return
 	}
-	fmt.Println("looking for cards to control")
 	GetFromHeader("Authorization", r)
 }
 
