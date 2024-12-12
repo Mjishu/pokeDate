@@ -5,13 +5,15 @@
   import CardComponent from "./components/CardComponent.svelte";
 
   type Animal = {
-    id: string;
-    name: string;
-    species: string;
-    date_of_birth: string;
-    sex: string;
-    available: boolean;
-    image_src: string;
+    Id: string;
+    Name: string;
+    Species: string;
+    Date_of_birth: string;
+    Sex: string;
+    Available: boolean;
+    Price: number;
+    Animal_type: string;
+    Image_src: string;
   };
 
   // type Card = {

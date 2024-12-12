@@ -34,6 +34,11 @@ func GetAnimals(id string) Animal {
 		fmt.Fprintf(os.Stderr, "QueryRow failed!: %v\n", err)
 	}
 
+	err = pool.QueryRow(ctx, "SELECT image_src FROM animal_images WHERE animal_id = $1;", animal.Id).Scan(&animal.Image_src)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "QueryRow failed!: %v\n", err)
+	}
+
 	return animal
 }
 
@@ -44,6 +49,10 @@ func GetRandomAnimal() Animal {
 		&animal.Id, &animal.Name, &animal.Species, &animal.Date_of_birth, &animal.Sex, &animal.Price,
 		&animal.Available, &animal.Animal_type,
 	)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "QueryRow failed!: %v\n", err)
+	}
+	err = pool.QueryRow(ctx, "SELECT image_src FROM animal_images WHERE animal_id = $1;", animal.Id).Scan(&animal.Image_src)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "QueryRow failed!: %v\n", err)
 	}

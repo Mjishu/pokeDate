@@ -14,6 +14,10 @@ func callSchemas(ctx context.Context, pool *pgxpool.Pool) {
 	createOrganization(ctx, pool)
 	createShots(ctx, pool)
 	createAnimals(ctx, pool)
+	createAnimalImages(ctx, pool)
+	createAnimalShots(ctx, pool)
+	createOrganizationAnimals(ctx, pool)
+	createUserAnimals(ctx, pool)
 }
 
 // * DONE SO FAR: locations, users, organizations, shots
@@ -30,7 +34,7 @@ func createLocations(ctx context.Context, pool *pgxpool.Pool) {
 	`
 
 	_, err := pool.Exec(ctx, sql)
-	queryFail(err)
+	queryFail(err, "locations")
 }
 
 func createAnimals(ctx context.Context, pool *pgxpool.Pool) {
@@ -49,7 +53,7 @@ func createAnimals(ctx context.Context, pool *pgxpool.Pool) {
 	`
 
 	_, err := pool.Exec(ctx, sql)
-	queryFail(err)
+	queryFail(err, "animals")
 }
 
 func createShots(ctx context.Context, pool *pgxpool.Pool) {
@@ -62,7 +66,7 @@ func createShots(ctx context.Context, pool *pgxpool.Pool) {
 	`
 
 	_, err := pool.Exec(ctx, sql)
-	queryFail(err)
+	queryFail(err, "shots")
 }
 
 func createUsers(ctx context.Context, pool *pgxpool.Pool) {
@@ -81,7 +85,7 @@ func createUsers(ctx context.Context, pool *pgxpool.Pool) {
 		);
 	`
 	_, err := pool.Exec(ctx, sql)
-	queryFail(err)
+	queryFail(err, "users")
 }
 
 func createOrganization(ctx context.Context, pool *pgxpool.Pool) {
@@ -97,17 +101,66 @@ func createOrganization(ctx context.Context, pool *pgxpool.Pool) {
 		)
 	`
 	_, err := pool.Exec(ctx, sql)
-	queryFail(err)
+	queryFail(err, "organization")
 }
 
-func queryFail(err error) {
+func createAnimalImages(ctx context.Context, pool *pgxpool.Pool) {
+	sql := `
+		CREATE TABLE IF NOT EXISTS animal_images (
+			animal_id UUID REFERENCES animals(id) ON DELETE CASCADE NOT NULL,
+			image_src TEXT NOT NULL
+		);
+	`
+
+	_, err := pool.Exec(ctx, sql)
+	queryFail(err, "animal Images")
+}
+
+func createAnimalShots(ctx context.Context, pool *pgxpool.Pool) {
+	sql := `
+		CREATE TABLE IF NOT EXISTS animal_shots (
+			animal_id UUID REFERENCES animals(id) ON DELETE CASCADE NOT NULL,
+			shots_id BIGINT REFERENCES shots(id) ON DELETE CASCADE NOT NULL,
+			date_given DATE,
+			next_due DATE,
+			PRIMARY KEY (animal_id, shots_id)
+		);
+	`
+	_, err := pool.Exec(ctx, sql)
+	queryFail(err, "animal shots")
+}
+
+func createOrganizationAnimals(ctx context.Context, pool *pgxpool.Pool) {
+	sql := `
+		CREATE TABLE IF NOT EXISTS organization_animals (
+			organization_id UUID REFERENCES organization(id) ON DELETE CASCADE NOT NULL,
+			animal_id UUID REFERENCES animals(id) ON DELETE CASCADE NOT NULL,
+			PRIMARY KEY (organization_id, animal_id)
+		);
+	`
+	_, err := pool.Exec(ctx, sql)
+	queryFail(err, "organization animals")
+}
+
+func createUserAnimals(ctx context.Context, pool *pgxpool.Pool) {
+	sql := `
+		CREATE TABLE IF NOT EXISTS user_animals (
+			user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+			animal_id UUID REFERENCES animals(id) ON DELETE CASCADE NOT NULL,
+			liked BOOLEAN NOT NULL,
+			PRIMARY KEY (user_id, animal_id)
+		);
+	`
+	_, err := pool.Exec(ctx, sql)
+	queryFail(err, "user animals")
+}
+
+// ! todo: add messages, conversation, conversation_member
+
+func queryFail(err error, tableName string) {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
 		os.Exit(1)
 	}
-	fmt.Println("Table 'users' created successfully")
+	fmt.Printf("Table '%s' created successfully\n", tableName)
 }
-
-// ! TODO: ADD animal_shots_join, organization_animals, animal_images
-
-// ! less todo: add messages, conversation, conversation_member

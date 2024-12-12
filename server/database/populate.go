@@ -16,6 +16,7 @@ type Animal struct {
 	Price         *float32
 	Available     bool
 	Animal_type   string
+	Image_src     *string
 }
 
 func PopulateDB(ctx context.Context, pool *pgxpool.Pool) {
@@ -34,6 +35,17 @@ func makeAnimals(ctx context.Context, pool *pgxpool.Pool) {
 	for _, query := range sql {
 
 		_, err := pool.Exec(ctx, query)
-		queryFail(err)
+		queryFail(err, "insert animal data")
+	}
+}
+
+func makeImage(ctx context.Context, pool *pgxpool.Pool) {
+	sql := []string{
+		`INSERT INTO animal_images (animal_id, image_src) VALUES ('5883f423-30ee-46e3-abf8-413f1f55bdc1', './images/dog.webp');`,
+	}
+
+	for _, query := range sql {
+		_, err := pool.Exec(ctx, query)
+		queryFail(err, "insert image data")
 	}
 }

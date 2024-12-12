@@ -1,5 +1,6 @@
 <script lang="ts">
       let props = $props();
+      console.log($state.snapshot(props.card_info));
 </script>
 
 <div
@@ -8,15 +9,15 @@
       class:disliked={props.isLiked == false}
       class:cardDone={props.cardDone}
 >
-      <img src={props.card_info.image_src} alt="animal" class="card" />
-      <h2>{props.card_info.name}</h2>
-      <p>{props.card_info.species}</p>
+      <img src={props.card_info.Image_src} alt="animal" class="card" />
+      <h2>{props.card_info.Name}</h2>
+      <p>{props.card_info.Species}</p>
       <div>
             <p>Date of birth</p>
-            <p>{props.card_info.date_of_birth}</p>
+            <p>{props.card_info.Date_of_birth}</p>
       </div>
-      <p>Sex: {props.card_info.sex}</p>
-      <h5>Available: {props.card_info.available}</h5>
+      <p>Sex: {props.card_info.Sex}</p>
+      <h5>Available: {props.card_info.Available}</h5>
 </div>
 
 <style>
