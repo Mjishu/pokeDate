@@ -46,7 +46,7 @@ func createAnimals(ctx context.Context, pool *pgxpool.Pool) {
 			species VARCHAR(100) NOT NULL, 
 			date_of_birth DATE NOT NULL,
 			sex sex_enum NOT NULL,
-			price FLOAT,
+			price FLOAT DEFAULT 0.00,
 			available BOOLEAN NOT NULL,
 			animal_type VARCHAR(50) NOT NULL
 		);

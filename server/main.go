@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/mjishu/pokeDate/cards"
+	"github.com/mjishu/pokeDate/controller"
 	"github.com/mjishu/pokeDate/database"
 )
 
@@ -13,7 +13,8 @@ func main() {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("/", index)
-	mux.HandleFunc("/cards", cards.CardsController)
+	mux.HandleFunc("/cards", controller.CardsController)
+	mux.HandleFunc("/animals", controller.AnimalController)
 
 	database.Database()
 

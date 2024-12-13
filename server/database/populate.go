@@ -7,6 +7,12 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+type Shot struct {
+	Id          string
+	Name        string
+	Description string
+}
+
 type Animal struct {
 	Id            string
 	Name          string
@@ -17,6 +23,7 @@ type Animal struct {
 	Available     bool
 	Animal_type   string
 	Image_src     *string
+	Shots         []Shot
 }
 
 func PopulateDB(ctx context.Context, pool *pgxpool.Pool) {

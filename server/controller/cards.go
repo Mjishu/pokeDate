@@ -1,4 +1,4 @@
-package cards
+package controller
 
 import (
 	"encoding/json"
@@ -27,24 +27,13 @@ type Card struct {
 	Animal_info     Animal `json:"animal_info"`
 }
 
-var animalData = []Animal{
-	{Id: "001", Name: "Nilah", Species: "dog", Date_of_birth: "2020/04/23", Sex: "female", Available: true, Image_src: "./images/dog.webp"},
-	{Id: "002", Name: "fortuna", Species: "cat", Date_of_birth: "2023/09/02", Sex: "male", Available: false, Image_src: "./images/cat.jpg"},
-}
-
-var data = []Card{
-	{Id: "001", Animal_id: "001", Organization_id: "001", Animal_info: animalData[0]},
-	{Id: "002", Animal_id: "002", Organization_id: "002", Animal_info: animalData[1]},
-	{Id: "003", Animal_id: "003", Organization_id: "003", Animal_info: animalData[0]},
-}
-
 func CardsController(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/cards" {
 		http.NotFound(w, r)
 		return
 	}
 
-	w.Header().Set("Access-Control-Allow-Origin", "http://localhost:5173")
+	w.Header().Set("Access-Control-Allow-Origin", GetFrontendURL())
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
