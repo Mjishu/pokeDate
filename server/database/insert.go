@@ -13,7 +13,7 @@ type NewAnimal struct {
 	Sex           string    `json:"sex"`
 	Price         float32   `json:"price"`
 	Available     bool      `json:"available"`
-	Animal_type   string    `json:"animal_type"`
+	Breed         string    `json:"breed"`
 }
 
 func InsertAnimal(animal NewAnimal) {
@@ -23,7 +23,7 @@ func InsertAnimal(animal NewAnimal) {
 		);
 	`
 	ctx, pool := createConnection()
-	_, err := pool.Exec(ctx, sql, animal.Name, animal.Species, animal.Date_of_birth, animal.Sex, animal.Price, animal.Available, animal.Animal_type)
+	_, err := pool.Exec(ctx, sql, animal.Name, animal.Species, animal.Date_of_birth, animal.Sex, animal.Price, animal.Available, animal.Breed)
 	inserQueryFail(err, "inserting animal")
 }
 

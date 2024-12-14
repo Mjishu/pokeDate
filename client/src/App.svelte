@@ -12,7 +12,7 @@
     Sex: string;
     Available: boolean;
     Price: number;
-    Animal_type: string;
+    Breed: string;
     Image_src: string;
   };
 
