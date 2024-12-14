@@ -14,7 +14,7 @@
 </script>
 
 <main>
-      <form onsubmit={() => createAnimal(newAnimal)}>
+      <form onsubmit={(e) => createAnimal(e, newAnimal)}>
             <div>
                   <label for="name">Name</label>
                   <input type="text" name="name" bind:value={newAnimal.name} />

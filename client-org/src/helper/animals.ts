@@ -20,7 +20,8 @@ export type NewAnimal = {
       breed: string;
 }
 
-export async function createAnimal(animal: NewAnimal | undefined) {
+export async function createAnimal(e: Event, animal: NewAnimal) {
+      e.preventDefault();
       if (animal == undefined) {
             console.error("cannot make an empty animal")
             return
