@@ -13,15 +13,17 @@ export type Animal = {
 export type NewAnimal = {
       name: string;
       species: string;
-      date_of_birth: Date | undefined;
+      date_of_birth: string | undefined;
       price: number;
       available: boolean;
       sex: string;
       breed: string;
 }
 
-export async function createAnimal(e: Event, animal: NewAnimal) {
-      e.preventDefault();
+
+export async function createAnimal(animal: NewAnimal) {
+      //! Switch date_birth to be in the 2024-10-09T00:00:00Z format
+      console.log(animal)
       if (animal == undefined) {
             console.error("cannot make an empty animal")
             return
@@ -31,17 +33,17 @@ export async function createAnimal(e: Event, animal: NewAnimal) {
             headers: {
                   "Content-Type": "application/json",
             },
-            body: JSON.stringify({ animal })
+            body: JSON.stringify({ ...animal })
       }
-      console.log("creating: " + animal)
-      // try {
-      //       const response = await fetch("http://localhost:8080/animals", fetchParams)
-      //       const data = await response.json()
-      //       return data
-      // } catch (error) {
-      //       console.error(`Error trying to create animal: ${error}`)
-      //       return
-      // }
+      console.log(fetchParams.body)
+      try {
+            const response = await fetch("http://localhost:8080/animals", fetchParams)
+            const data = await response.json()
+            return data
+      } catch (error) {
+            console.error(`Error trying to create animal: ${error}`)
+            return
+      }
 }
 
 export async function getOrganizationAnimals() {

@@ -11,10 +11,22 @@
             breed: "",
             price: 0,
       });
+
+      async function handleCreateAnimal(e: Event) {
+            e.preventDefault();
+
+            const formattedAnimal = {
+                  ...$state.snapshot(newAnimal),
+                  date_of_birth: newAnimal.date_of_birth
+                        ? new Date(newAnimal.date_of_birth).toISOString()
+                        : undefined,
+            };
+            await createAnimal(formattedAnimal);
+      }
 </script>
 
 <main>
-      <form onsubmit={(e) => createAnimal(e, newAnimal)}>
+      <form onsubmit={handleCreateAnimal}>
             <div>
                   <label for="name">Name</label>
                   <input type="text" name="name" bind:value={newAnimal.name} />
@@ -32,7 +44,7 @@
                   <input
                         type="date"
                         name="date_of_birth"
-                        bind:value={newAnimal.name}
+                        bind:value={newAnimal.date_of_birth}
                   />
             </div>
             <div>

@@ -17,14 +17,15 @@ type NewAnimal struct {
 }
 
 func InsertAnimal(animal NewAnimal) {
-	sql := `
-		INSERT INTO animals (name,species,date_of_birth,sex,price,available,animal_type) VALUES (
-			$1, $2, $3, $4, $5, $6, $7
-		);
-	`
-	ctx, pool := createConnection()
-	_, err := pool.Exec(ctx, sql, animal.Name, animal.Species, animal.Date_of_birth, animal.Sex, animal.Price, animal.Available, animal.Breed)
-	inserQueryFail(err, "inserting animal")
+	fmt.Println(animal)
+	// sql := `
+	// 	INSERT INTO animals (name,species,date_of_birth,sex,price,available,animal_type) VALUES (
+	// 		$1, $2, $3, $4, $5, $6, $7
+	// 	);
+	// `
+	// ctx, pool := createConnection()
+	// _, err := pool.Exec(ctx, sql, animal.Name, animal.Species, animal.Date_of_birth, animal.Sex, animal.Price, animal.Available, animal.Breed)
+	// inserQueryFail(err, "inserting animal")
 }
 
 func inserQueryFail(err error, name string) {
