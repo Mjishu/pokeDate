@@ -16,7 +16,7 @@ type NewAnimal struct {
 	Breed         string    `json:"breed"`
 }
 
-func InsertAnimal(animal NewAnimal) {
+func InsertAnimal(animal NewAnimal) { //! fix
 	fmt.Println(animal)
 	// sql := `
 	// 	INSERT INTO animals (name,species,date_of_birth,sex,price,available,animal_type) VALUES (

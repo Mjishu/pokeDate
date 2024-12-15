@@ -15,6 +15,8 @@ func main() {
 	mux.HandleFunc("/", index)
 	mux.HandleFunc("/cards", controller.CardsController)
 	mux.HandleFunc("/animals", controller.AnimalController)
+	//* find a better way to handle this
+	mux.HandleFunc("/organizations/animals", controller.AnimalController)
 
 	database.Database()
 

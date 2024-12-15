@@ -12,22 +12,33 @@ import (
 )
 
 func AnimalController(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/animals" {
-		http.NotFound(w, r)
-		return
+	if r.URL.Path == "/organizations/animals" {
+		switch r.Method {
+		case http.MethodPost:
+			w.Header().Set("Content-Type", "application/json")
+
+		case http.MethodGet:
+			w.Header().Set("Content-Type", "application/json")
+			if err := json.NewEncoder(w).Encode(database.GetAllAnimals()); err != nil {
+				http.Error(w, "unable to encode response", http.StatusInternalServerError)
+			}
+			return
+		}
 	}
 
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
-	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+	if r.URL.Path == "/animals" {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 
-	switch r.Method {
-	case http.MethodPost:
-		w.Header().Set("Content-Type", "application/json")
+		switch r.Method {
+		case http.MethodPost:
+			w.Header().Set("Content-Type", "application/json")
 
-		animal := GetAnimalFromBody("animal", w, r)
+			animal := GetAnimalFromBody("animal", w, r)
 
-		database.InsertAnimal(animal)
+			database.InsertAnimal(animal)
+		}
 	}
 }
 

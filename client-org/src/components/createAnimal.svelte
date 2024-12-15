@@ -2,7 +2,7 @@
       import { createAnimal } from "../helper/animals";
       import type { NewAnimal } from "../helper/animals";
 
-      let { showNewAnimal } = $props();
+      let { showNewAnimal = $bindable() } = $props();
 
       let newAnimal = $state<NewAnimal>({
             name: "",
@@ -24,6 +24,11 @@
                         : undefined,
             };
             await createAnimal(formattedAnimal);
+            showNewAnimal = false;
+      }
+
+      function closeForm() {
+            showNewAnimal = false;
       }
 </script>
 
@@ -80,11 +85,17 @@
             <button type="submit" onclick={() => (showNewAnimal = false)}
                   >Create</button
             >
-            <button type="button" onclick={() => (showNewAnimal = false)}
-                  >Cancel</button
-            >
+            <button type="button" onclick={closeForm}>Cancel</button>
       </form>
 </main>
 
 <style>
+      main {
+            position: absolute;
+            background-color: #5a595979;
+            border-radius: 5px;
+      }
+      form {
+            padding: 3rem;
+      }
 </style>

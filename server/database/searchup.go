@@ -59,3 +59,38 @@ func GetRandomAnimal() Animal {
 
 	return animal
 }
+
+/* func GetOrganizationAnimal() []Animal
+^ Get organization id from body
+^ search in organization_animals for all animals from X organization
+^ Get all the animals data from that organization
+^ return the slice of animals
+*/
+
+func GetAllAnimals() []Animal {
+	ctx, pool := createConnection()
+	var animals []Animal
+
+	//* how to store the animal info into animals?``
+	rows, err := pool.Query(ctx, "SELECT * FROM animals")
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var animal Animal
+		err := rows.Scan(&animal.Id, &animal.Name, &animal.Species, &animal.Date_of_birth, &animal.Sex, &animal.Price,
+			&animal.Available, &animal.Breed)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to scan row: %v\n", err)
+			continue
+		}
+		animals = append(animals, animal)
+	}
+
+	if err := rows.Err(); err != nil {
+		fmt.Fprintf(os.Stderr, "row iteration failed %v\n", err)
+	}
+	return animals
+}

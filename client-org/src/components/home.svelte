@@ -1,49 +1,144 @@
 <script lang="ts">
       import { onMount } from "svelte";
       import CreateAnimal from "./createAnimal.svelte";
+      import AllAnimals from "./allAnimals.svelte";
 
       let showNewAnimal = $state<boolean>(false);
+      let searchTerm = $state<string>("first name");
 </script>
 
 <!-- put createANimal behind a button  -->
 <main>
       <div class="navbar"></div>
-      <div class="main">
-            <div class="operation-bar">
-                  <div class="search-bar"></div>
-                  <label for="fields">Fields</label>
-                  <select name="fields" id=""> </select>
-                  <label for="filter">Filter</label>
-                  <select name="filter" id=""> </select>
-                  <label for="group-by">Group by</label>
-                  <select name="group-by" id=""> </select>
-                  <label for="sort">Sort</label>
-                  <select name="sort" id=""> </select>
-                  <button
-                        class="add-new-button"
-                        onclick={() => (showNewAnimal = true)}>Add New</button
-                  >
+      <div class="content">
+            <div class="filter-section">
+                  <h1>Org Name</h1>
+                  <div class="operation-bar">
+                        <div class="search-bar">
+                              <div class="search-toggle">
+                                    <label for="search-field"
+                                          >{searchTerm}</label
+                                    >
+                                    <select
+                                          name="search-field"
+                                          id="search-field"
+                                    ></select>
+                              </div>
+                              <div class="search-text">
+                                    <input
+                                          type="text"
+                                          placeholder={`Search ` + searchTerm}
+                                    />
+                              </div>
+                        </div>
+                        <div class="dropdown-items">
+                              <label for="fields">Fields</label>
+                              <select name="fields" id="fields"> </select>
+                              <label for="filter">Filter</label>
+                              <select name="filter" id=""> </select>
+                              <label for="group-by">Group by</label>
+                              <select name="group-by" id=""> </select>
+                              <label for="sort">Sort</label>
+                              <select name="sort" id=""> </select>
+                        </div>
+                        <button
+                              class="add-new-button"
+                              onclick={() => (showNewAnimal = !showNewAnimal)}
+                              >Add New</button
+                        >
+                  </div>
+                  <div class="show-new-animal">
+                        {#if showNewAnimal}
+                              <CreateAnimal bind:showNewAnimal />
+                        {/if}
+                  </div>
             </div>
-            <div class="show-new-animal">
-                  {#if showNewAnimal}
-                        <CreateAnimal {showNewAnimal} />
-                  {/if}
-            </div>
-            <div class="show-animals"></div>
+            <AllAnimals />
       </div>
 </main>
 
 <style>
       main {
             display: grid;
-            grid-template-columns: repeat(2, 1f);
+            grid-template-columns: 17.25rem 1fr;
+            height: 100%;
+            gap: 5rem;
       }
 
-      .show-animals {
+      .navbar {
+            width: 17.25rem;
+            height: 100%;
+            background: #e9e9e9;
+            border-left: 1px solid black;
+      }
+
+      .filter-section {
+            display: grid;
+            grid-template-rows: 15.5rem 6.5rem 1fr;
+      }
+
+      .operation-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-evenly;
+            gap: 1.15rem;
+            width: 95%;
+            display: grid;
+            gap: 3.5rem;
+            grid-template-columns: 16rem 1fr 10.5rem;
+      }
+
+      .dropdown-items {
+            justify-self: end;
+
+            display: flex;
+            align-items: center;
+      }
+
+      .search-bar {
+            width: 16.5rem;
+            height: 2rem;
+            border: 1px solid lightblue;
             border-radius: 5px;
+            display: grid;
+            grid-template-columns: 35% 1fr;
+      }
+
+      .search-toggle {
+            border: 1px solid green;
+            display: flex;
+      }
+
+      .search-text {
+            border: 1px solid blue;
+      }
+      .search-text input {
+            width: 95%;
+            height: 85%;
             border: none;
-            background: hsla(0, 1%, 77%, 0.5);
-            width: 66.25rem;
-            height: 42.75rem;
+            outline: none;
+      }
+      .search-text input:active,
+      .search-text input:focus {
+            border: none;
+            outline: none;
+      }
+
+      .add-new-button {
+            background: #30ca4a;
+            color: #e9e9e9;
+            width: 10.5rem;
+            height: 2rem;
+            border: none;
+            border-radius: 5px;
+            font-size: 2rem;
+            text-align: center;
+            padding: 0px;
+            line-height: 0px;
+      }
+
+      select {
+            height: 2rem;
+            width: 5rem;
       }
 </style>
