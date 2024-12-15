@@ -2,6 +2,8 @@
       import { createAnimal } from "../helper/animals";
       import type { NewAnimal } from "../helper/animals";
 
+      let { showNewAnimal } = $props();
+
       let newAnimal = $state<NewAnimal>({
             name: "",
             species: "",
@@ -75,7 +77,12 @@
                         bind:value={newAnimal.breed}
                   />
             </div>
-            <button>Create</button>
+            <button type="submit" onclick={() => (showNewAnimal = false)}
+                  >Create</button
+            >
+            <button type="button" onclick={() => (showNewAnimal = false)}
+                  >Cancel</button
+            >
       </form>
 </main>
 

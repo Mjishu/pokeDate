@@ -1,11 +1,11 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import CreateAnimal from "./components/createAnimal.svelte";
+  import Home from "./components/home.svelte";
 </script>
 
 <!-- put createANimal behind a button  -->
 <main>
-  <CreateAnimal />
+  <Home />
 </main>
 
 <style>
