@@ -1,6 +1,7 @@
 <script lang="ts">
       import { createAnimal } from "../helper/animals";
       import type { NewAnimal } from "../helper/animals";
+      import { formatISO } from "date-fns";
 
       let { showNewAnimal = $bindable() } = $props();
 
@@ -20,7 +21,7 @@
             const formattedAnimal = {
                   ...$state.snapshot(newAnimal),
                   date_of_birth: newAnimal.date_of_birth
-                        ? new Date(newAnimal.date_of_birth).toISOString()
+                        ? formatISO(new Date(newAnimal.date_of_birth))
                         : undefined,
             };
             await createAnimal(formattedAnimal);
@@ -33,7 +34,7 @@
 </script>
 
 <main>
-      <form onsubmit={handleCreateAnimal}>
+      <form onsubmit={handleCreateAnimal} autocomplete="off">
             <div>
                   <label for="name">Name</label>
                   <input type="text" name="name" bind:value={newAnimal.name} />
@@ -82,9 +83,7 @@
                         bind:value={newAnimal.breed}
                   />
             </div>
-            <button type="submit" onclick={() => (showNewAnimal = false)}
-                  >Create</button
-            >
+            <button type="submit">Create</button>
             <button type="button" onclick={closeForm}>Cancel</button>
       </form>
 </main>
@@ -92,8 +91,9 @@
 <style>
       main {
             position: absolute;
-            background-color: #5a595979;
+            background-color: #5a5959;
             border-radius: 5px;
+            color: white;
       }
       form {
             padding: 3rem;

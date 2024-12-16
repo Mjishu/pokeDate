@@ -4,12 +4,18 @@
       import AllAnimals from "./allAnimals.svelte";
 
       let showNewAnimal = $state<boolean>(false);
-      let searchTerm = $state<string>("first name");
+      let searchTerm = $state<string>("Name");
 </script>
 
 <!-- put createANimal behind a button  -->
 <main>
-      <div class="navbar"></div>
+      <div class="navbar">
+            <div class="icon-holder"></div>
+            <p>Home</p>
+            <p>Messages</p>
+            <p>Profile</p>
+            <p>Settings</p>
+      </div>
       <div class="content">
             <div class="filter-section">
                   <h1>Org Name</h1>
@@ -23,6 +29,7 @@
                                           <option value="search-term"
                                                 >{searchTerm}</option
                                           >
+                                          <!-- {#each AllAnimals as animal}{/each} -->
                                     </select>
                               </div>
                               <div class="search-text">
@@ -71,13 +78,6 @@
             gap: 5rem;
       }
 
-      .navbar {
-            width: 17.25rem;
-            height: 100%;
-            background: #e9e9e9;
-            border-left: 1px solid black;
-      }
-
       .filter-section {
             display: grid;
             grid-template-rows: 15.5rem 6.5rem 1fr;
@@ -106,7 +106,7 @@
             width: 16.5rem;
             height: 2rem;
             border: 1px solid var(--border-color);
-            border-radius: 5px;
+            border-radius: 10px;
             display: grid;
             grid-template-columns: 35% 1fr;
       }
@@ -135,7 +135,7 @@
             height: 1.2rem;
       }
       .search-text input {
-            width: 95%;
+            width: 80%;
             height: 85%;
             border: none;
             outline: none;
@@ -168,5 +168,29 @@
             font-size: 22px;
             color: rgba(99, 99, 99, 0.767);
             text-align: center;
+      }
+
+      .navbar {
+            width: 17.25rem;
+            height: 100%;
+            background: #94949413;
+            border-right: 1px solid rgba(126, 126, 126, 0.301);
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+      }
+
+      .navbar p {
+            font-size: 3em;
+      }
+
+      .icon-holder {
+            width: 11rem;
+            height: 5.25rem;
+            background: #4b4b4b;
+            border: 5px solid black;
+            border-radius: 5px;
+            margin-top: 2rem;
       }
 </style>

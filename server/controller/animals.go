@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -36,9 +37,10 @@ func AnimalController(w http.ResponseWriter, r *http.Request) {
 		case http.MethodPost:
 			w.Header().Set("Content-Type", "application/json")
 
-			animal := GetAnimalFromBody("animal", w, r)
+			animal := GetAnimalFromBody(w, r)
 
 			database.InsertAnimal(animal)
+			fmt.Fprintf(w, "Animal created Successfully!")
 		}
 	}
 }
@@ -59,7 +61,7 @@ func GetFrontendURL() string {
 	return frontendURL
 }
 
-func GetAnimalFromBody(key string, w http.ResponseWriter, r *http.Request) database.NewAnimal {
+func GetAnimalFromBody(w http.ResponseWriter, r *http.Request) database.NewAnimal {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "unable to read body", http.StatusInternalServerError)
@@ -73,5 +75,6 @@ func GetAnimalFromBody(key string, w http.ResponseWriter, r *http.Request) datab
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return database.NewAnimal{}
 	}
+	fmt.Printf("Animal inside GAFB is %v\n", animal)
 	return animal
 }
