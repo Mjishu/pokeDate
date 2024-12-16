@@ -50,6 +50,7 @@ export async function getOrganizationAnimals() {
       try {
             const response = await fetch("http://localhost:8080/organizations/animals")
             const data = await response.json()
+            console.log(data)
             return data
       } catch (error) {
             console.error(`Error trying to get all animals: ${error}`)

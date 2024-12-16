@@ -16,15 +16,17 @@
                   <div class="operation-bar">
                         <div class="search-bar">
                               <div class="search-toggle">
-                                    <label for="search-field"
-                                          >{searchTerm}</label
-                                    >
                                     <select
                                           name="search-field"
                                           id="search-field"
-                                    ></select>
+                                    >
+                                          <option value="search-term"
+                                                >{searchTerm}</option
+                                          >
+                                    </select>
                               </div>
                               <div class="search-text">
+                                    <img src="/icons/search_icon.svg" alt="" />
                                     <input
                                           type="text"
                                           placeholder={`Search ` + searchTerm}
@@ -32,14 +34,18 @@
                               </div>
                         </div>
                         <div class="dropdown-items">
-                              <label for="fields">Fields</label>
-                              <select name="fields" id="fields"> </select>
-                              <label for="filter">Filter</label>
-                              <select name="filter" id=""> </select>
-                              <label for="group-by">Group by</label>
-                              <select name="group-by" id=""> </select>
-                              <label for="sort">Sort</label>
-                              <select name="sort" id=""> </select>
+                              <select name="fields" id="fields">
+                                    <option value="fields">Fields</option>
+                              </select>
+                              <select name="filter" id="">
+                                    <option value="filter">Filter</option>
+                              </select>
+                              <select name="group-by" id="">
+                                    <option value="group-by">Group By</option>
+                              </select>
+                              <select name="sort" id="">
+                                    <option value="sort">Sort</option>
+                              </select>
                         </div>
                         <button
                               class="add-new-button"
@@ -92,25 +98,41 @@
             justify-self: end;
 
             display: flex;
+            gap: 1rem;
             align-items: center;
       }
 
       .search-bar {
             width: 16.5rem;
             height: 2rem;
-            border: 1px solid lightblue;
+            border: 1px solid var(--border-color);
             border-radius: 5px;
             display: grid;
             grid-template-columns: 35% 1fr;
       }
 
       .search-toggle {
-            border: 1px solid green;
+            border-right: 1px solid var(--border-color, #000);
             display: flex;
       }
 
+      #search-field {
+            width: 5.5rem;
+            font-size: 14px;
+            border: none;
+      }
+
       .search-text {
-            border: 1px solid blue;
+            border: none;
+            display: flex;
+            text-align: cetner;
+            align-items: center;
+            padding-left: 0.5rem;
+            gap: 0.25rem;
+      }
+      .search-text img {
+            width: 1rem;
+            height: 1.2rem;
       }
       .search-text input {
             width: 95%;
@@ -139,6 +161,12 @@
 
       select {
             height: 2rem;
-            width: 5rem;
+            width: auto;
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            font-size: 22px;
+            color: rgba(99, 99, 99, 0.767);
+            text-align: center;
       }
 </style>
