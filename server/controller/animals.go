@@ -98,6 +98,24 @@ func GetAnimalFromBody(w http.ResponseWriter, r *http.Request) database.NewAnima
 	return animal
 }
 
+func GetUpdatedAnimalFromBody(w http.ResponseWriter, r *http.Request) database.UpdateAnimalStruct {
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "unable to read body", http.StatusInternalServerError)
+		return database.UpdateAnimalStruct{}
+	}
+	defer r.Body.Close()
+
+	var animal database.UpdateAnimalStruct
+	err = json.Unmarshal(body, &animal)
+	if err != nil {
+		http.Error(w, "Invalid JSON", http.StatusBadRequest)
+		return database.UpdateAnimalStruct{}
+	}
+	fmt.Printf("Animal inside GAFB is %v\n", animal)
+	return animal
+}
+
 func checkForBodyItem(key string, w http.ResponseWriter, r *http.Request) (bool, any) {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {

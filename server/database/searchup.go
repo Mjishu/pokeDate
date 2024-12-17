@@ -28,14 +28,16 @@ func GetLocations() Location {
 func GetAnimal(id any) Animal {
 	ctx, pool := createConnection()
 	var animal Animal
-	err := pool.QueryRow(ctx, "SELECT a.*, ai.*, s.* FROM animals AS a LEFT JOIN animal_images as ai ON a.id = ai.animal_id LEFT JOIN animal_shots AS s ON a.id = s.animal_id WHERE a.id = $1", id).Scan(
+	err := pool.QueryRow(ctx, "SELECT a.*, ai.*, s.* FROM animals AS a LEFT JOIN animal_images as ai ON a.id = ai.animal_id WHERE a.id = $1", id).Scan(
 		&animal.Id, &animal.Name, &animal.Species, &animal.Date_of_birth, &animal.Sex, &animal.Price,
-		&animal.Available, &animal.Breed, &animal.Image_src, &animal.Shots[0].Name, &animal.Shots[0].Date_given, &animal.Shots[0].Next_due,
+		&animal.Available, &animal.Breed, &animal.Image_src,
 	)
 
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "QueryRow failed!: %v\n", err)
 	}
+
+	addShots(&animal, ctx, pool)
 
 	return animal
 }
@@ -79,7 +81,7 @@ func addShots(animal *Animal, ctx context.Context, pool *pgxpool.Pool) {
 	}
 
 	if rows.Err() != nil {
-		fmt.Fprintf(os.Stderr, "Rows iteration failed: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Rows iteration of shots failed: %v\n", err)
 		return
 	}
 }
@@ -96,7 +98,7 @@ func GetAllAnimals() []Animal {
 	var animals []Animal
 
 	//* how to store the animal info into animals?``
-	rows, err := pool.Query(ctx, "SELECT a.*, ai.*, s.* FROM animals AS a LEFT JOIN animal_images as ai ON a.id = ai.animal_id LEFT JOIN animal_shots AS s ON a.id = s.animal_id WHERE a.id = ai.animal_id")
+	rows, err := pool.Query(ctx, "SELECT a.*,  ai.image_src FROM animals AS a LEFT JOIN animal_images AS ai ON a.id = ai.animal_id")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
 	}
@@ -106,17 +108,18 @@ func GetAllAnimals() []Animal {
 	for rows.Next() {
 		var animal Animal
 		err := rows.Scan(&animal.Id, &animal.Name, &animal.Species, &animal.Date_of_birth, &animal.Sex, &animal.Price,
-			&animal.Available, &animal.Breed, &animal.Image_src, &animal.Shots[rowNumber].Name, &animal.Shots[rowNumber].Date_given, &animal.Shots[rowNumber].Next_due)
+			&animal.Available, &animal.Breed, &animal.Image_src)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Failed to scan row: %v\n", err)
 			continue
 		}
+		addShots(&animal, ctx, pool)
 		rowNumber++
 		animals = append(animals, animal)
 	}
 
 	if err := rows.Err(); err != nil {
-		fmt.Fprintf(os.Stderr, "row iteration failed %v\n", err)
+		fmt.Fprintf(os.Stderr, "row iteration of all animals failed %v\n", err)
 	}
 	return animals
 }

@@ -37,10 +37,10 @@ func InsertAnimal(animal NewAnimal) { //! fix
 
 func UpdateAnimal(animal UpdateAnimalStruct) {
 	sql := `
-		SELECT * FROM animals WHERE id = $1
+		UPDATE animals  SET name = $1, date_of_birth = $2, price = $3, available = $4  WHERE id = $5
 	`
 	ctx, pool := createConnection()
-	_, err := pool.Exec(ctx, sql, animal.Id)
+	_, err := pool.Exec(ctx, sql, animal.Name, animal.Date_of_birth, animal.Price, animal.Available, animal.Id)
 	inserQueryFail(err, "Updating Animal")
 }
 
