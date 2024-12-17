@@ -16,6 +16,14 @@ type NewAnimal struct {
 	Breed         string    `json:"breed"`
 }
 
+type UpdateAnimalStruct struct {
+	Id            string    `json:"id"`
+	Name          string    `json:"name"`
+	Date_of_birth time.Time `json:"date_of_birth"`
+	Price         float32   `json:"price"`
+	Available     bool      `json:"available"`
+}
+
 func InsertAnimal(animal NewAnimal) { //! fix
 	sql := `
 		INSERT INTO animals (name,species,date_of_birth,sex,price,available,breed) VALUES (
@@ -25,6 +33,15 @@ func InsertAnimal(animal NewAnimal) { //! fix
 	ctx, pool := createConnection()
 	_, err := pool.Exec(ctx, sql, animal.Name, animal.Species, animal.Date_of_birth, animal.Sex, animal.Price, animal.Available, animal.Breed)
 	inserQueryFail(err, "inserting animal")
+}
+
+func UpdateAnimal(animal UpdateAnimalStruct) {
+	sql := `
+		SELECT * FROM animals WHERE id = $1
+	`
+	ctx, pool := createConnection()
+	_, err := pool.Exec(ctx, sql, animal.Id)
+	inserQueryFail(err, "Updating Animal")
 }
 
 func inserQueryFail(err error, name string) {

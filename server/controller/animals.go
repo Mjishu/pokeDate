@@ -54,6 +54,12 @@ func AnimalController(w http.ResponseWriter, r *http.Request) {
 			}
 		case http.MethodPut:
 			fmt.Println("put has been called")
+			w.Header().Set("Content-Type", "application/json")
+
+			updatedAnimal := GetUpdatedAnimalFromBody(w, r)
+
+			database.UpdateAnimal(updatedAnimal)
+			fmt.Fprintf(w, "Animal updated successfully")
 		}
 	}
 }
@@ -74,7 +80,7 @@ func GetFrontendURL() string {
 	return frontendURL
 }
 
-func GetAnimalFromBody(w http.ResponseWriter, r *http.Request) database.NewAnimal {
+func GetAnimalFromBody(w http.ResponseWriter, r *http.Request) database.NewAnimal { // *can i make this take a type as a parmater and change the animal database.NewAnimal based on that?
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "unable to read body", http.StatusInternalServerError)
