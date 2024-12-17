@@ -37,13 +37,14 @@
 
 <main>
       <form
-            onsubmit={() => updateAnimalById(animal.id, updatedAnimal)}
+            onsubmit={(e) => updateAnimalById(e, currentId, updatedAnimal)}
             autocomplete="off"
       >
             <h3>Information</h3>
             <div>
                   <label for="name">Name</label>
                   <input
+                        required
                         type="text"
                         name="name"
                         bind:value={updatedAnimal.name}
@@ -52,6 +53,7 @@
             <div>
                   <label for="date_of_birth">Date of Birth</label>
                   <input
+                        required
                         type="date"
                         name="date_of_birth"
                         bind:value={updatedAnimal.date_of_birth}
@@ -60,14 +62,19 @@
             <div>
                   <label for="price">Price</label>
                   <input
+                        required
                         type="number"
                         name="price"
+                        step=".01"
+                        min="0"
+                        max="9999999"
                         bind:value={updatedAnimal.price}
                   />
             </div>
             <div>
                   <label for="available">Available</label>
                   <input
+                        required
                         type="checkbox"
                         name="available"
                         bind:checked={updatedAnimal.available}

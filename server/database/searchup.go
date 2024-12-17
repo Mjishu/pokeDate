@@ -28,7 +28,7 @@ func GetLocations() Location {
 func GetAnimal(id any) Animal {
 	ctx, pool := createConnection()
 	var animal Animal
-	err := pool.QueryRow(ctx, "SELECT a.*, ai.*, s.* FROM animals AS a LEFT JOIN animal_images as ai ON a.id = ai.animal_id WHERE a.id = $1", id).Scan(
+	err := pool.QueryRow(ctx, "SELECT a.*, ai.image_src FROM animals AS a LEFT JOIN animal_images as ai ON a.id = ai.animal_id WHERE a.id = $1", id).Scan(
 		&animal.Id, &animal.Name, &animal.Species, &animal.Date_of_birth, &animal.Sex, &animal.Price,
 		&animal.Available, &animal.Breed, &animal.Image_src,
 	)

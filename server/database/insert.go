@@ -35,7 +35,7 @@ func InsertAnimal(animal NewAnimal) { //! fix
 	inserQueryFail(err, "inserting animal")
 }
 
-func UpdateAnimal(animal UpdateAnimalStruct) {
+func UpdateAnimal(animal UpdateAnimalStruct) { //! Add ability to add new shots
 	sql := `
 		UPDATE animals  SET name = $1, date_of_birth = $2, price = $3, available = $4  WHERE id = $5
 	`

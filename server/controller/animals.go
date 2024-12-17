@@ -37,8 +37,6 @@ func AnimalController(w http.ResponseWriter, r *http.Request) {
 		case http.MethodPost:
 			hasId, id := checkForBodyItem("id", w, r)
 			if hasId {
-				fmt.Println("Id was found in body")
-				fmt.Printf("id is %s", id)
 				if err := json.NewEncoder(w).Encode(database.GetAnimal(id)); err != nil {
 					http.Error(w, "unable to encode response", http.StatusInternalServerError)
 				}

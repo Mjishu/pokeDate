@@ -90,19 +90,23 @@ export async function getAnimalById(id: string) {
       }
 }
 
-export async function updateAnimalById(id: string, updatedAnimal: UpdatedAnimal) {
+export async function updateAnimalById(e: Event, id: string, updatedAnimal: UpdatedAnimal) {
+      e.preventDefault()
       const fetchParams = {
             method: "PUT",
             headers: {
                   "Content-Type": "application/json"
             },
-            body: JSON.stringify({ id })
+            body: JSON.stringify({
+                  id: id, name: updatedAnimal.name, date_of_birth: updatedAnimal.date_of_birth + "T00:00:00Z",
+                  price: updatedAnimal.price, available: updatedAnimal.available
+            })
       }
+      console.log(fetchParams.body)
       try {
-            console.log(updatedAnimal)
-            // const response = await fetch("http://localhost:8080/animals", fetchParams)
-            // const data = await response.json()
-            // return data
+            const response = await fetch("http://localhost:8080/animals", fetchParams)
+            const data = await response.json()
+            return data
       } catch (error) {
             console.error(`error trying to update animal: ${error}`)
             return
