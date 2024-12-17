@@ -94,3 +94,15 @@ func GetAllAnimals() []Animal {
 	}
 	return animals
 }
+
+func GetAnimal(id any) Animal {
+	ctx, pool := createConnection()
+	var animal Animal
+
+	err := pool.QueryRow(ctx, "SELECT * FROM animals WHERE id = $1", id).Scan(&animal.Id, &animal.Name, &animal.Species, &animal.Date_of_birth, &animal.Sex, &animal.Price,
+		&animal.Available, &animal.Breed)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "QueryRow failed!: %v\n", err)
+	}
+	return animal
+}

@@ -1,15 +1,25 @@
 <script>
+      // @ts-nocheck
+
       import { getOrganizationAnimals } from "../helper/animals";
       import { format } from "date-fns";
+      import EditAnimal from "./editAnimal.svelte";
 
       let animalsData = $state();
       let isLoading = $state(true);
+      let currentId = $state();
+      let showEditPage = $state(false);
 
       async function callAnimals() {
             animalsData = await getOrganizationAnimals();
             isLoading = false;
       }
       callAnimals();
+
+      function showEdit(id) {
+            showEditPage = true;
+            currentId = id;
+      }
 </script>
 
 <!-- get all animals -> make sure it is from X org(the one that is logged in) -->
@@ -28,6 +38,7 @@
                               <th>Sex</th>
                               <th>Price</th>
                               <th>Available</th>
+                              <th>Actions</th>
                         </tr>
                   </thead>
                   <tbody>
@@ -45,10 +56,26 @@
                                     <td>{animal.Sex}</td>
                                     <td>{animal.Price}</td>
                                     <td>{animal.Available}</td>
+                                    <td class="action-holder">
+                                          <button
+                                                onclick={() =>
+                                                      showEdit(animal.Id)}
+                                                >edit</button
+                                          >
+                                          <button
+                                                ><img
+                                                      src="icons/trash_icon.svg"
+                                                      alt=""
+                                                /></button
+                                          >
+                                    </td>
                               </tr>
                         {/each}
                   </tbody>
             </table>
+            {#if showEditPage}
+                  <EditAnimal {currentId} bind:showEditPage />
+            {/if}
       </div>
 {/if}
 
@@ -95,5 +122,25 @@
             margin: 0 0;
             font-size: 16px;
             text-align: left;
+      }
+
+      .action-holder {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 0;
+            gap: 0.5rem;
+            justify-content: center;
+      }
+
+      .action-holder button {
+            border: none;
+            outline: none;
+            background-color: transparent;
+      }
+
+      .action-holder button img {
+            width: 1rem;
+            height: 1rem;
       }
 </style>

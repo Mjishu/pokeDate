@@ -35,12 +35,25 @@ func AnimalController(w http.ResponseWriter, r *http.Request) {
 
 		switch r.Method {
 		case http.MethodPost:
-			w.Header().Set("Content-Type", "application/json")
+			hasId, id := checkForBodyItem("id", w, r)
+			if hasId {
+				fmt.Println("Id was found in body")
+				fmt.Printf("id is %s", id)
+				if err := json.NewEncoder(w).Encode(database.GetAnimal(id)); err != nil {
+					http.Error(w, "unable to encode response", http.StatusInternalServerError)
+				}
+				return
 
-			animal := GetAnimalFromBody(w, r)
+			} else {
+				w.Header().Set("Content-Type", "application/json")
 
-			database.InsertAnimal(animal)
-			fmt.Fprintf(w, "Animal created Successfully!")
+				animal := GetAnimalFromBody(w, r)
+
+				database.InsertAnimal(animal)
+				fmt.Fprintf(w, "Animal created Successfully!")
+			}
+		case http.MethodPut:
+			fmt.Println("put has been called")
 		}
 	}
 }
@@ -77,4 +90,25 @@ func GetAnimalFromBody(w http.ResponseWriter, r *http.Request) database.NewAnima
 	}
 	fmt.Printf("Animal inside GAFB is %v\n", animal)
 	return animal
+}
+
+func checkForBodyItem(key string, w http.ResponseWriter, r *http.Request) (bool, any) {
+	body, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "unable to read body", http.StatusInternalServerError)
+		return false, ""
+	}
+	defer r.Body.Close()
+
+	var elements map[string]interface{}
+	err = json.Unmarshal(body, &elements)
+	if err != nil {
+		http.Error(w, "unable to unmarshal json", http.StatusInternalServerError)
+		return false, ""
+	}
+
+	if _, exists := elements[key]; exists {
+		return true, elements[key]
+	}
+	return false, ""
 }

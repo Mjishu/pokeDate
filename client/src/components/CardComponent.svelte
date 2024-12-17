@@ -18,6 +18,9 @@
       </div>
       <p>Sex: {props.card_info.Sex}</p>
       <h5>Available: {props.card_info.Available}</h5>
+      <button class="skip-button"
+            ><img src="/icons/cancel_icon.svg" alt="skip" /></button
+      >
 </div>
 
 <style>
@@ -28,14 +31,22 @@
             margin: 0;
             padding: 0;
             width: 30rem;
-            height: 25rem;
-            width: 20rem;
+            height: 35rem;
             transform: translateX(0);
             opacity: 1;
             transition:
                   transform 1.25s ease-in-out,
                   opacity 1s ease-out 500ms;
             overflow-y: scroll;
+
+            position: relative;
+      }
+      .skip-button {
+            position: absolute;
+            right: 0;
+            top: 0;
+            border: none;
+            background-color: transparent;
       }
       .cardDone {
             transition: none !important;

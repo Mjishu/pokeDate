@@ -1,57 +1,52 @@
 <script lang="ts">
-      import { createAnimal } from "../helper/animals";
-      import type { NewAnimal } from "../helper/animals";
+      import {
+            createAnimal,
+            getAnimalById,
+            updateAnimalById,
+      } from "../helper/animals";
+      import type { NewAnimal, UpdatedAnimal } from "../helper/animals";
       import { formatISO } from "date-fns";
 
-      let { showNewAnimal = $bindable() } = $props();
+      let { showEditPage = $bindable(), currentId } = $props();
+      let animal = $state();
 
-      let newAnimal = $state<NewAnimal>({
+      animal = getAnimalById(currentId);
+
+      let updatedAnimal = $state<UpdatedAnimal>({
+            // switch this to animal.name etc
             name: "",
-            species: "",
-            date_of_birth: undefined,
-            sex: "",
-            available: false,
-            breed: "",
+            date_of_birth: "",
             price: 0,
-            shots: [{ name: "", date_given: "", date_due: "" }],
+            available: false,
+            shots: [],
       });
 
-      async function handleCreateAnimal(e: Event) {
-            e.preventDefault();
-
-            const formattedAnimal = {
-                  ...$state.snapshot(newAnimal),
-                  date_of_birth: newAnimal.date_of_birth
-                        ? formatISO(new Date(newAnimal.date_of_birth))
-                        : undefined,
-            };
-            await createAnimal(formattedAnimal);
-            showNewAnimal = false;
-      }
-
       function closeForm() {
-            showNewAnimal = false;
+            showEditPage = false;
+            ``;
       }
 
       function addNewShot() {
-            newAnimal.shots.push({ name: "", date_given: "", date_due: "" });
-            console.log("add new shots was called");
+            updatedAnimal.shots.push({
+                  name: "",
+                  date_given: "",
+                  date_due: "",
+            });
       }
 </script>
 
 <main>
-      <form onsubmit={handleCreateAnimal} autocomplete="off">
+      <form
+            onsubmit={() => updateAnimalById(animal.id, updatedAnimal)}
+            autocomplete="off"
+      >
             <h3>Information</h3>
             <div>
                   <label for="name">Name</label>
-                  <input type="text" name="name" bind:value={newAnimal.name} />
-            </div>
-            <div>
-                  <label for="species">Species</label>
                   <input
                         type="text"
-                        name="species"
-                        bind:value={newAnimal.species}
+                        name="name"
+                        bind:value={updatedAnimal.name}
                   />
             </div>
             <div>
@@ -59,19 +54,15 @@
                   <input
                         type="date"
                         name="date_of_birth"
-                        bind:value={newAnimal.date_of_birth}
+                        bind:value={updatedAnimal.date_of_birth}
                   />
-            </div>
-            <div>
-                  <label for="sex">Sex</label>
-                  <input type="text" name="sex" bind:value={newAnimal.sex} />
             </div>
             <div>
                   <label for="price">Price</label>
                   <input
                         type="number"
                         name="price"
-                        bind:value={newAnimal.price}
+                        bind:value={updatedAnimal.price}
                   />
             </div>
             <div>
@@ -79,21 +70,13 @@
                   <input
                         type="checkbox"
                         name="available"
-                        bind:checked={newAnimal.available}
-                  />
-            </div>
-            <div>
-                  <label for="breed">Breed</label>
-                  <input
-                        type="text"
-                        name="breed"
-                        bind:value={newAnimal.breed}
+                        bind:checked={updatedAnimal.available}
                   />
             </div>
             <hr />
             <h3>Shots</h3>
             <div class="shots">
-                  {#each newAnimal.shots as shot, i}
+                  {#each updatedAnimal.shots as shot, i}
                         <div class="shot-wrapper">
                               <div>
                                     <label for="shot-name">Name</label>
@@ -101,7 +84,8 @@
                                           type="text"
                                           placeholder="name..."
                                           name="shot-name"
-                                          bind:value={newAnimal.shots[i].name}
+                                          bind:value={updatedAnimal.shots[i]
+                                                .name}
                                     />
                               </div>
                               <div>
@@ -109,7 +93,7 @@
                                     <input
                                           type="date"
                                           name="shot-given"
-                                          bind:value={newAnimal.shots[i]
+                                          bind:value={updatedAnimal.shots[i]
                                                 .date_given}
                                     />
                               </div>
@@ -118,7 +102,7 @@
                                     <input
                                           type="date"
                                           name="shot-due"
-                                          bind:value={newAnimal.shots[i]
+                                          bind:value={updatedAnimal.shots[i]
                                                 .date_due}
                                     />
                               </div>

@@ -18,6 +18,21 @@ export type NewAnimal = {
       available: boolean;
       sex: string;
       breed: string;
+      shots: NewShot[];
+}
+
+type NewShot = {
+      name: string;
+      date_given: string;
+      date_due: string;
+}
+
+export type UpdatedAnimal = {
+      name: string;
+      date_of_birth: string | undefined;
+      price: number;
+      available: boolean;
+      shots: NewShot[];
 }
 
 
@@ -35,7 +50,6 @@ export async function createAnimal(animal: NewAnimal) {
             },
             body: JSON.stringify({ ...animal })
       }
-      console.log(fetchParams.body)
       try {
             const response = await fetch("http://localhost:8080/animals", fetchParams)
             const data = await response.json()
@@ -53,6 +67,44 @@ export async function getOrganizationAnimals() {
             return data
       } catch (error) {
             console.error(`Error trying to get all animals: ${error}`)
+            return
+      }
+}
+
+export async function getAnimalById(id: string) {
+      const fetchParams = { //causes error on backend bc it thinks its getting a new animal to create
+            method: "POST",
+            headers: {
+                  "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ id: id })
+      }
+      try {
+            const response = await fetch("http://localhost:8080/animals", fetchParams)
+            const data = await response.json()
+            console.log(data)
+            return data
+      } catch (error) {
+            console.error(`error trying to get animal: ${error}`)
+            return
+      }
+}
+
+export async function updateAnimalById(id: string, updatedAnimal: UpdatedAnimal) {
+      const fetchParams = {
+            method: "PUT",
+            headers: {
+                  "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ id })
+      }
+      try {
+            console.log(updatedAnimal)
+            // const response = await fetch("http://localhost:8080/animals", fetchParams)
+            // const data = await response.json()
+            // return data
+      } catch (error) {
+            console.error(`error trying to update animal: ${error}`)
             return
       }
 }
