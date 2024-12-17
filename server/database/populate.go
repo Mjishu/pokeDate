@@ -7,11 +7,14 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
+// shot needs name description and id
+
 type Shot struct {
-	Id         string
-	Name       string
-	Date_given string
-	Next_due   string
+	Id          string
+	Description string
+	Name        string
+	Date_given  string
+	Next_due    string
 }
 
 type Animal struct {
