@@ -55,7 +55,7 @@ func CardsController(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		id := GetIdFromBody("id", w, r)
 
-		animal := database.GetAnimals(id)
+		animal := database.GetAnimal(id)
 
 		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(animal); err != nil {

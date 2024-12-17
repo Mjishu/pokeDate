@@ -8,9 +8,10 @@ import (
 )
 
 type Shot struct {
-	Id          string
-	Name        string
-	Description string
+	Id         string
+	Name       string
+	Date_given string
+	Next_due   string
 }
 
 type Animal struct {
