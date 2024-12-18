@@ -159,3 +159,16 @@ func GetAllShots() []Shot {
 	}
 	return shots
 }
+
+func GetShot(animal_id string) (NewAnimalShot, bool) {
+	ctx, pool := createConnection()
+	var shot NewAnimalShot
+
+	err := pool.QueryRow(ctx, "SELECT * FROM animal_shots WHERE animal_id = $1", animal_id).Scan(&shot.Animal_id, &shot.Shot_id, &shot.Date_due,
+		&shot.Date_given)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "QueryRow failed for get shot: %v\n", err)
+		return NewAnimalShot{}, false
+	}
+	return shot, true
+}

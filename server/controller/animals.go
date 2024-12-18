@@ -23,22 +23,13 @@ func AnimalController(w http.ResponseWriter, r *http.Request) {
 			fmt.Println("The else in method post was called")
 
 			animal := GetAnimalFromBody(w, r)
-
 			database.InsertAnimal(animal)
-			// make sure to do for each
-			// need to create animal, and then once i create animal, take the info from the shot part of the body and create shot with that
-			// fetch the new animals id first though.
 
-			/*
-				iterate over each shot in animal.shots
-			*/
 			animal_id := database.GetAnimalByName(animal.Name)
-			fmt.Printf("animal id is %s\n", animal_id)
 
 			for _, values := range animal.Shots {
 
 				newShot := database.NewAnimalShot{Animal_id: animal_id, Shot_id: values.Shot_id, Date_given: values.Date_given, Date_due: values.Date_due}
-				fmt.Println("About to create the shot!")
 				database.InsertAnimalShots(newShot)
 			}
 
@@ -47,6 +38,11 @@ func AnimalController(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 
 			updatedAnimal := GetUpdatedAnimalFromBody(w, r)
+
+			for _, values := range updatedAnimal.Shots {
+				newShot := database.NewAnimalShot{Animal_id: updatedAnimal.Id, Shot_id: values.Shot_id, Date_given: values.Date_given, Date_due: values.Date_due}
+				database.InsertAnimalShots(newShot)
+			}
 
 			database.UpdateAnimal(updatedAnimal)
 			fmt.Fprintf(w, "Animal updated successfully")

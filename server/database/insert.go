@@ -31,11 +31,12 @@ type NewAnimalShot struct {
 }
 
 type UpdateAnimalStruct struct {
-	Id            string    `json:"id"`
-	Name          string    `json:"name"`
-	Date_of_birth time.Time `json:"date_of_birth"`
-	Price         float32   `json:"price"`
-	Available     bool      `json:"available"`
+	Id            string              `json:"id"`
+	Name          string              `json:"name"`
+	Date_of_birth time.Time           `json:"date_of_birth"`
+	Price         float32             `json:"price"`
+	Available     bool                `json:"available"`
+	Shots         []NewShotFromClient `json:"shots"`
 }
 
 func InsertAnimal(animal NewAnimal) {
@@ -50,12 +51,25 @@ func InsertAnimal(animal NewAnimal) {
 }
 
 func InsertAnimalShots(shot NewAnimalShot) { //! inserting Date_due gives incorrect date! fix this.!
-	sql := `
-		INSERT INTO animal_shots(animal_id, shots_id, date_given, next_due) VALUES ($1, $2, $3, $4)
-	`
+	//* if animal alrady as shot THEN update the shot with new info
 	ctx, pool := createConnection()
-	_, err := pool.Exec(ctx, sql, shot.Animal_id, shot.Shot_id, shot.Date_given, shot.Date_due)
-	inserQueryFail(err, "Inserting shot")
+
+	_, isShot := GetShot(shot.Animal_id)
+	if isShot {
+		fmt.Println("is shot is true")
+		_, err := pool.Exec(ctx, `UPDATE animal_shots SET next_due = $1, date_give = $2 WHERE animal_id = $2 AND shots_id = $3 `, shot.Date_due, shot.Date_given, shot.Animal_id, shot.Shot_id)
+		inserQueryFail(err, "Updating shot")
+		return
+	}
+
+	//* CREATE NEW
+	if !isShot {
+		sql := `
+		INSERT INTO animal_shots(animal_id, shots_id, date_given, next_due) VALUES ($1, $2, $3, $4)
+		`
+		_, err := pool.Exec(ctx, sql, shot.Animal_id, shot.Shot_id, shot.Date_given, shot.Date_due)
+		inserQueryFail(err, "Inserting shot")
+	}
 }
 
 func UpdateAnimal(animal UpdateAnimalStruct) { //! Add ability to add new shots

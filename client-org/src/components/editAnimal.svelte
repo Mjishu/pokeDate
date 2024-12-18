@@ -3,12 +3,15 @@
             createAnimal,
             getAnimalById,
             updateAnimalById,
+            GetAllShots,
       } from "../helper/animals";
-      import type { NewAnimal, UpdatedAnimal } from "../helper/animals";
+      import type { NewAnimal, UpdatedAnimal, Shot } from "../helper/animals";
       import { formatISO } from "date-fns";
+      import { onMount } from "svelte";
 
       let { showEditPage = $bindable(), currentId } = $props();
       let animal = $state();
+      let shotData = $state<Shot[]>();
 
       animal = getAnimalById(currentId);
 
@@ -32,6 +35,9 @@
                   date_due: "",
             });
       }
+      onMount(async () => {
+            shotData = await GetAllShots();
+      });
 </script>
 
 <main>
@@ -88,12 +94,22 @@
                         <div class="shot-wrapper">
                               <div>
                                     <label for="shot-name">Name</label>
-                                    <input
-                                          type="text"
-                                          placeholder="name..."
+                                    <select
                                           name="shot-name"
+                                          id="sahot-name"
                                           bind:value={updatedAnimal.shots[i].id}
-                                    />
+                                    >
+                                          <option value="" disabled selected
+                                                >Name</option
+                                          >
+                                          {#if shotData != undefined}
+                                                {#each shotData as shot}
+                                                      <option value={shot.Id}
+                                                            >{shot.Name}</option
+                                                      >
+                                                {/each}
+                                          {/if}
+                                    </select>
                               </div>
                               <div>
                                     <label for="shot-given">Shot Given</label>
