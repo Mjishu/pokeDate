@@ -31,7 +31,7 @@ func Database() {
 	ctx, dbpool := createConnection()
 	defer dbpool.Close()
 
-	callSchemas(ctx, dbpool)
+	// callSchemas(ctx, dbpool)
 	PopulateDB(ctx, dbpool)
 	// getLocations(ctx, dbpool)
 }

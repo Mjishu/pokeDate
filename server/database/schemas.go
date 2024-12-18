@@ -108,7 +108,9 @@ func createAnimalImages(ctx context.Context, pool *pgxpool.Pool) {
 	sql := `
 		CREATE TABLE IF NOT EXISTS animal_images (
 			animal_id UUID REFERENCES animals(id) ON DELETE CASCADE NOT NULL,
-			image_src TEXT NOT NULL
+			image_src TEXT NOT NULL,
+			priority INT NOT NULL, 
+			CONSTRAINT unique_priority_per_animal UNIQUE (animal_id, priority)
 		);
 	`
 
