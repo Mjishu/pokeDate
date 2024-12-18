@@ -90,7 +90,7 @@ export async function getAnimalById(id: string) {
             body: JSON.stringify({ id: id })
       }
       try {
-            const response = await fetch("http://localhost:8080/animals", fetchParams)
+            const response = await fetch("http://localhost:8080/organizations/animals", fetchParams)
             const data = await response.json()
             console.log(data)
             return data

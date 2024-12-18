@@ -22,6 +22,15 @@ func AnimalController(w http.ResponseWriter, r *http.Request) {
 		case http.MethodPost:
 			w.Header().Set("Content-Type", "application/json")
 
+			hasId, id := checkForBodyItem("id", w, r)
+			if hasId {
+				if err := json.NewEncoder(w).Encode(database.GetAnimal(id)); err != nil {
+					http.Error(w, "unable to encode response", http.StatusInternalServerError)
+				}
+				return
+			}
+			fmt.Fprintf(w, "Body does not have an id!")
+
 		case http.MethodGet:
 			w.Header().Set("Content-Type", "application/json")
 			if err := json.NewEncoder(w).Encode(database.GetAllAnimals()); err != nil {
@@ -35,22 +44,14 @@ func AnimalController(w http.ResponseWriter, r *http.Request) {
 
 		switch r.Method {
 		case http.MethodPost:
-			hasId, id := checkForBodyItem("id", w, r)
-			if hasId {
-				if err := json.NewEncoder(w).Encode(database.GetAnimal(id)); err != nil {
-					http.Error(w, "unable to encode response", http.StatusInternalServerError)
-				}
-				return
 
-			} else { //! this just doesnt create the animal with the fields given, the fields are empty besides default
-				w.Header().Set("Content-Type", "application/json")
-				fmt.Println("The else in method post was called")
+			w.Header().Set("Content-Type", "application/json")
+			fmt.Println("The else in method post was called")
 
-				animal := GetAnimalFromBody(w, r)
+			animal := GetAnimalFromBody(w, r)
 
-				database.InsertAnimal(animal)
-				fmt.Fprintf(w, "Animal created Successfully!")
-			}
+			// database.InsertAnimal(animal)
+			fmt.Fprintf(w, "Animal created Successfully!: %v\n", animal)
 		case http.MethodPut:
 			w.Header().Set("Content-Type", "application/json")
 
@@ -85,10 +86,11 @@ func GetFrontendURL() string {
 	return frontendURL
 }
 
-func GetAnimalFromBody(w http.ResponseWriter, r *http.Request) database.NewAnimal { // *can i make this take a type as a parmater and change the animal database.NewAnimal based on that?
+func GetAnimalFromBody(w http.ResponseWriter, r *http.Request) database.NewAnimal {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		http.Error(w, "unable to read body", http.StatusInternalServerError)
+		fmt.Printf("error trying to read body: %v\n", err)
+		http.Error(w, "unable to read body: %v\n", http.StatusInternalServerError)
 		return database.NewAnimal{}
 	}
 	defer r.Body.Close()
