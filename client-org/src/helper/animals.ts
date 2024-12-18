@@ -8,10 +8,16 @@ export type Animal = {
       Price: number;
       Breed: string;
       Image_src: string;
-      Shots: Shot[]
+      Shots: AnimalShot[]
 };
 
 export type Shot = {
+      Id: number;
+      Name: string;
+      Description: string;
+}
+
+export type AnimalShot = {
       id: string;
       name: string;
       description: string;
@@ -31,7 +37,7 @@ export type NewAnimal = {
 }
 
 type NewShot = {
-      name: string;
+      id: string;
       date_given: string;
       date_due: string;
 }
@@ -137,5 +143,16 @@ export async function DeleteAnimalById(id: string): Promise<void> {
       } catch (error) {
             console.error(`error trying to delete animal: ${error}`)
             return
+      }
+}
+
+export async function GetAllShots(): Promise<Shot[]> {
+      try {
+            const response = await fetch("http://localhost:8080/shots")
+            const data = await response.json()
+            return data
+      } catch (error) {
+            console.error(`there was an error trying to fetch all shots: ${error}`)
+            return []
       }
 }

@@ -7,21 +7,27 @@ import (
 )
 
 type NewAnimal struct {
-	Name          string          `json:"name"`
-	Species       string          `json:"species"`
-	Date_of_birth time.Time       `json:"date_of_birth"`
-	Sex           string          `json:"sex"`
-	Price         float32         `json:"price"`
-	Available     bool            `json:"available"`
-	Breed         string          `json:"breed"`
-	Shots         []NewAnimalShot `json:"shots"`
+	Name          string              `json:"name"`
+	Species       string              `json:"species"`
+	Date_of_birth time.Time           `json:"date_of_birth"`
+	Sex           string              `json:"sex"`
+	Price         float32             `json:"price"`
+	Available     bool                `json:"available"`
+	Breed         string              `json:"breed"`
+	Shots         []NewShotFromClient `json:"shots"`
+}
+
+type NewShotFromClient struct {
+	Shot_id    string    `json:"id"`
+	Date_given time.Time `json:"date_given"`
+	Date_due   time.Time `json:"date_due:"`
 }
 
 type NewAnimalShot struct {
-	Animal_id  string `json:"animal_id"`
-	Shot_id    string `json:"shot_id"`
-	Date_given string `json:"date_given"`
-	Date_due   string `json:"date_due:"`
+	Animal_id  string    `json:"animal_id"`
+	Shot_id    string    `json:"shot_id"`
+	Date_given time.Time `json:"date_given"`
+	Date_due   time.Time `json:"date_due:"`
 }
 
 type UpdateAnimalStruct struct {
@@ -43,7 +49,7 @@ func InsertAnimal(animal NewAnimal) {
 	inserQueryFail(err, "inserting animal")
 }
 
-func InsertShots(shot NewAnimalShot) {
+func InsertAnimalShots(shot NewAnimalShot) { //! inserting Date_due gives incorrect date! fix this.!
 	sql := `
 		INSERT INTO animal_shots(animal_id, shots_id, date_given, next_due) VALUES ($1, $2, $3, $4)
 	`
@@ -63,7 +69,7 @@ func UpdateAnimal(animal UpdateAnimalStruct) { //! Add ability to add new shots
 
 func inserQueryFail(err error, name string) {
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
+		fmt.Fprintf(os.Stderr, "QueryRow failed of %s: %v\n", name, err)
 	}
 	fmt.Printf("command  '%s' created successfully\n", name)
 }

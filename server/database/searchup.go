@@ -42,6 +42,16 @@ func GetAnimal(id any) Animal {
 	return animal
 }
 
+func GetAnimalByName(animal_name string) string {
+	ctx, pool := createConnection()
+	var id string
+	err := pool.QueryRow(ctx, "SELECT id FROM animals WHERE name = $1", animal_name).Scan(&id)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "QueryRow failed for animal by name: %v\n", err)
+	}
+	return id
+}
+
 func GetRandomAnimal() Animal {
 	ctx, pool := createConnection()
 	var animal Animal

@@ -1,10 +1,12 @@
 <script lang="ts">
-      import { createAnimal } from "../helper/animals";
-      import type { NewAnimal } from "../helper/animals";
+      import { onMount } from "svelte";
+      import { createAnimal, GetAllShots } from "../helper/animals";
+      import type { NewAnimal, Shot } from "../helper/animals";
       import { formatISO } from "date-fns";
 
       let { showNewAnimal = $bindable() } = $props();
 
+      let shotData = $state<Shot[]>();
       let newAnimal = $state<NewAnimal>({
             name: "",
             species: "",
@@ -13,7 +15,7 @@
             available: false,
             breed: "",
             price: 0,
-            shots: [{ name: "", date_given: "", date_due: "" }],
+            shots: [{ id: "", date_given: "", date_due: "" }],
       });
 
       async function handleCreateAnimal(e: Event) {
@@ -24,6 +26,11 @@
                   date_of_birth: newAnimal.date_of_birth
                         ? formatISO(new Date(newAnimal.date_of_birth))
                         : undefined,
+                  shots: newAnimal.shots.map((shot) => ({
+                        id: shot.id,
+                        date_given: formatISO(new Date(shot.date_given)),
+                        date_due: formatISO(new Date(shot.date_due)),
+                  })),
             };
             console.log(formattedAnimal);
             await createAnimal(formattedAnimal);
@@ -35,9 +42,13 @@
       }
 
       function addNewShot() {
-            newAnimal.shots.push({ name: "", date_given: "", date_due: "" });
+            newAnimal.shots.push({ id: "", date_given: "", date_due: "" });
             console.log("add new shots was called");
       }
+
+      onMount(async () => {
+            shotData = await GetAllShots();
+      });
 </script>
 
 <main>
@@ -91,13 +102,15 @@
                         required
                         type="number"
                         name="price"
+                        step=".01"
+                        min="0"
+                        max="9999999"
                         bind:value={newAnimal.price}
                   />
             </div>
             <div>
                   <label for="available">Available</label>
                   <input
-                        required
                         type="checkbox"
                         name="available"
                         bind:checked={newAnimal.available}
@@ -119,12 +132,22 @@
                         <div class="shot-wrapper">
                               <div>
                                     <label for="shot-name">Name</label>
-                                    <input
-                                          type="text"
-                                          placeholder="name..."
+                                    <select
                                           name="shot-name"
-                                          bind:value={newAnimal.shots[i].name}
-                                    />
+                                          id="sahot-name"
+                                          bind:value={newAnimal.shots[i].id}
+                                    >
+                                          <option value="" disabled selected
+                                                >Name</option
+                                          >
+                                          {#if shotData != undefined}
+                                                {#each shotData as shot}
+                                                      <option value={shot.Id}
+                                                            >{shot.Name}</option
+                                                      >
+                                                {/each}
+                                          {/if}
+                                    </select>
                               </div>
                               <div>
                                     <label for="shot-given">Shot Given</label>

@@ -25,6 +25,23 @@ func AnimalController(w http.ResponseWriter, r *http.Request) {
 			animal := GetAnimalFromBody(w, r)
 
 			database.InsertAnimal(animal)
+			// make sure to do for each
+			// need to create animal, and then once i create animal, take the info from the shot part of the body and create shot with that
+			// fetch the new animals id first though.
+
+			/*
+				iterate over each shot in animal.shots
+			*/
+			animal_id := database.GetAnimalByName(animal.Name)
+			fmt.Printf("animal id is %s\n", animal_id)
+
+			for _, values := range animal.Shots {
+
+				newShot := database.NewAnimalShot{Animal_id: animal_id, Shot_id: values.Shot_id, Date_given: values.Date_given, Date_due: values.Date_due}
+				fmt.Println("About to create the shot!")
+				database.InsertAnimalShots(newShot)
+			}
+
 			fmt.Fprintf(w, "Animal created Successfully!: %v\n", animal)
 		case http.MethodPut:
 			w.Header().Set("Content-Type", "application/json")

@@ -23,12 +23,11 @@
 
       function closeForm() {
             showEditPage = false;
-            ``;
       }
 
       function addNewShot() {
             updatedAnimal.shots.push({
-                  name: "",
+                  id: "",
                   date_given: "",
                   date_due: "",
             });
@@ -37,7 +36,10 @@
 
 <main>
       <form
-            onsubmit={(e) => updateAnimalById(e, currentId, updatedAnimal)}
+            onsubmit={(e) => {
+                  closeForm();
+                  updateAnimalById(e, currentId, updatedAnimal);
+            }}
             autocomplete="off"
       >
             <h3>Information</h3>
@@ -74,7 +76,6 @@
             <div>
                   <label for="available">Available</label>
                   <input
-                        required
                         type="checkbox"
                         name="available"
                         bind:checked={updatedAnimal.available}
@@ -91,8 +92,7 @@
                                           type="text"
                                           placeholder="name..."
                                           name="shot-name"
-                                          bind:value={updatedAnimal.shots[i]
-                                                .name}
+                                          bind:value={updatedAnimal.shots[i].id}
                                     />
                               </div>
                               <div>
