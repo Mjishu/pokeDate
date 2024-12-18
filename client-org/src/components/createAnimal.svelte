@@ -25,6 +25,7 @@
                         ? formatISO(new Date(newAnimal.date_of_birth))
                         : undefined,
             };
+            console.log(formattedAnimal);
             await createAnimal(formattedAnimal);
             showNewAnimal = false;
       }
@@ -44,7 +45,12 @@
             <h3>Information</h3>
             <div>
                   <label for="name">Name</label>
-                  <input type="text" name="name" bind:value={newAnimal.name} />
+                  <input
+                        type="text"
+                        name="name"
+                        bind:value={newAnimal.name}
+                        required
+                  />
             </div>
             <div>
                   <label for="species">Species</label>
@@ -52,6 +58,7 @@
                         type="text"
                         name="species"
                         bind:value={newAnimal.species}
+                        required
                   />
             </div>
             <div>
@@ -60,15 +67,28 @@
                         type="date"
                         name="date_of_birth"
                         bind:value={newAnimal.date_of_birth}
+                        required
                   />
             </div>
             <div>
                   <label for="sex">Sex</label>
-                  <input type="text" name="sex" bind:value={newAnimal.sex} />
+                  <select
+                        name="sex"
+                        id="sex"
+                        bind:value={newAnimal.sex}
+                        required
+                  >
+                        <option value="" disabled selected>Sex</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="undefined">Undefined</option>
+                  </select>
+                  <!-- <input type="text" name="sex" bind:value={newAnimal.sex} /> -->
             </div>
             <div>
                   <label for="price">Price</label>
                   <input
+                        required
                         type="number"
                         name="price"
                         bind:value={newAnimal.price}
@@ -77,6 +97,7 @@
             <div>
                   <label for="available">Available</label>
                   <input
+                        required
                         type="checkbox"
                         name="available"
                         bind:checked={newAnimal.available}
@@ -85,6 +106,7 @@
             <div>
                   <label for="breed">Breed</label>
                   <input
+                        required
                         type="text"
                         name="breed"
                         bind:value={newAnimal.breed}

@@ -42,8 +42,9 @@ func AnimalController(w http.ResponseWriter, r *http.Request) {
 				}
 				return
 
-			} else {
+			} else { //! this just doesnt create the animal with the fields given, the fields are empty besides default
 				w.Header().Set("Content-Type", "application/json")
+				fmt.Println("The else in method post was called")
 
 				animal := GetAnimalFromBody(w, r)
 
@@ -51,13 +52,19 @@ func AnimalController(w http.ResponseWriter, r *http.Request) {
 				fmt.Fprintf(w, "Animal created Successfully!")
 			}
 		case http.MethodPut:
-			fmt.Println("put has been called")
 			w.Header().Set("Content-Type", "application/json")
 
 			updatedAnimal := GetUpdatedAnimalFromBody(w, r)
 
 			database.UpdateAnimal(updatedAnimal)
 			fmt.Fprintf(w, "Animal updated successfully")
+		case http.MethodDelete:
+			w.Header().Set("Content-Type", "application/json")
+
+			_, id := checkForBodyItem("id", w, r)
+
+			database.DeleteAnimal(id)
+			fmt.Fprintf(w, "Animal was removed successfully")
 		}
 	}
 }
@@ -92,6 +99,7 @@ func GetAnimalFromBody(w http.ResponseWriter, r *http.Request) database.NewAnima
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return database.NewAnimal{}
 	}
+
 	fmt.Printf("Animal inside GAFB is %v\n", animal)
 	return animal
 }

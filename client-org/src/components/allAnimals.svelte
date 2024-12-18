@@ -1,7 +1,10 @@
 <script>
       // @ts-nocheck
 
-      import { getOrganizationAnimals } from "../helper/animals";
+      import {
+            getOrganizationAnimals,
+            DeleteAnimalById,
+      } from "../helper/animals";
       import { format } from "date-fns";
       import EditAnimal from "./editAnimal.svelte";
 
@@ -9,6 +12,7 @@
       let isLoading = $state(true);
       let currentId = $state();
       let showEditPage = $state(false);
+      let showDeleteForm = $state(false);
 
       async function callAnimals() {
             animalsData = await getOrganizationAnimals();
@@ -19,6 +23,17 @@
       function showEdit(id) {
             showEditPage = true;
             currentId = id;
+      }
+
+      function showDelete(id) {
+            currentId = id;
+            showDeleteForm = true;
+      }
+
+      async function deleteEntry(id) {
+            currentId = undefined;
+            showDeleteForm = false;
+            await DeleteAnimalById(id);
       }
 </script>
 
@@ -63,6 +78,8 @@
                                                 >edit</button
                                           >
                                           <button
+                                                onclick={() =>
+                                                      showDelete(animal.Id)}
                                                 ><img
                                                       src="icons/trash_icon.svg"
                                                       alt=""
@@ -75,6 +92,19 @@
             </table>
             {#if showEditPage}
                   <EditAnimal {currentId} bind:showEditPage />
+            {/if}
+
+            {#if showDeleteForm}
+                  <div class="delete-form">
+                        <h4>Are you sure you want to delete this?</h4>
+                        <button onclick={() => (showDeleteForm = false)}
+                              >Cancel</button
+                        >
+                        <button
+                              onclick={async () => await deleteEntry(currentId)}
+                              >Delete</button
+                        >
+                  </div>
             {/if}
       </div>
 {/if}
@@ -142,5 +172,23 @@
       .action-holder button img {
             width: 1rem;
             height: 1rem;
+      }
+
+      .delete-form {
+            background: pink;
+            width: 20em;
+            height: 10em;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0 1rem;
+            padding: 1rem 2rem;
+      }
+      .delete-form h4 {
+            grid-column: 1/ -1;
+            text-align: center;
+      }
+      .delete-form button {
+            width: 10rem;
+            height: 3rem;
       }
 </style>

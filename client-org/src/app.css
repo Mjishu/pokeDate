@@ -38,6 +38,7 @@ a:hover {
 
 :root {
   --border-color: hsla(0,0%,45%,.44);
+  --tag-color: hsla(0, 0%, 36%, 1);
 }
 
 html {

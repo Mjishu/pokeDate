@@ -24,7 +24,7 @@ type UpdateAnimalStruct struct {
 	Available     bool      `json:"available"`
 }
 
-func InsertAnimal(animal NewAnimal) { //! fix
+func InsertAnimal(animal NewAnimal) {
 	sql := `
 		INSERT INTO animals (name,species,date_of_birth,sex,price,available,breed) VALUES (
 			$1, $2, $3, $4, $5, $6, $7
@@ -47,7 +47,15 @@ func UpdateAnimal(animal UpdateAnimalStruct) { //! Add ability to add new shots
 func inserQueryFail(err error, name string) {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)
-		os.Exit(1)
 	}
 	fmt.Printf("command  '%s' created successfully\n", name)
+}
+
+func DeleteAnimal(id interface{}) {
+	sql := `
+		DELETE FROM animals WHERE id = $1
+	`
+	ctx, pool := createConnection()
+	_, err := pool.Exec(ctx, sql, id)
+	inserQueryFail(err, "deleting animal")
 }

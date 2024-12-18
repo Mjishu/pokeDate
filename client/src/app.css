@@ -1,5 +1,6 @@
 :root {
   --border-color: hsla(0,0%,45%,.44);
+  --tag-color: 0, 0%, 36%;
 }
 
 html {

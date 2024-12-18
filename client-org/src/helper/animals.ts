@@ -8,7 +8,16 @@ export type Animal = {
       Price: number;
       Breed: string;
       Image_src: string;
+      Shots: Shot[]
 };
+
+export type Shot = {
+      id: string;
+      name: string;
+      description: string;
+      date_given: string;
+      next_due: string
+}
 
 export type NewAnimal = {
       name: string;
@@ -50,6 +59,7 @@ export async function createAnimal(animal: NewAnimal) {
             },
             body: JSON.stringify({ ...animal })
       }
+      console.log(fetchParams.body)
       try {
             const response = await fetch("http://localhost:8080/animals", fetchParams)
             const data = await response.json()
@@ -90,7 +100,7 @@ export async function getAnimalById(id: string) {
       }
 }
 
-export async function updateAnimalById(e: Event, id: string, updatedAnimal: UpdatedAnimal) {
+export async function updateAnimalById(e: Event, id: string, updatedAnimal: UpdatedAnimal): Promise<void> {
       e.preventDefault()
       const fetchParams = {
             method: "PUT",
@@ -102,13 +112,30 @@ export async function updateAnimalById(e: Event, id: string, updatedAnimal: Upda
                   price: updatedAnimal.price, available: updatedAnimal.available
             })
       }
-      console.log(fetchParams.body)
       try {
             const response = await fetch("http://localhost:8080/animals", fetchParams)
             const data = await response.json()
             return data
       } catch (error) {
             console.error(`error trying to update animal: ${error}`)
+            return
+      }
+}
+
+export async function DeleteAnimalById(id: string): Promise<void> {
+      const fetchParams = {
+            method: "DELETE",
+            headers: {
+                  "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ id })
+      }
+      try {
+            const response = await fetch("http://localhost:8080/animals", fetchParams)
+            const data = await response.json()
+            return data
+      } catch (error) {
+            console.error(`error trying to delete animal: ${error}`)
             return
       }
 }
