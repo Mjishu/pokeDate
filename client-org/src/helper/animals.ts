@@ -4,11 +4,11 @@ export type Animal = {
       Species: string;
       Date_of_birth: string;
       Sex: string;
-      Available: boolean;
       Price: number;
+      Available: boolean;
       Breed: string;
       Image_src: string;
-      Shots: AnimalShot[]
+      Shots: AnimalShot[] | NewShot[]
 };
 
 export type Shot = {
@@ -34,6 +34,7 @@ export type NewAnimal = {
       sex: string;
       breed: string;
       shots: NewShot[];
+      image_src: string;
 }
 
 type NewShot = {
@@ -108,6 +109,7 @@ export async function getAnimalById(id: string) {
 
 export async function updateAnimalById(e: Event, id: string, updatedAnimal: UpdatedAnimal): Promise<void> {
       e.preventDefault()
+      console.log(updatedAnimal)
       const fetchParams = {
             method: "PUT",
             headers: {
@@ -115,7 +117,7 @@ export async function updateAnimalById(e: Event, id: string, updatedAnimal: Upda
             },
             body: JSON.stringify({
                   id: id, name: updatedAnimal.name, date_of_birth: updatedAnimal.date_of_birth + "T00:00:00Z",
-                  price: updatedAnimal.price, available: updatedAnimal.available
+                  price: updatedAnimal.price, available: updatedAnimal.available, shots: updatedAnimal.shots
             })
       }
       try {

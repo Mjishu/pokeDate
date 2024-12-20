@@ -84,9 +84,10 @@ func SelectShots(animal *Animal, ctx context.Context, pool *pgxpool.Pool) {
 		var shot AnimalShot
 		err := rows.Scan(&shot.Name, &shot.Description, &shot.Id, &shot.Date_given, &shot.Next_due)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Scaning row didn't work: %v\n", err)
+			fmt.Fprintf(os.Stderr, "Scaning row for shots didn't work: %v\n", err)
 			return
 		}
+		fmt.Printf("Your shot is; %v\n", shot)
 		animal.Shots = append(animal.Shots, shot)
 	}
 

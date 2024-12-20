@@ -15,7 +15,8 @@
             available: false,
             breed: "",
             price: 0,
-            shots: [{ id: "", date_given: "", date_due: "" }],
+            shots: [],
+            image_src: "",
       });
 
       async function handleCreateAnimal(e: Event) {
@@ -123,6 +124,17 @@
                         type="text"
                         name="breed"
                         bind:value={newAnimal.breed}
+                  />
+            </div>
+            <hr />
+            <!-- * ADD IMAGES -->
+            <h3>Images</h3>
+            <div class="image-container">
+                  <input
+                        multiple={false}
+                        bind:value={newAnimal.image_src}
+                        type="file"
+                        accept=".jpeg, .jpg, .png, .bmp, .webp, .avif, .svg"
                   />
             </div>
             <hr />

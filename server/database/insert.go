@@ -20,7 +20,7 @@ type NewAnimal struct {
 type NewShotFromClient struct {
 	Shot_id    string    `json:"id"`
 	Date_given time.Time `json:"date_given"`
-	Date_due   time.Time `json:"date_due:"`
+	Date_due   time.Time `json:"date_due:"` //! This might need a T00:00:00Z on frontend
 }
 
 type NewAnimalShot struct {
@@ -63,13 +63,12 @@ func InsertAnimalShots(shot NewAnimalShot) { //! inserting Date_due gives incorr
 	}
 
 	//* CREATE NEW
-	if !isShot {
-		sql := `
+	fmt.Println("isShot was false")
+	sql := `
 		INSERT INTO animal_shots(animal_id, shots_id, date_given, next_due) VALUES ($1, $2, $3, $4)
 		`
-		_, err := pool.Exec(ctx, sql, shot.Animal_id, shot.Shot_id, shot.Date_given, shot.Date_due)
-		inserQueryFail(err, "Inserting shot")
-	}
+	_, err := pool.Exec(ctx, sql, shot.Animal_id, shot.Shot_id, shot.Date_given, shot.Date_due)
+	inserQueryFail(err, "Inserting shot")
 }
 
 func UpdateAnimal(animal UpdateAnimalStruct) { //! Add ability to add new shots

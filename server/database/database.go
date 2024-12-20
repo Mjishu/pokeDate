@@ -19,7 +19,7 @@ type Location struct {
 
 func createConnection() (context.Context, *pgxpool.Pool) {
 	ctx := context.Background()
-	dbpool, err := pgxpool.New(ctx, GetDatabaseURL())
+	dbpool, err := pgxpool.New(ctx, GetItemFromENV("DATABASE_URL"))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Unable to connect to database %v\n", err)
 		os.Exit(1)
@@ -36,7 +36,7 @@ func Database() {
 	// getLocations(ctx, dbpool)
 }
 
-func GetDatabaseURL() string {
+func GetItemFromENV(key string) string {
 	err := godotenv.Load("../.env")
 	if err != nil {
 		err = godotenv.Load(".env")
@@ -45,7 +45,7 @@ func GetDatabaseURL() string {
 		}
 	}
 
-	dbURL := os.Getenv("DATABASE_URL")
+	dbURL := os.Getenv(key)
 	if dbURL == "" {
 		log.Fatal("DATABASE_URL not set in .env")
 	}

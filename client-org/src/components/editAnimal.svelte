@@ -5,15 +5,19 @@
             updateAnimalById,
             GetAllShots,
       } from "../helper/animals";
-      import type { NewAnimal, UpdatedAnimal, Shot } from "../helper/animals";
+      import type {
+            NewAnimal,
+            UpdatedAnimal,
+            Shot,
+            Animal,
+      } from "../helper/animals";
       import { formatISO } from "date-fns";
       import { onMount } from "svelte";
 
       let { showEditPage = $bindable(), currentId } = $props();
-      let animal = $state();
+      let oldAnimal = $state();
+      let animal = $state<Animal>();
       let shotData = $state<Shot[]>();
-
-      animal = getAnimalById(currentId);
 
       let updatedAnimal = $state<UpdatedAnimal>({
             // switch this to animal.name etc
@@ -37,6 +41,15 @@
       }
       onMount(async () => {
             shotData = await GetAllShots();
+
+            animal = await getAnimalById(currentId);
+            updatedAnimal = {
+                  name: animal?.Name || "",
+                  date_of_birth: animal?.Date_of_birth || "",
+                  price: animal?.Price || 0,
+                  available: animal?.Available || false,
+                  shots: animal?.Shots || [], // figure out how to add animal.shots, will have to iterate over each shot in updatedAnimal and show the shots
+            };
       });
 </script>
 

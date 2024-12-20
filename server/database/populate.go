@@ -16,11 +16,11 @@ type Shot struct {
 }
 
 type AnimalShot struct {
-	Id          string
+	Id          int
 	Description string
 	Name        string
-	Date_given  string
-	Next_due    string
+	Next_due    time.Time
+	Date_given  time.Time
 }
 
 type Animal struct {
@@ -39,6 +39,7 @@ type Animal struct {
 func PopulateDB(ctx context.Context, pool *pgxpool.Pool) {
 	// makeAnimals(ctx, pool)
 	// populateShots(ctx, pool)
+	// makeImage(ctx, pool)
 }
 
 func makeAnimals(ctx context.Context, pool *pgxpool.Pool) {
@@ -59,7 +60,7 @@ func makeAnimals(ctx context.Context, pool *pgxpool.Pool) {
 
 func makeImage(ctx context.Context, pool *pgxpool.Pool) {
 	sql := []string{
-		`INSERT INTO animal_images (animal_id, image_src) VALUES ('5883f423-30ee-46e3-abf8-413f1f55bdc1', './images/dog.webp');`,
+		`INSERT INTO animal_images (animal_id, image_src, priority) VALUES ('90f74cb5-2f24-434d-90ac-4553c9f31cd4', './images/dog.webp', 1);`,
 	}
 
 	for _, query := range sql {
