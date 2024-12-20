@@ -46,7 +46,7 @@ func AnimalController(w http.ResponseWriter, r *http.Request) {
 				fmt.Printf("the new shot is: %v\n", newShot)
 				database.InsertAnimalShots(newShot)
 			}
-
+			fmt.Printf("the animal given is %v\n", updatedAnimal)
 			database.UpdateAnimal(updatedAnimal)
 			fmt.Fprintf(w, "Animal updated successfully")
 		case http.MethodDelete:

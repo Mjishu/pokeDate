@@ -7,37 +7,37 @@ import (
 )
 
 type NewAnimal struct {
-	Name          string              `json:"name"`
-	Species       string              `json:"species"`
-	Date_of_birth time.Time           `json:"date_of_birth"`
-	Sex           string              `json:"sex"`
-	Price         float32             `json:"price"`
-	Available     bool                `json:"available"`
-	Breed         string              `json:"breed"`
-	Shots         []NewShotFromClient `json:"shots"`
+	Name          string              `json:"Name"`
+	Species       string              `json:"Species"`
+	Date_of_birth time.Time           `json:"Date_of_birth"`
+	Sex           string              `json:"Sex"`
+	Price         float32             `json:"Price"`
+	Available     bool                `json:"Available"`
+	Breed         string              `json:"Breed"`
+	Shots         []NewShotFromClient `json:"Shots"`
 }
 
 type NewAnimalShot struct {
-	Animal_id  string    `json:"animal_id"`
-	Shot_id    int       `json:"shot_id"`
-	Date_given time.Time `json:"date_given"`
-	Date_due   time.Time `json:"date_due"`
+	Animal_id  string    `json:"Animal_id"`
+	Shot_id    int       `json:"Shot_id"`
+	Date_given time.Time `json:"Date_given"`
+	Date_due   time.Time `json:"Next_due"`
 }
 
 type NewShotFromClient struct {
-	Shot_id    int       `json:"id"`
-	Date_given time.Time `json:"date_given"`
-	Date_due   time.Time `json:"date_due"`
+	Shot_id    int       `json:"Id"`
+	Date_given time.Time `json:"Date_given"`
+	Date_due   time.Time `json:"Next_due"`
 }
 
 type UpdateAnimalStruct struct {
-	Id            string              `json:"id"`
-	Name          string              `json:"name"`
-	Date_of_birth time.Time           `json:"date_of_birth"`
-	Price         float32             `json:"price"`
-	Available     bool                `json:"available"`
-	Image_src     string              `json:"image_src"`
-	Shots         []NewShotFromClient `json:"shots"`
+	Id            string              `json:"Id"`
+	Name          string              `json:"Name"`
+	Date_of_birth time.Time           `json:"Date_of_birth"`
+	Price         float32             `json:"Price"`
+	Available     bool                `json:"Available"`
+	Image_src     string              `json:"Image_src"`
+	Shots         []NewShotFromClient `json:"Shots"`
 }
 
 func InsertAnimal(animal NewAnimal) {
@@ -73,12 +73,13 @@ func InsertAnimalShots(shot NewAnimalShot) {
 	inserQueryFail(err, "Inserting shot")
 }
 
-func UpdateAnimal(animal UpdateAnimalStruct) { //! Add ability to add new shots
+func UpdateAnimal(animal UpdateAnimalStruct) {
 	sql := `
-		UPDATE animals  SET name = $1, date_of_birth = $2, price = $3, available = $4  WHERE id = $5
+		UPDATE animals SET name = $1, date_of_birth = $2, price = $3, available = $4 WHERE id = $5
 	`
+	fmt.Printf("the updated animal is %v\n and the animal_id = %v\n", animal, animal.Id)
 	ctx, pool := createConnection()
-	_, err := pool.Exec(ctx, sql, animal.Name, animal.Date_of_birth, animal.Price, animal.Available, animal.Id)
+	_, err := pool.Exec(ctx, sql, animal.Name, animal.Date_of_birth, animal.Price, animal.Available, animal.Id) //? Why is this giving an error?
 	inserQueryFail(err, "Updating Animal")
 }
 

@@ -88,7 +88,6 @@ func SelectShots(animal *Animal, ctx context.Context, pool *pgxpool.Pool) {
 			fmt.Fprintf(os.Stderr, "shot was: %v\n", shot)
 			return
 		}
-		fmt.Printf("Your shot is; %v\n", shot)
 		animal.Shots = append(animal.Shots, shot)
 	}
 
@@ -172,8 +171,6 @@ func GetShot(animal_id string, shot_id int) (NewAnimalShot, bool) {
 		fmt.Fprintf(os.Stderr, "QueryRow failed for get shot: %v\n", err)
 		return NewAnimalShot{}, false
 	}
-
-	fmt.Printf("show animal_id is %v\n shot_id is %v\n", shot.Animal_id, shot.Shot_id)
 
 	return shot, shot.Animal_id != ""
 }

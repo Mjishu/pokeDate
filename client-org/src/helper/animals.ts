@@ -1,3 +1,5 @@
+import { formatISO } from "date-fns";
+
 export type Animal = {
       Id: string;
       Name: string;
@@ -18,37 +20,38 @@ export type Shot = {
 }
 
 export type AnimalShot = {
-      id: string;
-      name: string;
-      description: string;
-      date_given: string;
-      next_due: string
+      Id: number;
+      Name: string;
+      Description: string;
+      Date_given: string;
+      Next_due: string
 }
 
 export type NewAnimal = {
-      name: string;
-      species: string;
-      date_of_birth: string | undefined;
-      price: number;
-      available: boolean;
-      sex: string;
-      breed: string;
-      shots: NewShot[];
-      image_src: string;
+      Name: string;
+      Species: string;
+      Date_of_birth: string | undefined;
+      Price: number;
+      Available: boolean;
+      Sex: string;
+      Breed: string;
+      Shots: NewShot[];
+      Image_src: string;
 }
 
 type NewShot = {
-      id: string;
-      date_given: string;
-      date_due: string;
+      Id: number;
+      Date_given: string;
+      Next_due: string;
 }
 
 export type UpdatedAnimal = {
-      name: string;
-      date_of_birth: string | undefined;
-      price: number;
-      available: boolean;
-      shots: NewShot[];
+      Name: string;
+      Date_of_birth: string | undefined;
+      Price: number;
+      Available: boolean;
+      Shots: NewShot[];
+      Image_src: string;
 }
 
 
@@ -115,8 +118,8 @@ export async function updateAnimalById(id: string, updatedAnimal: UpdatedAnimal)
                   "Content-Type": "application/json"
             },
             body: JSON.stringify({
-                  id: id, name: updatedAnimal.name, date_of_birth: updatedAnimal.date_of_birth + "T00:00:00Z",
-                  price: updatedAnimal.price, available: updatedAnimal.available, shots: updatedAnimal.shots
+                  ...updatedAnimal,
+                  Id: id,
             })
       }
       try {

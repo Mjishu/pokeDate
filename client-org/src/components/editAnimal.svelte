@@ -1,3 +1,5 @@
+<!-- TODO  -->
+<!-- Iterate over each updatedAnimal.shots so that if we get info from the backend about a shot it will show the data -->
 <script lang="ts">
       import {
             createAnimal,
@@ -21,11 +23,12 @@
 
       let updatedAnimal = $state<UpdatedAnimal>({
             // switch this to animal.name etc
-            name: "",
-            date_of_birth: "",
-            price: 0,
-            available: false,
-            shots: [],
+            Name: "",
+            Date_of_birth: "",
+            Price: 0,
+            Available: false,
+            Shots: [],
+            Image_src: "",
       });
 
       function closeForm() {
@@ -33,45 +36,52 @@
       }
 
       function addNewShot() {
-            updatedAnimal.shots.push({
-                  id: "",
-                  date_given: "",
-                  date_due: "",
+            updatedAnimal.Shots.push({
+                  Id: 0,
+                  Date_given: "",
+                  Next_due: "",
             });
       }
       onMount(async () => {
             shotData = await GetAllShots();
-
             animal = await getAnimalById(currentId);
+
             updatedAnimal = {
-                  name: animal?.Name || "",
-                  date_of_birth: animal?.Date_of_birth || "",
-                  price: animal?.Price || 0,
-                  available: animal?.Available || false,
-                  shots: animal?.Shots || [], // figure out how to add animal.shots, will have to iterate over each shot in updatedAnimal and show the shots
+                  Name: animal?.Name || "",
+                  Date_of_birth: animal?.Date_of_birth || "",
+                  Price: animal?.Price || 0,
+                  Available: animal?.Available || false,
+                  Shots:
+                        animal?.Shots?.map((shot) => ({
+                              Id: shot.Id || shot.Id,
+                              Date_given: shot.Date_given || shot.Date_given,
+                              Next_due: shot.Next_due,
+                        })) || [],
+                  Image_src: animal?.Image_src || "",
             };
       });
 
-      function cleanAndUpdateAnimal(e: Event) {
+      async function cleanAndUpdateAnimal(e: Event) {
             e.preventDefault();
 
             const formattedAnimal = {
                   ...$state.snapshot(updatedAnimal),
-                  date_of_birth:
-                        updatedAnimal.date_of_birth &&
-                        formatISO(new Date(updatedAnimal.date_of_birth)),
-                  shots: updatedAnimal?.shots?.map((shot) => ({
-                        id: shot.id,
-                        date_given:
-                              shot.date_given &&
-                              formatISO(new Date(shot.date_given)),
-                        date_due:
-                              shot.date_due &&
-                              formatISO(new Date(shot.date_due)),
+                  Date_of_birth:
+                        updatedAnimal.Date_of_birth &&
+                        formatISO(new Date(updatedAnimal.Date_of_birth)),
+                  Shots: updatedAnimal?.Shots?.map((shot) => ({
+                        id: Number(shot.Id),
+                        Date_given:
+                              shot.Date_given &&
+                              formatISO(new Date(shot.Date_given)),
+                        Date_due:
+                              shot.Next_due &&
+                              formatISO(new Date(shot.Next_due)),
                   })),
             };
 
-            updateAnimalById(currentId, updatedAnimal);
+            await updateAnimalById(currentId, updatedAnimal);
+            console.log(formattedAnimal);
             closeForm();
       }
 </script>
@@ -85,7 +95,7 @@
                         required
                         type="text"
                         name="name"
-                        bind:value={updatedAnimal.name}
+                        bind:value={updatedAnimal.Name}
                   />
             </div>
             <div>
@@ -94,7 +104,7 @@
                         required
                         type="date"
                         name="date_of_birth"
-                        bind:value={updatedAnimal.date_of_birth}
+                        bind:value={updatedAnimal.Date_of_birth}
                   />
             </div>
             <div>
@@ -106,7 +116,7 @@
                         step=".01"
                         min="0"
                         max="9999999"
-                        bind:value={updatedAnimal.price}
+                        bind:value={updatedAnimal.Price}
                   />
             </div>
             <div>
@@ -114,23 +124,27 @@
                   <input
                         type="checkbox"
                         name="available"
-                        bind:checked={updatedAnimal.available}
+                        bind:checked={updatedAnimal.Available}
                   />
             </div>
             <hr />
             <h3>Shots</h3>
             <div class="shots">
-                  {#each updatedAnimal.shots as shot, i}
+                  {#each updatedAnimal.Shots as shot, i}
                         <div class="shot-wrapper">
                               <div>
                                     <label for="shot-name">Name</label>
                                     <select
                                           name="shot-name"
                                           id="sahot-name"
-                                          bind:value={updatedAnimal.shots[i].id}
+                                          bind:value={updatedAnimal.Shots[i].Id}
                                     >
                                           <option value="" disabled selected
-                                                >Name</option
+                                                >{updatedAnimal.Shots[i].Name !=
+                                                ""
+                                                      ? updatedAnimal.Shots[i]
+                                                              .Name
+                                                      : "Name"}</option
                                           >
                                           {#if shotData != undefined}
                                                 {#each shotData as shot}
@@ -146,8 +160,8 @@
                                     <input
                                           type="date"
                                           name="shot-given"
-                                          bind:value={updatedAnimal.shots[i]
-                                                .date_given}
+                                          bind:value={updatedAnimal.Shots[i]
+                                                .Date_given}
                                     />
                               </div>
                               <div>
@@ -155,8 +169,8 @@
                                     <input
                                           type="date"
                                           name="shot-due"
-                                          bind:value={updatedAnimal.shots[i]
-                                                .date_due}
+                                          bind:value={updatedAnimal.Shots[i]
+                                                .Next_due}
                                     />
                               </div>
                         </div>

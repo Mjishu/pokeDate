@@ -8,15 +8,15 @@
 
       let shotData = $state<Shot[]>();
       let newAnimal = $state<NewAnimal>({
-            name: "",
-            species: "",
-            date_of_birth: undefined,
-            sex: "",
-            available: false,
-            breed: "",
-            price: 0,
-            shots: [],
-            image_src: "",
+            Name: "",
+            Species: "",
+            Date_of_birth: undefined,
+            Sex: "",
+            Available: false,
+            Breed: "",
+            Price: 0,
+            Shots: [],
+            Image_src: "",
       });
 
       async function handleCreateAnimal(e: Event) {
@@ -24,13 +24,13 @@
 
             const formattedAnimal = {
                   ...$state.snapshot(newAnimal),
-                  date_of_birth: newAnimal.date_of_birth
-                        ? formatISO(new Date(newAnimal.date_of_birth))
+                  Date_of_birth: newAnimal.Date_of_birth
+                        ? formatISO(new Date(newAnimal.Date_of_birth))
                         : undefined,
-                  shots: newAnimal.shots.map((shot) => ({
-                        id: shot.id,
-                        date_given: formatISO(new Date(shot.date_given)),
-                        date_due: formatISO(new Date(shot.date_due)),
+                  Shots: newAnimal.Shots.map((shot) => ({
+                        Id: shot.Id,
+                        Date_given: formatISO(new Date(shot.Date_given)),
+                        Next_due: formatISO(new Date(shot.Next_due)),
                   })),
             };
             console.log(formattedAnimal);
@@ -43,8 +43,7 @@
       }
 
       function addNewShot() {
-            newAnimal.shots.push({ id: "", date_given: "", date_due: "" });
-            console.log("add new shots was called");
+            newAnimal.Shots.push({ Id: 0, Date_given: "", Next_due: "" });
       }
 
       onMount(async () => {
@@ -60,7 +59,7 @@
                   <input
                         type="text"
                         name="name"
-                        bind:value={newAnimal.name}
+                        bind:value={newAnimal.Name}
                         required
                   />
             </div>
@@ -69,7 +68,7 @@
                   <input
                         type="text"
                         name="species"
-                        bind:value={newAnimal.species}
+                        bind:value={newAnimal.Species}
                         required
                   />
             </div>
@@ -78,7 +77,7 @@
                   <input
                         type="date"
                         name="date_of_birth"
-                        bind:value={newAnimal.date_of_birth}
+                        bind:value={newAnimal.Date_of_birth}
                         required
                   />
             </div>
@@ -87,7 +86,7 @@
                   <select
                         name="sex"
                         id="sex"
-                        bind:value={newAnimal.sex}
+                        bind:value={newAnimal.Sex}
                         required
                   >
                         <option value="" disabled selected>Sex</option>
@@ -106,7 +105,7 @@
                         step=".01"
                         min="0"
                         max="9999999"
-                        bind:value={newAnimal.price}
+                        bind:value={newAnimal.Price}
                   />
             </div>
             <div>
@@ -114,7 +113,7 @@
                   <input
                         type="checkbox"
                         name="available"
-                        bind:checked={newAnimal.available}
+                        bind:checked={newAnimal.Available}
                   />
             </div>
             <div>
@@ -123,7 +122,7 @@
                         required
                         type="text"
                         name="breed"
-                        bind:value={newAnimal.breed}
+                        bind:value={newAnimal.Breed}
                   />
             </div>
             <hr />
@@ -132,7 +131,7 @@
             <div class="image-container">
                   <input
                         multiple={false}
-                        bind:value={newAnimal.image_src}
+                        bind:value={newAnimal.Image_src}
                         type="file"
                         accept=".jpeg, .jpg, .png, .bmp, .webp, .avif, .svg"
                   />
@@ -140,14 +139,14 @@
             <hr />
             <h3>Shots</h3>
             <div class="shots">
-                  {#each newAnimal.shots as shot, i}
+                  {#each newAnimal.Shots as shot, i}
                         <div class="shot-wrapper">
                               <div>
                                     <label for="shot-name">Name</label>
                                     <select
                                           name="shot-name"
                                           id="sahot-name"
-                                          bind:value={newAnimal.shots[i].id}
+                                          bind:value={newAnimal.Shots[i].Id}
                                     >
                                           <option value="" disabled selected
                                                 >Name</option
@@ -166,8 +165,8 @@
                                     <input
                                           type="date"
                                           name="shot-given"
-                                          bind:value={newAnimal.shots[i]
-                                                .date_given}
+                                          bind:value={newAnimal.Shots[i]
+                                                .Date_given}
                                     />
                               </div>
                               <div>
@@ -175,8 +174,8 @@
                                     <input
                                           type="date"
                                           name="shot-due"
-                                          bind:value={newAnimal.shots[i]
-                                                .date_due}
+                                          bind:value={newAnimal.Shots[i]
+                                                .Next_due}
                                     />
                               </div>
                         </div>
