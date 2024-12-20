@@ -51,16 +51,33 @@
                   shots: animal?.Shots || [], // figure out how to add animal.shots, will have to iterate over each shot in updatedAnimal and show the shots
             };
       });
+
+      function cleanAndUpdateAnimal(e: Event) {
+            e.preventDefault();
+
+            const formattedAnimal = {
+                  ...$state.snapshot(updatedAnimal),
+                  date_of_birth:
+                        updatedAnimal.date_of_birth &&
+                        formatISO(new Date(updatedAnimal.date_of_birth)),
+                  shots: updatedAnimal?.shots?.map((shot) => ({
+                        id: shot.id,
+                        date_given:
+                              shot.date_given &&
+                              formatISO(new Date(shot.date_given)),
+                        date_due:
+                              shot.date_due &&
+                              formatISO(new Date(shot.date_due)),
+                  })),
+            };
+
+            updateAnimalById(currentId, updatedAnimal);
+            closeForm();
+      }
 </script>
 
 <main>
-      <form
-            onsubmit={(e) => {
-                  closeForm();
-                  updateAnimalById(e, currentId, updatedAnimal);
-            }}
-            autocomplete="off"
-      >
+      <form onsubmit={cleanAndUpdateAnimal} autocomplete="off">
             <h3>Information</h3>
             <div>
                   <label for="name">Name</label>

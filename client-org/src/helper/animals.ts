@@ -107,8 +107,7 @@ export async function getAnimalById(id: string) {
       }
 }
 
-export async function updateAnimalById(e: Event, id: string, updatedAnimal: UpdatedAnimal): Promise<void> {
-      e.preventDefault()
+export async function updateAnimalById(id: string, updatedAnimal: UpdatedAnimal): Promise<void> {
       console.log(updatedAnimal)
       const fetchParams = {
             method: "PUT",

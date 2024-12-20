@@ -17,17 +17,17 @@ type NewAnimal struct {
 	Shots         []NewShotFromClient `json:"shots"`
 }
 
-type NewShotFromClient struct {
-	Shot_id    string    `json:"id"`
-	Date_given time.Time `json:"date_given"`
-	Date_due   time.Time `json:"date_due:"` //! This might need a T00:00:00Z on frontend
-}
-
 type NewAnimalShot struct {
 	Animal_id  string    `json:"animal_id"`
 	Shot_id    string    `json:"shot_id"`
 	Date_given time.Time `json:"date_given"`
 	Date_due   time.Time `json:"date_due:"`
+}
+
+type NewShotFromClient struct {
+	Shot_id    string    `json:"id"`
+	Date_given time.Time `json:"date_given"`
+	Date_due   time.Time `json:"date_due"`
 }
 
 type UpdateAnimalStruct struct {
@@ -36,6 +36,7 @@ type UpdateAnimalStruct struct {
 	Date_of_birth time.Time           `json:"date_of_birth"`
 	Price         float32             `json:"price"`
 	Available     bool                `json:"available"`
+	Image_src     string              `json:"image_src"`
 	Shots         []NewShotFromClient `json:"shots"`
 }
 
