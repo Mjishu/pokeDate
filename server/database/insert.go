@@ -19,13 +19,13 @@ type NewAnimal struct {
 
 type NewAnimalShot struct {
 	Animal_id  string    `json:"animal_id"`
-	Shot_id    string    `json:"shot_id"`
+	Shot_id    int       `json:"shot_id"`
 	Date_given time.Time `json:"date_given"`
 	Date_due   time.Time `json:"date_due"`
 }
 
 type NewShotFromClient struct {
-	Shot_id    string    `json:"id"`
+	Shot_id    int       `json:"id"`
 	Date_given time.Time `json:"date_given"`
 	Date_due   time.Time `json:"date_due"`
 }
@@ -51,14 +51,15 @@ func InsertAnimal(animal NewAnimal) {
 	inserQueryFail(err, "inserting animal")
 }
 
-func InsertAnimalShots(shot NewAnimalShot) { //! inserting Date_due gives incorrect date! fix this.!
-	//* if animal alrady as shot THEN update the shot with new info
+func InsertAnimalShots(shot NewAnimalShot) {
+
 	ctx, pool := createConnection()
 
-	_, isShot := GetShot(shot.Animal_id)
+	//! This isn't working properly to check if shot exists, i create new shot and it goes to the isShot if statement
+	_, isShot := GetShot(shot.Animal_id, shot.Shot_id)
 	if isShot {
 		fmt.Println("is shot is true")
-		_, err := pool.Exec(ctx, `UPDATE animal_shots SET next_due = $1, date_give = $2 WHERE animal_id = $2 AND shots_id = $3 `, shot.Date_due, shot.Date_given, shot.Animal_id, shot.Shot_id)
+		_, err := pool.Exec(ctx, `UPDATE animal_shots SET next_due = $1, date_given = $2 WHERE animal_id = $3 AND shots_id = $4 `, shot.Date_due, shot.Date_given, shot.Animal_id, shot.Shot_id)
 		inserQueryFail(err, "Updating shot")
 		return
 	}

@@ -10,7 +10,7 @@ import (
 // shot needs name description and id
 
 type Shot struct {
-	Id          string
+	Id          int
 	Description string
 	Name        string
 }
