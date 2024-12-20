@@ -73,7 +73,7 @@ func GetRandomAnimal() Animal {
 
 // * CREATE NEW FUNCTION THAT GETS SHOTS AND ADDS IT TO ANIMAL
 func SelectShots(animal *Animal, ctx context.Context, pool *pgxpool.Pool) {
-	rows, err := pool.Query(ctx, "SELECT a.date_given, a.next_due, s.* FROM animal_shots AS a LEFT JOIN shots AS s ON a.shots_id = s.id WHERE animal_id = $1", animal.Id)
+	rows, err := pool.Query(ctx, "SELECT s.*,a.date_given, a.next_due FROM animal_shots AS a LEFT JOIN shots AS s ON a.shots_id = s.id WHERE animal_id = $1", animal.Id)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "error selecting animals shots %v\n", err)
 		return
@@ -82,9 +82,10 @@ func SelectShots(animal *Animal, ctx context.Context, pool *pgxpool.Pool) {
 
 	for rows.Next() {
 		var shot AnimalShot
-		err := rows.Scan(&shot.Name, &shot.Description, &shot.Id, &shot.Date_given, &shot.Next_due)
+		err := rows.Scan(&shot.Id, &shot.Name, &shot.Description, &shot.Date_given, &shot.Next_due)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "Scaning row for shots didn't work: %v\n", err)
+			fmt.Fprintf(os.Stderr, "shot was: %v\n", shot)
 			return
 		}
 		fmt.Printf("Your shot is; %v\n", shot)
@@ -165,8 +166,8 @@ func GetShot(animal_id string) (NewAnimalShot, bool) {
 	ctx, pool := createConnection()
 	var shot NewAnimalShot
 
-	err := pool.QueryRow(ctx, "SELECT * FROM animal_shots WHERE animal_id = $1", animal_id).Scan(&shot.Animal_id, &shot.Shot_id, &shot.Date_due,
-		&shot.Date_given)
+	err := pool.QueryRow(ctx, "SELECT aniimal_id, shots_id, date_given, next_due FROM animal_shots WHERE animal_id = $1", animal_id).Scan(&shot.Animal_id, &shot.Shot_id, &shot.Date_given,
+		&shot.Date_due)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "QueryRow failed for get shot: %v\n", err)
 		return NewAnimalShot{}, false

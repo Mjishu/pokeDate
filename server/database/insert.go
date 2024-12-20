@@ -21,7 +21,7 @@ type NewAnimalShot struct {
 	Animal_id  string    `json:"animal_id"`
 	Shot_id    string    `json:"shot_id"`
 	Date_given time.Time `json:"date_given"`
-	Date_due   time.Time `json:"date_due:"`
+	Date_due   time.Time `json:"date_due"`
 }
 
 type NewShotFromClient struct {
