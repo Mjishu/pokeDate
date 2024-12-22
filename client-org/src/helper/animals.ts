@@ -102,7 +102,6 @@ export async function getAnimalById(id: string) {
       try {
             const response = await fetch("http://localhost:8080/organizations/animals", fetchParams)
             const data = await response.json()
-            console.log(data)
             return data
       } catch (error) {
             console.error(`error trying to get animal: ${error}`)
@@ -111,7 +110,6 @@ export async function getAnimalById(id: string) {
 }
 
 export async function updateAnimalById(id: string, updatedAnimal: UpdatedAnimal): Promise<void> {
-      console.log(updatedAnimal)
       const fetchParams = {
             method: "PUT",
             headers: {
@@ -123,6 +121,7 @@ export async function updateAnimalById(id: string, updatedAnimal: UpdatedAnimal)
             })
       }
       try {
+            console.log(fetchParams.body)
             const response = await fetch("http://localhost:8080/animals", fetchParams)
             const data = await response.json()
             return data

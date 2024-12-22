@@ -48,14 +48,20 @@
 
             updatedAnimal = {
                   Name: animal?.Name || "",
-                  Date_of_birth: animal?.Date_of_birth || "",
+                  Date_of_birth: animal?.Date_of_birth
+                        ? animal.Date_of_birth.split("T")[0]
+                        : "",
                   Price: animal?.Price || 0,
                   Available: animal?.Available || false,
                   Shots:
                         animal?.Shots?.map((shot) => ({
                               Id: shot.Id || shot.Id,
-                              Date_given: shot.Date_given || shot.Date_given,
-                              Next_due: shot.Next_due,
+                              Date_given: shot.Date_given
+                                    ? shot.Date_given.split("T")[0]
+                                    : "",
+                              Next_due: shot.Next_due
+                                    ? shot.Next_due.split("T")[0]
+                                    : "",
                         })) || [],
                   Image_src: animal?.Image_src || "",
             };
@@ -66,21 +72,21 @@
 
             const formattedAnimal = {
                   ...$state.snapshot(updatedAnimal),
-                  Date_of_birth:
-                        updatedAnimal.Date_of_birth &&
-                        formatISO(new Date(updatedAnimal.Date_of_birth)),
+                  Date_of_birth: updatedAnimal.Date_of_birth
+                        ? formatISO(new Date(updatedAnimal.Date_of_birth))
+                        : undefined,
                   Shots: updatedAnimal?.Shots?.map((shot) => ({
                         id: Number(shot.Id),
-                        Date_given:
-                              shot.Date_given &&
-                              formatISO(new Date(shot.Date_given)),
-                        Date_due:
-                              shot.Next_due &&
-                              formatISO(new Date(shot.Next_due)),
+                        Date_given: shot.Date_given
+                              ? formatISO(new Date(shot.Date_given))
+                              : undefined,
+                        Next_due: shot.Next_due
+                              ? formatISO(new Date(shot.Next_due))
+                              : undefined,
                   })),
             };
 
-            await updateAnimalById(currentId, updatedAnimal);
+            await updateAnimalById(currentId, formattedAnimal);
             console.log(formattedAnimal);
             closeForm();
       }
@@ -101,7 +107,6 @@
             <div>
                   <label for="date_of_birth">Date of Birth</label>
                   <input
-                        required
                         type="date"
                         name="date_of_birth"
                         bind:value={updatedAnimal.Date_of_birth}
