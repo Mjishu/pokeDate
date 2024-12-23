@@ -76,13 +76,13 @@
                         ? formatISO(new Date(updatedAnimal.Date_of_birth))
                         : undefined,
                   Shots: updatedAnimal?.Shots?.map((shot) => ({
-                        id: Number(shot.Id),
+                        Id: Number(shot.Id),
                         Date_given: shot.Date_given
                               ? formatISO(new Date(shot.Date_given))
-                              : undefined,
+                              : "",
                         Next_due: shot.Next_due
                               ? formatISO(new Date(shot.Next_due))
-                              : undefined,
+                              : "",
                   })),
             };
 
@@ -130,6 +130,16 @@
                         type="checkbox"
                         name="available"
                         bind:checked={updatedAnimal.Available}
+                  />
+            </div>
+            <hr />
+            <h3>Images</h3>
+            <div class="image-container">
+                  <input
+                        multiple={false}
+                        bind:value={updatedAnimal.Image_src}
+                        type="file"
+                        accept=".jpeg, .jpg, .png, .bmp, .webp, .avif, .svg"
                   />
             </div>
             <hr />

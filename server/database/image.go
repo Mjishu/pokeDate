@@ -35,7 +35,7 @@ func uploadImage(cld *cloudinary.Cloudinary, ctx context.Context) {
 	}
 
 	// Log the delivery URL
-	fmt.Println("****2. Upload an image****\nDelivery URL:", resp.SecureURL, "\n")
+	fmt.Println("****2. Upload an image****\nDelivery URL:", resp.SecureURL)
 }
 
 func getAssetInfo(cld *cloudinary.Cloudinary, ctx context.Context) {
@@ -45,7 +45,7 @@ func getAssetInfo(cld *cloudinary.Cloudinary, ctx context.Context) {
 	if err != nil {
 		fmt.Println("error")
 	}
-	fmt.Println("****3. Get and use details of the image****\nDetailed response:\n", resp, "\n")
+	fmt.Println("****3. Get and use details of the image****\nDetailed response:\n", resp)
 
 	// Assign tags to the uploaded image based on its width. Save the response to the update in the variable 'update_resp'.
 	if resp.Width > 900 {
@@ -66,7 +66,7 @@ func getAssetInfo(cld *cloudinary.Cloudinary, ctx context.Context) {
 			fmt.Println("error")
 		} else {
 			// Log the new tag to the console.
-			fmt.Println("New tag: ", update_resp.Tags, "\n")
+			fmt.Println("New tag: ", update_resp.Tags)
 		}
 	}
 

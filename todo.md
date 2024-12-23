@@ -1,6 +1,6 @@
 ## General
 
-- [ ]
+- [ ] Work with cloudinary to upload images from frontend to backend and set the url in the animal_images
 
 ## Frontend
 
