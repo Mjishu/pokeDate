@@ -67,6 +67,15 @@
             };
       });
 
+      function cleanImageData() {
+            if (updatedAnimal.Image_src) {
+                  const data = new FormData();
+                  data.append("image_src", updatedAnimal.Image_src);
+                  console.log(data);
+                  return data;
+            }
+      }
+
       async function cleanAndUpdateAnimal(e: Event) {
             e.preventDefault();
 
@@ -75,6 +84,7 @@
                   Date_of_birth: updatedAnimal.Date_of_birth
                         ? formatISO(new Date(updatedAnimal.Date_of_birth))
                         : undefined,
+                  Image_src: cleanImageData(),
                   Shots: updatedAnimal?.Shots?.map((shot) => ({
                         Id: Number(shot.Id),
                         Date_given: shot.Date_given

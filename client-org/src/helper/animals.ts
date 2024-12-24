@@ -70,14 +70,14 @@ export async function createAnimal(animal: NewAnimal) {
             body: JSON.stringify({ ...animal })
       }
       console.log(fetchParams.body)
-      try {
-            const response = await fetch("http://localhost:8080/animals", fetchParams)
-            const data = await response.json()
-            return data
-      } catch (error) {
-            console.error(`Error trying to create animal: ${error}`)
-            return
-      }
+      // try {
+      //       const response = await fetch("http://localhost:8080/animals", fetchParams)
+      //       const data = await response.json()
+      //       return data
+      // } catch (error) {
+      //       console.error(`Error trying to create animal: ${error}`)
+      //       return
+      // }
 }
 
 export async function getOrganizationAnimals() {

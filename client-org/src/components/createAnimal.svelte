@@ -19,6 +19,16 @@
             Image_src: "",
       });
 
+      function cleanImageData() {
+            // call a backend route that creates image and then add that image
+            if (newAnimal.Image_src) {
+                  const data = new FormData();
+                  data.append("image_src", newAnimal.Image_src);
+                  console.log(data);
+                  return data;
+            }
+      }
+
       async function handleCreateAnimal(e: Event) {
             e.preventDefault();
 
@@ -27,6 +37,7 @@
                   Date_of_birth: newAnimal.Date_of_birth
                         ? formatISO(new Date(newAnimal.Date_of_birth))
                         : undefined,
+                  Image_src: "", //cleanImageData(),
                   Shots: newAnimal.Shots.map((shot) => ({
                         Id: shot.Id,
                         Date_given: formatISO(new Date(shot.Date_given)),

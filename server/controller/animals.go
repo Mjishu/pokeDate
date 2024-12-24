@@ -37,8 +37,8 @@ func AnimalController(w http.ResponseWriter, r *http.Request, cld *cloudinary.Cl
 			if animal.Image_src != "" {
 				animal_public_id := GetImagePublicId(animal.Image_src)
 				fmt.Printf("iamge public id %v\n and animal url is %v\n", animal_public_id, animal.Image_src)
-				database.UploadImage(cld, ctx, animal_public_id, animal.Image_src)
-				return
+				database.UploadImage(cld, ctx, animal.Image_src)
+				return //! get rid of this to make everything else work
 			}
 			database.InsertAnimal(animal)
 

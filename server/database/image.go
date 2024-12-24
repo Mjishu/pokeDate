@@ -22,12 +22,12 @@ func Credentials() (*cloudinary.Cloudinary, context.Context) {
 	return cld, ctx
 }
 
-func UploadImage(cld *cloudinary.Cloudinary, ctx context.Context, image_pId string, image_url string) string {
+func UploadImage(cld *cloudinary.Cloudinary, ctx context.Context, image_url string) string {
 
 	// Upload the image.
 	// Set the asset's public ID and allow overwriting the asset with new versions
 	resp, err := cld.Upload.Upload(ctx, image_url, uploader.UploadParams{
-		PublicID:       image_pId, //"quickstart_butterfly"
+		// PublicID:       image_pId, //"quickstart_butterfly"
 		UniqueFilename: api.Bool(false),
 		Overwrite:      api.Bool(true)})
 	if err != nil {

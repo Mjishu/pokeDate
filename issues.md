@@ -2,7 +2,7 @@
 
 ## General Issues
 
-- [ ] sending update request from frontend to backend does not properly send information, works with postman though
+- [x] sending update request from frontend to backend does not properly send information, works with postman though
 
 ## Frontend Issues
 
