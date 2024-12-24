@@ -1,18 +1,28 @@
 package controller
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 
+	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/joho/godotenv"
 	"github.com/mjishu/pokeDate/database"
 )
 
-func AnimalController(w http.ResponseWriter, r *http.Request) {
+func GetImagePublicId(image_url string) string {
+	splitString := strings.Split(image_url, "\\")
+	finalString := strings.Split(splitString[len(splitString)-1], ".")
+
+	return finalString[0]
+}
+
+func AnimalController(w http.ResponseWriter, r *http.Request, cld *cloudinary.Cloudinary, ctx context.Context) {
 	SetHeader(w)
 
 	if r.URL.Path == "/animals" {
@@ -24,6 +34,12 @@ func AnimalController(w http.ResponseWriter, r *http.Request) {
 
 			animal := GetAnimalFromBody(w, r)
 			// call the function to make the cloudinary image here then pass the url to database.insertanimal
+			if animal.Image_src != "" {
+				animal_public_id := GetImagePublicId(animal.Image_src)
+				fmt.Printf("iamge public id %v\n and animal url is %v\n", animal_public_id, animal.Image_src)
+				database.UploadImage(cld, ctx, animal_public_id, animal.Image_src)
+				return
+			}
 			database.InsertAnimal(animal)
 
 			animal_id := database.GetAnimalByName(animal.Name)

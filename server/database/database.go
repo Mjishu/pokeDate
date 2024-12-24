@@ -37,11 +37,14 @@ func Database() {
 }
 
 func GetItemFromENV(key string) string {
-	err := godotenv.Load("../.env")
+	err := godotenv.Load("/.env")
 	if err != nil {
-		err = godotenv.Load(".env")
+		err = godotenv.Load("../.env")
 		if err != nil {
-			log.Fatal("ERror loading .env file")
+			err = godotenv.Load(".env")
+			if err != nil {
+				log.Fatal("ERror loading .env file")
+			}
 		}
 	}
 

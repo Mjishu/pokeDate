@@ -110,6 +110,7 @@ func createAnimalImages(ctx context.Context, pool *pgxpool.Pool) {
 			animal_id UUID REFERENCES animals(id) ON DELETE CASCADE NOT NULL,
 			image_src TEXT NOT NULL,
 			priority INT NOT NULL, 
+			image_public_id VARCHAR(120) NOT NULL,
 			CONSTRAINT unique_priority_per_animal UNIQUE (animal_id, priority)
 		);
 	`

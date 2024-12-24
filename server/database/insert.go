@@ -14,6 +14,7 @@ type NewAnimal struct {
 	Price         float32             `json:"Price"`
 	Available     bool                `json:"Available"`
 	Breed         string              `json:"Breed"`
+	Image_src     string              `json:"Image_src"`
 	Shots         []NewShotFromClient `json:"Shots"`
 }
 
