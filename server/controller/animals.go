@@ -90,6 +90,7 @@ func AnimalImageOperations(w http.ResponseWriter, r *http.Request, cld *cloudina
 	switch r.Method {
 	case http.MethodPost:
 		_, image_data := checkForBodyItem("FormData", w, r)
+		database.UploadImage(cld, ctx, image_data)
 	}
 }
 
