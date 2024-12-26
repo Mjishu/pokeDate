@@ -14,7 +14,7 @@ func main() {
 	cld, ctx := database.Credentials()
 
 	mux.HandleFunc("/cards", controller.CardsController)
-	mux.HandleFunc("/animals", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/animals/", func(w http.ResponseWriter, r *http.Request) {
 		controller.AnimalController(w, r, cld, ctx)
 	})
 	mux.HandleFunc("/organizations/animals", controller.OrganizationController) //? change to /orgnaizations and make a new controller called organizations Cotnroller

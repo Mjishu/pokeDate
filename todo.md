@@ -1,6 +1,8 @@
 ## General
 
 - [ ] Work with cloudinary to upload images from frontend to backend and set the url in the animal_images
+      Instead of updating animals from 1 call make 2 calls, one to create the animal and one to create animal images
+      the one for images should send the animal id and the image.
 
 ## Frontend
 

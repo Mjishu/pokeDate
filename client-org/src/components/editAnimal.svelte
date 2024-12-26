@@ -21,6 +21,7 @@
       let animal = $state<Animal>();
       let shotData = $state<Shot[]>();
 
+      let Image_src = $state<string>();
       let updatedAnimal = $state<UpdatedAnimal>({
             // switch this to animal.name etc
             Name: "",
@@ -28,7 +29,6 @@
             Price: 0,
             Available: false,
             Shots: [],
-            Image_src: "",
       });
 
       function closeForm() {
@@ -63,18 +63,8 @@
                                     ? shot.Next_due.split("T")[0]
                                     : "",
                         })) || [],
-                  Image_src: animal?.Image_src || "",
             };
       });
-
-      function cleanImageData() {
-            if (updatedAnimal.Image_src) {
-                  const data = new FormData();
-                  data.append("image_src", updatedAnimal.Image_src);
-                  console.log(data);
-                  return data;
-            }
-      }
 
       async function cleanAndUpdateAnimal(e: Event) {
             e.preventDefault();
@@ -84,7 +74,6 @@
                   Date_of_birth: updatedAnimal.Date_of_birth
                         ? formatISO(new Date(updatedAnimal.Date_of_birth))
                         : undefined,
-                  Image_src: cleanImageData(),
                   Shots: updatedAnimal?.Shots?.map((shot) => ({
                         Id: Number(shot.Id),
                         Date_given: shot.Date_given
@@ -96,7 +85,7 @@
                   })),
             };
 
-            await updateAnimalById(currentId, formattedAnimal);
+            await updateAnimalById(currentId, formattedAnimal, Image_src);
             console.log(formattedAnimal);
             closeForm();
       }
@@ -147,7 +136,7 @@
             <div class="image-container">
                   <input
                         multiple={false}
-                        bind:value={updatedAnimal.Image_src}
+                        bind:value={Image_src}
                         type="file"
                         accept=".jpeg, .jpg, .png, .bmp, .webp, .avif, .svg"
                   />

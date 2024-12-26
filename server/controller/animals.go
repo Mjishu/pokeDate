@@ -22,61 +22,74 @@ func GetImagePublicId(image_url string) string {
 	return finalString[0]
 }
 
+func MainAnimalOperations(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPost:
+		w.Header().Set("Content-Type", "application/json")
+		fmt.Println("The else in method post was called")
+
+		animal := GetAnimalFromBody(w, r)
+
+		// if animal.Image_src != "" {
+		// 	animal_public_id := GetImagePublicId(animal.Image_src)
+		// 	fmt.Printf("iamge public id %v\n and animal url is %v\n", animal_public_id, animal.Image_src)
+		// 	database.UploadImage(cld, ctx, animal.Image_src)
+		// 	return //! get rid of this to make everything else work
+		// }
+
+		database.InsertAnimal(animal)
+
+		animal_id := database.GetAnimalByName(animal.Name)
+
+		for _, values := range animal.Shots {
+
+			newShot := database.NewAnimalShot{Animal_id: animal_id, Shot_id: values.Shot_id, Date_given: values.Date_given, Date_due: values.Date_due}
+			database.InsertAnimalShots(newShot)
+		}
+
+		fmt.Fprintf(w, "Animal created Successfully!: %v\n", animal)
+	case http.MethodPut:
+		w.Header().Set("Content-Type", "application/json")
+
+		updatedAnimal := GetUpdatedAnimalFromBody(w, r)
+
+		for i, values := range updatedAnimal.Shots {
+			fmt.Printf("Shot number: %v\n", i)
+			newShot := database.NewAnimalShot{Animal_id: updatedAnimal.Id, Shot_id: values.Shot_id, Date_given: values.Date_given, Date_due: values.Date_due}
+			fmt.Printf("the new shot is: %v\n", newShot)
+			database.InsertAnimalShots(newShot)
+		}
+		fmt.Printf("the animal given is %v\n", updatedAnimal)
+		database.UpdateAnimal(updatedAnimal)
+		fmt.Fprintf(w, "Animal updated successfully")
+	case http.MethodDelete:
+		w.Header().Set("Content-Type", "application/json")
+
+		hasId, id := checkForBodyItem("id", w, r)
+
+		if hasId {
+			database.DeleteAnimal(id)
+			fmt.Fprintf(w, "Animal was removed successfully")
+			return
+		}
+		fmt.Fprintf(w, "Id was not found in body!")
+	}
+}
+
 func AnimalController(w http.ResponseWriter, r *http.Request, cld *cloudinary.Cloudinary, ctx context.Context) {
 	SetHeader(w)
 
 	if r.URL.Path == "/animals" {
+		MainAnimalOperations(w, r)
+	} else if r.URL.Path == "/animals/images" {
+		AnimalImageOperations(w, r, cld, ctx)
+	}
+}
 
-		switch r.Method {
-		case http.MethodPost:
-			w.Header().Set("Content-Type", "application/json")
-			fmt.Println("The else in method post was called")
-
-			animal := GetAnimalFromBody(w, r)
-			// call the function to make the cloudinary image here then pass the url to database.insertanimal
-			if animal.Image_src != "" {
-				animal_public_id := GetImagePublicId(animal.Image_src)
-				fmt.Printf("iamge public id %v\n and animal url is %v\n", animal_public_id, animal.Image_src)
-				database.UploadImage(cld, ctx, animal.Image_src)
-				return //! get rid of this to make everything else work
-			}
-			database.InsertAnimal(animal)
-
-			animal_id := database.GetAnimalByName(animal.Name)
-
-			for _, values := range animal.Shots {
-
-				newShot := database.NewAnimalShot{Animal_id: animal_id, Shot_id: values.Shot_id, Date_given: values.Date_given, Date_due: values.Date_due}
-				database.InsertAnimalShots(newShot)
-			}
-
-			fmt.Fprintf(w, "Animal created Successfully!: %v\n", animal)
-		case http.MethodPut:
-			w.Header().Set("Content-Type", "application/json")
-
-			updatedAnimal := GetUpdatedAnimalFromBody(w, r)
-
-			for i, values := range updatedAnimal.Shots {
-				fmt.Printf("Shot number: %v\n", i)
-				newShot := database.NewAnimalShot{Animal_id: updatedAnimal.Id, Shot_id: values.Shot_id, Date_given: values.Date_given, Date_due: values.Date_due}
-				fmt.Printf("the new shot is: %v\n", newShot)
-				database.InsertAnimalShots(newShot)
-			}
-			fmt.Printf("the animal given is %v\n", updatedAnimal)
-			database.UpdateAnimal(updatedAnimal)
-			fmt.Fprintf(w, "Animal updated successfully")
-		case http.MethodDelete:
-			w.Header().Set("Content-Type", "application/json")
-
-			hasId, id := checkForBodyItem("id", w, r)
-
-			if hasId {
-				database.DeleteAnimal(id)
-				fmt.Fprintf(w, "Animal was removed successfully")
-				return
-			}
-			fmt.Fprintf(w, "Id was not found in body!")
-		}
+func AnimalImageOperations(w http.ResponseWriter, r *http.Request, cld *cloudinary.Cloudinary, ctx context.Context) {
+	switch r.Method {
+	case http.MethodPost:
+		_, image_data := checkForBodyItem("FormData", w, r)
 	}
 }
 

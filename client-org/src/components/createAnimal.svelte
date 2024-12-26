@@ -1,12 +1,17 @@
 <script lang="ts">
       import { onMount } from "svelte";
-      import { createAnimal, GetAllShots } from "../helper/animals";
+      import {
+            createAnimal,
+            GetAllShots,
+            createAnimalImage,
+      } from "../helper/animals";
       import type { NewAnimal, Shot } from "../helper/animals";
       import { formatISO } from "date-fns";
 
       let { showNewAnimal = $bindable() } = $props();
 
       let shotData = $state<Shot[]>();
+      let Image_src = $state();
       let newAnimal = $state<NewAnimal>({
             Name: "",
             Species: "",
@@ -16,18 +21,7 @@
             Breed: "",
             Price: 0,
             Shots: [],
-            Image_src: "",
       });
-
-      function cleanImageData() {
-            // call a backend route that creates image and then add that image
-            if (newAnimal.Image_src) {
-                  const data = new FormData();
-                  data.append("image_src", newAnimal.Image_src);
-                  console.log(data);
-                  return data;
-            }
-      }
 
       async function handleCreateAnimal(e: Event) {
             e.preventDefault();
@@ -37,7 +31,6 @@
                   Date_of_birth: newAnimal.Date_of_birth
                         ? formatISO(new Date(newAnimal.Date_of_birth))
                         : undefined,
-                  Image_src: "", //cleanImageData(),
                   Shots: newAnimal.Shots.map((shot) => ({
                         Id: shot.Id,
                         Date_given: formatISO(new Date(shot.Date_given)),
@@ -45,7 +38,7 @@
                   })),
             };
             console.log(formattedAnimal);
-            await createAnimal(formattedAnimal);
+            await createAnimal(formattedAnimal, Image_src.files[0]);
             showNewAnimal = false;
       }
 
@@ -142,7 +135,7 @@
             <div class="image-container">
                   <input
                         multiple={false}
-                        bind:value={newAnimal.Image_src}
+                        bind:value={Image_src}
                         type="file"
                         accept=".jpeg, .jpg, .png, .bmp, .webp, .avif, .svg"
                   />

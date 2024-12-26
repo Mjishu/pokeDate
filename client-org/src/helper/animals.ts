@@ -27,6 +27,10 @@ export type AnimalShot = {
       Next_due: string
 }
 
+export type NewAnimalImage = {
+      animal_id: string;
+}
+
 export type NewAnimal = {
       Name: string;
       Species: string;
@@ -36,7 +40,6 @@ export type NewAnimal = {
       Sex: string;
       Breed: string;
       Shots: NewShot[];
-      Image_src: string;
 }
 
 type NewShot = {
@@ -51,11 +54,32 @@ export type UpdatedAnimal = {
       Price: number;
       Available: boolean;
       Shots: NewShot[];
-      Image_src: string;
 }
 
+export async function createAnimalImage(image_data: File, animal_id: string, newImage: boolean) {
+      if (image_data) {
+            const data = new FormData();
+            data.append("Image_src", image_data);
+            data.append("Animal_id", animal_id);
+            console.log(data);
+            const fetchParams = {
+                  method: newImage ? "POST" : "PUT",
+                  body: JSON.stringify(data)
+            }
 
-export async function createAnimal(animal: NewAnimal) {
+            try {
+                  const response = await fetch("http://localhost:8080/animals/images", fetchParams)
+                  if (!response.ok) {
+                        console.error(`Error trying to create image: ${response.statusText}`)
+                  }
+                  return data;
+            } catch (error) {
+                  console.error(`error uploading image ${error}`)
+            }
+      }
+}
+
+export async function createAnimal(animal: NewAnimal, image: File) {
       //! Switch date_birth to be in the 2024-10-09T00:00:00Z format
       console.log(animal)
       if (animal == undefined) {
@@ -70,14 +94,17 @@ export async function createAnimal(animal: NewAnimal) {
             body: JSON.stringify({ ...animal })
       }
       console.log(fetchParams.body)
-      // try {
-      //       const response = await fetch("http://localhost:8080/animals", fetchParams)
-      //       const data = await response.json()
-      //       return data
-      // } catch (error) {
-      //       console.error(`Error trying to create animal: ${error}`)
-      //       return
-      // }
+      try {
+            const response = await fetch("http://localhost:8080/animals", fetchParams)
+            if (!response.ok) {
+                  throw new Error(`issue uploading animal: ${response.statusText}`)
+            }
+            const data = await response.json()
+            createAnimalImage(image, data.animal.Id, true)
+      } catch (error) {
+            console.error(`Error trying to create animal: ${error}`)
+            return
+      }
 }
 
 export async function getOrganizationAnimals() {
@@ -109,7 +136,7 @@ export async function getAnimalById(id: string) {
       }
 }
 
-export async function updateAnimalById(id: string, updatedAnimal: UpdatedAnimal): Promise<void> {
+export async function updateAnimalById(id: string, updatedAnimal: UpdatedAnimal, image_src: string): Promise<void> {
       const fetchParams = {
             method: "PUT",
             headers: {
@@ -124,6 +151,12 @@ export async function updateAnimalById(id: string, updatedAnimal: UpdatedAnimal)
             console.log(fetchParams.body)
             const response = await fetch("http://localhost:8080/animals", fetchParams)
             const data = await response.json()
+            try {
+                  createAnimalImage(image_src, data.Id, true)
+            } catch (error) {
+                  console.error(`error trying to create animal image ${error}`)
+                  return
+            }
             return data
       } catch (error) {
             console.error(`error trying to update animal: ${error}`)
