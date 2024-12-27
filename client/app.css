@@ -1,0 +1,20 @@
+:root {
+      --border-color: hsla(0,0%,45%,.44);
+      --tag-color: 0, 0%, 36%;
+    }
+    
+    html {
+      height: 100%;
+    }
+    
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
+    
+    #app {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+    }
