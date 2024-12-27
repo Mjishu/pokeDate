@@ -100,7 +100,7 @@ export async function createAnimal(animal: NewAnimal, image: File) {
                   throw new Error(`issue uploading animal: ${response.statusText}`)
             }
             const data = await response.json()
-            createAnimalImage(image, data.animal.Id, true)
+            // createAnimalImage(image, data.animal.Id, true)
       } catch (error) {
             console.error(`Error trying to create animal: ${error}`)
             return

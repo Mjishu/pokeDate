@@ -89,8 +89,26 @@ func AnimalController(w http.ResponseWriter, r *http.Request, cld *cloudinary.Cl
 func AnimalImageOperations(w http.ResponseWriter, r *http.Request, cld *cloudinary.Cloudinary, ctx context.Context) {
 	switch r.Method {
 	case http.MethodPost:
-		_, image_data := checkForBodyItem("FormData", w, r)
-		database.UploadImage(cld, ctx, image_data)
+		err := r.ParseMultipartForm(10 << 20)
+		if err != nil {
+			http.Error(w, "unable to parse form data", http.StatusBadRequest)
+			return
+		}
+
+		file, handler, err := r.FormFile("Image_src")
+		if err != nil {
+			http.Error(w, "error trying to form file", http.StatusBadRequest)
+			return
+		}
+		defer file.Close()
+
+		filePath := fmt.Sprintf("./uploads/%s", handler.Filename)
+		if filePath == "" {
+			return
+		}
+
+		// _, image_data := checkForBodyItem("FormData", w, r)
+		// database.UploadImage(cld, ctx, image_data)
 	}
 }
 
