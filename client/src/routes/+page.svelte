@@ -1,7 +1,13 @@
 <script>
-      import Home from "../components/home.svelte"
+	import Home from '../components/home.svelte';
 </script>
 
 <main>
-      <Home/>
+	<Home />
 </main>
+
+<style>
+	main {
+		height: 100%;
+	}
+</style>
