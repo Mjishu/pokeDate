@@ -13,6 +13,7 @@ func main() {
 	mux := http.NewServeMux()
 	cld, ctx := database.Credentials()
 
+	mux.HandleFunc("/users", controller.UserController)
 	mux.HandleFunc("/cards", controller.CardsController)
 	mux.HandleFunc("/animals/", func(w http.ResponseWriter, r *http.Request) {
 		controller.AnimalController(w, r, cld, ctx)
