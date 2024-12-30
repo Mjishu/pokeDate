@@ -1,46 +1,70 @@
 <script lang="ts">
-	let formFields = [
-		{ name: 'Username', type: 'text' },
-		{ name: 'Email', type: 'email' },
-		{ name: 'Password', type: 'password' },
-		{ name: 'Confirm Password', type: 'password' } //might have issues with the name of this one
-	];
+	import { goto } from '$app/navigation';
+	import { userFormSubmit } from '../../helpers/users';
+
+	let formData = {
+		Username: '',
+		Email: '',
+		Password: '',
+		C_password: ''
+	};
+
+	async function submitForm(e: Event) {
+		e.preventDefault();
+		if (await userFormSubmit('POST', formData)) {
+			goto('/');
+		}
+	}
 </script>
 
 <main>
 	<h2>Create Account</h2>
 
-	<form>
+	<form onsubmit={submitForm}>
 		<div class="input-grandparent">
-			{#each formFields as field}
-				<div class="input-parent">
-					<label for={field.name.toLowerCase()}>{field.name}</label>
-					<input type={field.type} id={field.name.toLowerCase()} name={field.name.toLowerCase()} />
-				</div>
-			{/each}
+			<div class="input-parent">
+				<label for="username">Username</label>
+				<input bind:value={formData.Username} type="text" id="username" name="username" />
+			</div>
+			<div class="input-parent">
+				<label for="email">Email</label>
+				<input bind:value={formData.Email} type="email" id="email" name="email" />
+			</div>
+			<div class="input-parent">
+				<label for="password">Password</label>
+				<input bind:value={formData.Password} type="password" id="password" name="password" />
+			</div>
+			<div class="input-parent">
+				<label for="confirm-password">Confirm Password</label>
+				<input
+					bind:value={formData.C_password}
+					type="password"
+					id="confirm-password"
+					name="confirm-password"
+				/>
+			</div>
 		</div>
 
 		<button class="action-button">Create</button>
 	</form>
 	<p>OR</p>
 	<div class="org-div">
-		<button onclick={() => (window.location.href = 'google.com')} class="action-button org-button"
-			>Create Organization</button
-		>
+		<button onclick={() => (window.location.href = 'google.com')} class="action-button org-button">
+			Create Organization
+		</button>
 	</div>
 </main>
 
 <style>
+	/* Your original styles here */
 	main {
 		height: 100%;
 		display: flex;
 		flex-direction: column;
-		/* background: pink; */
 		padding: 0;
 		margin: 0;
 		text-align: center;
 		align-items: center;
-		/* gap: 1.5rem; */
 		padding-top: 7rem;
 	}
 
@@ -67,7 +91,6 @@
 
 	.action-button {
 		background-color: #fff;
-
 		opacity: 0.9;
 		transition:
 			ease-in-out 200ms background-color,

@@ -1,26 +1,39 @@
-<script>
+<script lang="ts">
 	import { goto } from '$app/navigation';
+	import { userFormSubmit } from '../../helpers/users';
+
+	let formData = $state({
+		Username: '',
+		Password: ''
+	});
 
 	let logos = [
 		{ name: 'google', path: '/icons/Google.svg' },
 		{ name: 'github', path: '/icons/Github.svg' },
 		{ name: 'facebook', path: '/icons/Facebook.svg' }
 	];
+
+	async function formSubmit(e: Event) {
+		e.preventDefault();
+		if (await userFormSubmit('POST', formData)) {
+			goto('/');
+		}
+	}
 </script>
 
 <main>
 	<h2>Sign In</h2>
 
-	<form>
+	<form onsubmit={formSubmit}>
 		<div class="input-grandparent">
 			<div class="input-parent">
 				<label for="username">Username</label>
-				<input type="text" id="username" name="username" />
+				<input bind:value={formData.Username} type="text" id="username" name="username" />
 			</div>
 
 			<div class="input-parent">
 				<label for="password">Password</label>
-				<input type="password" id="password" name="password" />
+				<input bind:value={formData.Password} type="password" id="password" name="password" />
 			</div>
 		</div>
 
