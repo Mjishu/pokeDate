@@ -11,3 +11,4 @@
 ## Backend
 
 - [x] set up a route that returns a random animal? (route could be GET /cards instead of POST)
+- [ ] users route should check for post and then  

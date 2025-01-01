@@ -11,7 +11,7 @@
 
 	async function submitForm(e: Event) {
 		e.preventDefault();
-		if (await userFormSubmit('POST', formData)) {
+		if (await userFormSubmit('signup', 'POST', formData)) {
 			goto('/');
 		}
 	}

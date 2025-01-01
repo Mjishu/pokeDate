@@ -5,9 +5,9 @@ export type userData = {
       C_password?: string;
 }
 
-export async function userFormSubmit(method: string, formData: userData): Promise<boolean> {
+export async function userFormSubmit(url: string, method: string, formData: userData): Promise<boolean> {
       const fetchParams = {
-            method: 'POST',
+            method: method,
             headers: {
                   'Content-Type': 'application/json'
             },
@@ -15,7 +15,7 @@ export async function userFormSubmit(method: string, formData: userData): Promis
       };
 
       try {
-            const response = await fetch('/api/users', fetchParams);
+            const response = await fetch('/api/' + url, fetchParams);
             const data = await response.json();
             if (data.success) {
                   return true

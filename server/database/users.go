@@ -13,6 +13,13 @@ type User struct {
 	Date_of_birth time.Time
 }
 
+type NewUser struct {
+	Username      string    `json:"Username"`
+	Email         string    `json:"Email"`
+	Password      string    `json:"Password"`
+	Date_of_birth time.Time `json:"Date_of_birth"`
+}
+
 // id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
 // username VARCHAR(40) NOT NULL,
 // email VARCHAR(100) ,
@@ -36,4 +43,13 @@ func GetUser(id any) (User, error) {
 	}
 
 	return user, nil
+}
+
+func CreateUser(user NewUser) {
+	sql := `INSERT INTO users(username, email, password, date_of_birth) VALUES ($1,$2,$3,$4)`
+
+	ctx, pool := createConnection()
+
+	_, err := pool.Exec(ctx, sql, user.Username, user.Email, user.Password, user.Date_of_birth)
+	inserQueryFail(err, "creating user")
 }
