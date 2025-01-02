@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/mjishu/pokeDate/auth"
 	"github.com/mjishu/pokeDate/database"
@@ -13,6 +14,7 @@ import (
 type AuthUser struct {
 	Username string
 	Password string
+	Expires_in_seconds time.Time
 }
 
 func UserController(w http.ResponseWriter, r *http.Request) {
@@ -49,6 +51,8 @@ func handleUsers(w http.ResponseWriter, r *http.Request) database.User { //? how
 
 func LoginUser(w http.ResponseWriter, r *http.Request) {
 	var incomingUser AuthUser
+	var expiresIn time.Time //! might cause error need to figure out what format time.Time is in
+	maxExpireTime := 3600
 	checkAuthUser(w, r, &incomingUser)
 
 	storedUser, err := database.GetUser(incomingUser.Username) //this password should be hashed(i.e user.Password)
@@ -62,6 +66,17 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// checks if time is > than max expire time if so set expiresIn to maxTime
+	if incomingUser.Expires_in_seconds == nil {
+		expiresIn = maxExpireTime // seconds * minutes = 1 hour
+	} else if incomingUser.Expires_in_seconds > maxExpireTime {
+		expiresIn = maxExpireTime
+		} else {
+		expiresIn = incomingUser.Expires_in_seconds
+		}
+	// need to call the token somewhere here
+
+
 	response := map[string]interface{}{
 		"username": storedUser.Username,
 		"id":       storedUser.Id,
@@ -73,6 +88,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
+
 
 func CreateUser(w http.ResponseWriter, r *http.Request) { //? how to get this to work so that it passes the user of body to createUser
 
