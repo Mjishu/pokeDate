@@ -76,7 +76,7 @@ func createUsers(ctx context.Context, pool *pgxpool.Pool) {
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
 			username VARCHAR(40) NOT NULL,
 			email VARCHAR(100) ,
-			password VARCHAR(50) NOT NULL,
+			password text NOT NULL,
 			date_of_birth DATE,
 			country_id INT REFERENCES locations(id) ON DELETE SET NULL,
 			state_id INT REFERENCES locations(id) ON DELETE SET NULL,
