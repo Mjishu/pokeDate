@@ -14,3 +14,14 @@ func TestPasswordHash(t *testing.T) {
 		t.Fatalf(`CheckPasswordHash(password, hash) = %v, want nil`, err)
 	}
 }
+
+func TestGetBearerToken(t *testing.T) { //expects http.Header but im passing string. How to to turn token into a headers
+	headers := { // turn into http.Headers
+		"Authorization": "Bearer ababab"
+	}
+	want := "ababab"
+	got,err := GetBearerToken(token)
+	if err != nil {
+		t.Fatalf("GetBearerToken, want = %v, nil got %v, %v",want, got, err)
+	}
+}
