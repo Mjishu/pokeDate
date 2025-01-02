@@ -7,6 +7,12 @@ import (
 
 // go get uuid?
 
+type CustomClaims struct {
+	Id uuid.UUID`json:"Id"`
+	jwt.RegisteredClaims
+}
+
+
 func HashPassword(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 0)
 	if err != nil {
@@ -31,6 +37,27 @@ func MakeJWT(userID uuid.UUID, tokenSecret string, expiresIn time.Duration) (str
 }
 
 // further implement the validate function
-// func ValidateJWT(tokenString, tokenSecret string) (uuid.UUID,error) {
-// 	token, err := jwt.ParseWithClaims(tokenString, )
-// }
+// ADD UNIT TESTS !!!!!
+func ValidateJWT(tokenString, tokenSecret string) (uuid.UUID,error) {
+	token, err := jwt.ParseWithClaims(tokenString,&CustomClaims{}, func(token *jwt.Token)(interface{}, error) {
+		return []byte("allyourbase), nil //default return given by docs
+	}
+	if err != nil {
+		log.Fatal(err)
+		} else if claims, ok := token.Claims.(*CustomClaims); ok { //this is my token.Claims
+			fmt.Println(claims.Id, claims.RegisteredClaims.Issuer)// gets issuer be want id?	
+	} else {
+		log.Fatal("unknown claims type, cannot proceed")
+		}		      
+}
+
+func GetBearerToken(headers http.Header) (string, error) {
+	// look for auth header in headers and return the token_string from bearer
+	// get the string and then split it based on spaces and then return length -1?
+	if !headers.Authorization {
+		return "", new error("Could not find authorization header")
+		}
+	bearerToken := strings.Split(headers.Authorization, " ")
+	return strings.TrimSpace(bearerToken[len(bearerToken) - 1]), nil
+}
+			      
