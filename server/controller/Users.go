@@ -18,7 +18,6 @@ type AuthUser struct {
 
 func UserController(w http.ResponseWriter, r *http.Request, jwtSecret string) {
 	SetHeader(w)
-	w.Header().Set("Content-Type", "application/json")
 	switch r.URL.Path {
 	case "/users/login":
 		LoginUser(w, r, jwtSecret)
@@ -34,42 +33,24 @@ func UserController(w http.ResponseWriter, r *http.Request, jwtSecret string) {
 	case "/users/current":
 		GetCurrentUser(w, r, jwtSecret)
 		return
-	default:
-		handleUsers(w, r)
+	default: // ! THIS WONT CHANGE FROM A GET REQ?
+		fmt.Println("This is the default path")
 		return
 	}
-	// if r.URL.Path == "/users" {
-	// 	handleUsers(w, r)
-	// 	return
-	// } else if r.URL.Path == "/users/login" {
-	// 	LoginUser(w, r, jwtSecret)
-	// 	return
-	// } else if r.URL.Path == "/users/create" {
-	// 	switch r.Method {
-	// 	case http.MethodPost:
-	// 		CreateUser(w, r)
-	// 	case http.MethodGet:
-	// 		fmt.Fprint(w, "no get route setup")
-	// 	}
-	// 	return
-	// }
 }
 
-func handleUsers(w http.ResponseWriter, r *http.Request) database.User { //? how to send the user back to frontend?
-	switch r.Method {
-	case http.MethodGet:
-		hasid, userId := checkForBodyItem("id", w, r)
-		if !hasid {
-			fmt.Fprint(w, "Could not find the user id in body", http.StatusBadRequest)
-		}
-		user, err := database.GetUser(userId)
-		if err != nil {
-			fmt.Fprint(w, "There was an error trying to create user", http.StatusInternalServerError)
-		}
-		fmt.Fprint(w, "user recieved", http.StatusAccepted)
-		return user
+func UpdateUser(w http.ResponseWriter, r *http.Request, jwtSecret string) {
+	fmt.Println("put was called")
+	tokenUserId, err := auth.UserValid(r.Header, jwtSecret)
+	if err != nil {
+		http.Error(w, "unable to validate jwt", http.StatusBadRequest)
+		return
 	}
-	return database.User{}
+	var user database.UpdatedUser
+	checkUpdateUser(w, r, &user)
+	fmt.Printf("user body is %v\n with id %v\n", user, tokenUserId)
+
+	database.UpdateUser(tokenUserId, user)
 }
 
 func LoginUser(w http.ResponseWriter, r *http.Request, jwtSecret string) { //? does this properly check if the usernames are the same before logging in?
@@ -133,7 +114,6 @@ func LoginUser(w http.ResponseWriter, r *http.Request, jwtSecret string) { //? d
 }
 
 func CreateUser(w http.ResponseWriter, r *http.Request) { //? how to get this to work so that it passes the user of body to createUser
-
 	var user database.NewUser
 	checkUser(w, r, &user)
 
@@ -159,9 +139,6 @@ func GetCurrentUser(w http.ResponseWriter, r *http.Request, jwtSecret string) {
 			http.Error(w, "error finding stored user", http.StatusInternalServerError)
 			return
 		}
-		/*
-			get current user id from jwt, then search up that user in db and return that user
-		*/
 
 		response := map[string]interface{}{
 			"Id":       storedUser.Id,
@@ -172,12 +149,14 @@ func GetCurrentUser(w http.ResponseWriter, r *http.Request, jwtSecret string) {
 			http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 			return
 		}
+	case http.MethodPut:
+		UpdateUser(w, r, jwtSecret)
 	}
 }
 
 //? -------------------- GETS item from body
 
-func checkAuthUser(w http.ResponseWriter, r *http.Request, user *AuthUser) error {
+func checkUser(w http.ResponseWriter, r *http.Request, user interface{}) error {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "unable to read body", http.StatusInternalServerError)
@@ -192,17 +171,11 @@ func checkAuthUser(w http.ResponseWriter, r *http.Request, user *AuthUser) error
 	return err
 }
 
-func checkUser(w http.ResponseWriter, r *http.Request, user *database.NewUser) error {
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "unable to read body", http.StatusInternalServerError)
-		return nil
-	}
-	defer r.Body.Close()
+// Modify the existing functions to use the new checkUser function
+func checkAuthUser(w http.ResponseWriter, r *http.Request, user *AuthUser) error {
+	return checkUser(w, r, user)
+}
 
-	err = json.Unmarshal(body, user)
-	if err != nil {
-		http.Error(w, "unable to unmarshal json", http.StatusInternalServerError)
-	}
-	return err
+func checkUpdateUser(w http.ResponseWriter, r *http.Request, user *database.UpdatedUser) error {
+	return checkUser(w, r, user)
 }

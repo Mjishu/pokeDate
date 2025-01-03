@@ -18,6 +18,10 @@ type User struct {
 	Date_of_birth time.Time
 }
 
+type UpdatedUser struct {
+	Username string `json:"Username"`
+}
+
 type NewUser struct {
 	Username string `json:"Username"`
 	Password string `json:"Password"`
@@ -97,4 +101,17 @@ func UserExists(ctx context.Context, pool *pgxpool.Pool, username string) (bool,
 		return false, nil
 	}
 	return true, nil
+}
+
+func UpdateUser(userId uuid.UUID, userInfo UpdatedUser) error {
+	ctx, pool := createConnection()
+
+	// check if user exists?
+	sql := `UPDATE USERS SET username = $1 WHERE id = $2`
+
+	_, err := pool.Exec(ctx, sql, userInfo.Username, userId)
+	if err != nil {
+		return err
+	}
+	return nil
 }
