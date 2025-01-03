@@ -28,7 +28,7 @@ func RefreshToken(w http.ResponseWriter, r *http.Request, jwtSecret string) {
 			fmt.Printf("userId from refreshToken %v\n refreshToken exists %v\n", userId, exists)
 			return
 		}
-		newToken, err := auth.MakeJWT(userId, jwtSecret, time.Duration(1*time.Hour))
+		newToken, err := auth.MakeJWT(userId, jwtSecret, time.Duration(15*time.Minute))
 		if err != nil {
 			http.Error(w, "error creating jwt auth token", http.StatusInternalServerError)
 			return
@@ -40,4 +40,30 @@ func RefreshToken(w http.ResponseWriter, r *http.Request, jwtSecret string) {
 		}
 
 	}
+}
+
+func RevokeToken(w http.ResponseWriter, r *http.Request) {
+	SetHeader(w)
+	switch r.Method {
+	case http.MethodPost:
+		err := DestroyToken(r.Header)
+		if err != nil {
+			http.Error(w, "cannot find the refresh token", http.StatusBadRequest)
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+func DestroyToken(header http.Header) error {
+	refresh_token, err := auth.GetBearerToken(header)
+	if err != nil {
+		return err
+	}
+	err = database.RevokeToken(refresh_token)
+	if err != nil {
+		fmt.Printf("error revoking token: %v\n", err)
+		return err
+	}
+	return nil
 }

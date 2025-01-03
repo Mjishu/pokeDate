@@ -5,6 +5,11 @@ export type userData = {
       C_password?: string;
 }
 
+export type incomingUser = {
+      Username: string;
+
+}
+
 export async function userFormSubmit(url: string, method: string, formData: userData): Promise<boolean> {
       const fetchParams = {
             method: "POST",
@@ -42,6 +47,7 @@ export async function loginUser(formData: userData): Promise<boolean> {
             const data = await response.json();
             if (data.status == 200) {
                   console.log("status 200")
+                  localStorage.setItem("refresh_token", data.refresh_token)
                   localStorage.setItem("token", data.token)
             }
       } catch (error) {
@@ -49,4 +55,48 @@ export async function loginUser(formData: userData): Promise<boolean> {
             return false;
       }
       return false
+}
+
+export async function GetCurrentUser() {
+      try {
+            const jwtToken = localStorage.getItem("token")
+            const bearerToken = "Bearer " + jwtToken
+            const fetchParams = {
+                  method: "POST",
+                  headers: {
+                        "Authorization": bearerToken
+                  }
+            }
+            const response = await fetch("/api/users/current", fetchParams)
+            const data = await response.json()
+            return data
+      } catch (error) {
+            console.error(`error getting current user ${error}`)
+            return
+      }
+}
+
+
+export async function LogoutUser() {
+      try {
+            const refreshToken = localStorage.getItem("refresh_token")
+            const bearerToken = "Bearer " + refreshToken
+            const fetchParams = {
+                  method: "POST",
+                  headers: {
+                        "Authorization": bearerToken
+                  }
+            }
+            const response = await fetch("/api/revoke", fetchParams)
+            if (response.status != 204) {
+                  alert("issue revoking token")
+                  return
+            }
+
+            localStorage.removeItem("token")
+            localStorage.removeItem("refresh_token")
+      } catch (error) {
+            console.error(`error trying to sign you out ${error}`)
+            return
+      }
 }

@@ -73,16 +73,16 @@ func GetBearerToken(headers http.Header) (string, error) {
 	return strings.TrimSpace(bearerToken[len(bearerToken)-1]), nil
 }
 
-func UserValid(header http.Header, jwtSecret string) error {
+func UserValid(header http.Header, jwtSecret string) (uuid.UUID, error) {
 	bearerToken, err := GetBearerToken(header)
 	if err != nil {
-		return err
+		return uuid.UUID{}, err
 	}
-	_, err = ValidateJWT(bearerToken, jwtSecret)
+	userId, err := ValidateJWT(bearerToken, jwtSecret)
 	if err != nil {
-		return err
+		return uuid.UUID{}, err
 	}
-	return nil
+	return userId, nil
 }
 
 func MakeRefreshToken() (string, error) {

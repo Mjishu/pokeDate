@@ -47,6 +47,7 @@ func main() {
 	mux.HandleFunc("/refresh", func(w http.ResponseWriter, r *http.Request) {
 		controller.RefreshToken(w, r, config.jwt_secret)
 	})
+	mux.HandleFunc("/revoke", controller.RevokeToken)
 
 	database.Database()
 
