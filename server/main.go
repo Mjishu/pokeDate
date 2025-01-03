@@ -44,6 +44,9 @@ func main() {
 	})
 	mux.HandleFunc("/organizations/animals", controller.OrganizationController) //? change to /orgnaizations and make a new controller called organizations Cotnroller
 	mux.HandleFunc("/shots", controller.ShotController)
+	mux.HandleFunc("/refresh", func(w http.ResponseWriter, r *http.Request) {
+		controller.RefreshToken(w, r, config.jwt_secret)
+	})
 
 	database.Database()
 

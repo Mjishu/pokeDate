@@ -14,7 +14,6 @@ import (
 type AuthUser struct {
 	Username           string `json:"Username"`
 	Password           string `json:"Password"`
-	Expires_in_seconds int    `json:"exp_seconds"`
 }
 
 func UserController(w http.ResponseWriter, r *http.Request, jwtSecret string) {
@@ -57,8 +56,7 @@ func handleUsers(w http.ResponseWriter, r *http.Request) database.User { //? how
 func LoginUser(w http.ResponseWriter, r *http.Request, jwtSecret string) { //? does this properly check if the usernames are the same before logging in?
 	var incomingUser AuthUser
 	var expiresIn time.Duration
-	maxExpireTime := time.Duration(1 * time.Hour)
-	checkAuthUser(w, r, &incomingUser)
+	checkAuthUser(w, r, &incomingUser) //* gets req body
 
 	fmt.Printf("incoming user is %v\n", incomingUser)
 	storedUser, err := database.GetUser(incomingUser.Username) //this password should be hashed(i.e user.Password)
@@ -66,39 +64,48 @@ func LoginUser(w http.ResponseWriter, r *http.Request, jwtSecret string) { //? d
 		fmt.Fprint(w, "Error getting user from database", http.StatusInternalServerError)
 	}
 
+	//* checks password. useful code goes after this
 	err = auth.CheckPasswordHash(incomingUser.Password, storedUser.HashPassword)
 	if err != nil {
 		fmt.Fprint(w, "issue checking passwords", http.StatusBadRequest)
 		return
 	}
 
-	// checks if time is > than max expire time if so set expiresIn to maxTime
-	expiresTime := time.Duration(incomingUser.Expires_in_seconds) * time.Second
-	if expiresTime == 0 {
-		expiresIn = maxExpireTime // seconds * minutes = 1 hour
-	} else if expiresTime > maxExpireTime { // shuld reject anything past 3600
-		expiresIn = maxExpireTime
-	} else {
-		expiresIn = expiresTime
-	}
-	fmt.Printf("Expires in: %v\n", expiresIn)
-	// need to call the token somewhere here
+	// Token information
+	expiresIn = time.Duration(1 * time.Hour)
 
 	token, err := auth.MakeJWT(storedUser.Id, jwtSecret, expiresIn)
-	if err != nil {
+	if err != nil{
 		if err := json.NewEncoder(w).Encode(map[string]interface{}{"success": false}); err != nil {
 			http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 			return
 		}
-		fmt.Printf("error finding json token %v", err)
+		fmt.Printf("error finding json token %v\n ", err)
 		return
 	}
+
+	refresh_token,err := auth.MakeRefreshToken()
+	if  err != nil {
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{"success": false}); err != nil {
+			http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+			return
+		}
+		fmt.Printf("error finding getting refresh token %v\n ", err)
+		return
+	}
+	_, err = database.CreateRefreshToken(refresh_token, storedUser.Id)
+	if err != nil {
+		http.Error(w, "error creating refresh token", http.StatusInternalServerError)
+		return
+	}
+
 
 	response := map[string]interface{}{
 		"username": storedUser.Username,
 		"id":       storedUser.Id,
 		"status":   http.StatusOK,
 		"token":    token,
+		"refresh_token": refresh_token,
 	}
 
 	if err := json.NewEncoder(w).Encode(response); err != nil {

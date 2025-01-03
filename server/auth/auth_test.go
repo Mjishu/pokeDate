@@ -67,7 +67,7 @@ func TestExpiredJWT(t *testing.T) {
 }
 
 func TestInvalidSecret(t *testing.T) {
-	ogSecret := "imASecret"
+	realSecret := "imASecret"
 	fakeSecret := "hahaImFake"
 	userId, err := uuid.NewRandom()
 	if err != nil {
@@ -75,12 +75,12 @@ func TestInvalidSecret(t *testing.T) {
 		return
 	}
 
-	jwtToken, err := MakeJWT(userId, ogSecret, 1*time.Hour)
+	jwtToken, err := MakeJWT(userId, realSecret, 1*time.Hour) 
 	if err != nil {
 		t.Fatalf("error creating jwt token: %v\n", err)
 	}
-	returnedId, err := ValidateJWT(jwtToken, ogSecret)
+	returnedId, err := ValidateJWT(jwtToken, fakeSecret) 
 	if (err == nil || returnedId != uuid.UUID{}) {
-		t.Fatalf("Given real secret: %v, and fake secret: %v\n want: %v, %v, got %v, nil\n", ogSecret, fakeSecret, uuid.UUID{}, err, returnedId)
+		t.Fatalf("Given real secret: %v, and fake secret: %v\n want: %v, %v, got %v, nil\n", realSecret, fakeSecret, uuid.UUID{}, err, returnedId)
 	}
 }

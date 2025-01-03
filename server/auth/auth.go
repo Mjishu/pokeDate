@@ -48,11 +48,9 @@ func MakeJWT(userID uuid.UUID, tokenSecret string, expiresIn time.Duration) (str
 	return tokenString, nil
 }
 
-// further implement the validate function
-// ADD UNIT TESTS !!!!!
 func ValidateJWT(tokenString, tokenSecret string) (uuid.UUID, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(tokenSecret), nil //default return given by docs
+		return []byte(tokenSecret), nil
 	}, jwt.WithLeeway(5*time.Second))
 	if err != nil {
 		return uuid.UUID{}, fmt.Errorf("error parsing token: %v", err)
@@ -67,7 +65,7 @@ func ValidateJWT(tokenString, tokenSecret string) (uuid.UUID, error) {
 }
 
 func GetBearerToken(headers http.Header) (string, error) {
-	authToken := headers.Get("Authorization") // if field has multiple: headers["Authorization"] -> returns a struct of strings
+	authToken := headers.Get("Authorization") //? if field has multiple: headers["Authorization"] -> returns a struct of strings
 	if authToken == "" {
 		return "", errors.New("could not find authorization header")
 	}
