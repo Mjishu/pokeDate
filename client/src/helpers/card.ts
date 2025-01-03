@@ -10,7 +10,6 @@ export async function cardResponse(liked: boolean, id: string) {
       try {
             const response = await fetch(`/api/cards`, fetchParams)
             const data = await response.json()
-            console.log(data)
             return response.status
       } catch (error) {
             console.log("Error trying to get card: " + id + error)
@@ -29,8 +28,6 @@ export async function getRandomCard() {
             }
             const response = await fetch("/api/cards", fetchParams)
             const data = await response.json()
-            console.log(data)
-            console.log("status code inside getRandomCard is " + response.status)
             return { data, statusCode: response.status }
       } catch (error) {
             console.error(`error trying to get card: ${error}`)

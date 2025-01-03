@@ -1,6 +1,6 @@
 ## General
 
-- [ ] CHANGE ALL CONTEXT FOR SQL TO R.CONTEXT
+- [ ] CHANGE ALL CONTEXT FOR SQL TO R.CONTEXT AND UPDATE POOL TO JUST HAVE 1?
       - example func GetUser(context.Context, id any) -> GetUser(r.Header, id)
             I like to pass the request context r.Context() into all functions in handlers, propagating it. Any queries that are running will be cancelled if the context is cancelled. 
             If you have some background process in a go routine (within a handler), you do not want to use the request context, because it'll be cancelled when the handler exits/finishes 
@@ -10,7 +10,7 @@
       the one for images should send the animal id and the image.
 
 ## Frontend
-
+- [ ] where to call GetTokens so that each time the page is rerendered(or switch from / to /profile) it refreshes token? or something else
 - [x] Call /cards to get a card on page load, and set the cards image instead of hard coding it
 
 ## Backend

@@ -25,7 +25,6 @@
 
 	async function newCard() {
 		let randomCardInfo = await getRandomCard();
-		console.log(randomCardInfo.statusCode);
 		if (randomCardInfo.statusCode == 400) {
 			goto('/login');
 		}
