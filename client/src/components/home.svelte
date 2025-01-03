@@ -1,93 +1,105 @@
 <script lang="ts">
-      import { cardResponse, getRandomCard } from "../helpers/card";
-      import { trapFocus } from "../helpers/actions.svelte";
-      import { onMount } from "svelte";
-      import CardComponent from "./CardComponent.svelte";
-      import Navbar from "./Navbar.svelte";
+	import { cardResponse, getRandomCard } from '../helpers/card';
+	import { goto } from '$app/navigation';
+	import { trapFocus } from '../helpers/actions.svelte';
+	import { onMount } from 'svelte';
+	import CardComponent from './CardComponent.svelte';
+	import Navbar from './Navbar.svelte';
 
-      type Animal = {
-            Id: string;
-            Name: string;
-            Species: string;
-            Date_of_birth: string;
-            Sex: string;
-            Available: boolean;
-            Price: number;
-            Breed: string;
-            Image_src: string[];
-      };
+	type Animal = {
+		Id: string;
+		Name: string;
+		Species: string;
+		Date_of_birth: string;
+		Sex: string;
+		Available: boolean;
+		Price: number;
+		Breed: string;
+		Image_src: string[];
+	};
 
-      let isLiked = $state<boolean | undefined>();
-      let cardInfo = $state<Animal | undefined>(undefined);
-      let isLoading = $state(true);
-      let cardDone = $state(false);
+	let isLiked = $state<boolean | undefined>();
+	let cardInfo = $state<Animal | undefined>(undefined);
+	let isLoading = $state(true);
+	let cardDone = $state(false);
 
-      async function newCard() {
-            cardInfo = await getRandomCard();
-            isLoading = false;
-            isLiked = undefined;
-            cardDone = false;
-      }
+	async function newCard() {
+		let randomCardInfo = await getRandomCard();
+		console.log(randomCardInfo.statusCode);
+		if (randomCardInfo.statusCode == 400) {
+			goto('/login');
+		}
+		cardInfo = randomCardInfo.data;
+		isLoading = false;
+		isLiked = undefined;
+		cardDone = false;
+	}
 
-      onMount(async () => {
-            await newCard();
-      });
+	onMount(async () => {
+		await newCard();
+	});
 
-      async function likedCard() {
-            isLiked = true;
-            await cardResponse(isLiked, "001");
-            setTimeout(async () => {
-                  cardDone = true;
-                  await newCard();
-            }, 1300);
-      }
+	async function likedCard() {
+		isLiked = true;
+		let statusCode = await cardResponse(isLiked, '001');
+		if (statusCode == 400) {
+			goto('/login');
+		}
+		setTimeout(async () => {
+			cardDone = true;
+			await newCard();
+		}, 1300);
+	}
 
-      async function dislikedCard() {
-            isLiked = false;
-            await cardResponse(isLiked, "001");
-            setTimeout(async () => {
-                  cardDone = true;
-                  await newCard();
-            }, 1300);
-      }
+	async function dislikedCard() {
+		isLiked = false;
+		let statusCode = await cardResponse(isLiked, '001');
+		if (statusCode == 400) {
+			goto('/login');
+		}
+		setTimeout(async () => {
+			cardDone = true;
+			await newCard();
+		}, 1300);
+	}
 </script>
 
 {#if isLoading}
-      <div>Loading...</div>
+	<div>Loading...</div>
 {:else}
-      <main>
-            <Navbar />
-            <div class="content" use:trapFocus>
-                  <CardComponent card_info={cardInfo} {isLiked} {cardDone} />
-                  <div class="liked-buttons">
-                        <button onclick={() => dislikedCard()}>&lt</button>
-                        <button onclick={() => likedCard()}>&gt</button>
-                  </div>
-            </div>
-      </main>
+	<main>
+		<Navbar />
+		<div class="content" use:trapFocus>
+			<CardComponent card_info={cardInfo} {isLiked} {cardDone} />
+			<div class="liked-buttons">
+				<button onclick={() => dislikedCard()}>&lt</button>
+				<button onclick={() => likedCard()}>&gt</button>
+			</div>
+		</div>
+	</main>
 {/if}
 
 <style>
-      main {
-            display: grid;
-            grid-template-columns: 17.25rem 1fr;
-            height: 100%;
-            gap: 5rem;
-      }
-      .content {
-            display: flex;
-            flex-direction: column;
-            gap: 1rem;
-            align-items: center;
-            justify-content: center;
-      }
+	main {
+		display: grid;
+		grid-template-columns: 17.25rem 1fr;
+		height: 100%;
+		gap: 5rem;
+	}
+	.content {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		align-items: center;
+		justify-content: center;
+	}
 
-      .liked-buttons {
-            display: flex;
-            gap: 2rem;
-      }
-      .liked-buttons button {
-            width: 14rem;
-            height: 3rem;
-      }
+	.liked-buttons {
+		display: flex;
+		gap: 2rem;
+	}
+	.liked-buttons button {
+		width: 14rem;
+		height: 3rem;
+	}
 </style>

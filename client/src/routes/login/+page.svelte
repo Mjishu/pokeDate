@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import { userFormSubmit } from '../../helpers/users';
+	import { loginUser } from '../../helpers/users';
 
 	let formData = $state({
 		Username: '',
@@ -15,7 +15,7 @@
 
 	async function formSubmit(e: Event) {
 		e.preventDefault();
-		if (await userFormSubmit('/login', 'POST', formData)) {
+		if (await loginUser(formData)) {
 			goto('/');
 		}
 	}

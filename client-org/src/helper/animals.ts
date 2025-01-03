@@ -68,7 +68,7 @@ export async function createAnimalImage(image_data: File, animal_id: string, new
             }
 
             try {
-                  const response = await fetch("http://localhost:8080/animals/images", fetchParams)
+                  const response = await fetch("/api/animals/images", fetchParams)
                   if (!response.ok) {
                         console.error(`Error trying to create image: ${response.statusText}`)
                   }
@@ -95,7 +95,7 @@ export async function createAnimal(animal: NewAnimal, image: File) {
       }
       console.log(fetchParams.body)
       try {
-            const response = await fetch("http://localhost:8080/animals", fetchParams)
+            const response = await fetch("/api/animals", fetchParams)
             if (!response.ok) {
                   throw new Error(`issue uploading animal: ${response.statusText}`)
             }
@@ -109,7 +109,7 @@ export async function createAnimal(animal: NewAnimal, image: File) {
 
 export async function getOrganizationAnimals() {
       try {
-            const response = await fetch("http://localhost:8080/organizations/animals")
+            const response = await fetch("/api/organizations/animals")
             const data = await response.json()
             return data
       } catch (error) {
@@ -127,7 +127,7 @@ export async function getAnimalById(id: string) {
             body: JSON.stringify({ id: id })
       }
       try {
-            const response = await fetch("http://localhost:8080/organizations/animals", fetchParams)
+            const response = await fetch("/api/organizations/animals", fetchParams)
             const data = await response.json()
             return data
       } catch (error) {
@@ -149,7 +149,7 @@ export async function updateAnimalById(id: string, updatedAnimal: UpdatedAnimal,
       }
       try {
             console.log(fetchParams.body)
-            const response = await fetch("http://localhost:8080/animals", fetchParams)
+            const response = await fetch("/api/animals", fetchParams)
             const data = await response.json()
             try {
                   createAnimalImage(image_src, data.Id, true)
@@ -173,7 +173,7 @@ export async function DeleteAnimalById(id: string): Promise<void> {
             body: JSON.stringify({ id })
       }
       try {
-            const response = await fetch("http://localhost:8080/animals", fetchParams)
+            const response = await fetch("/api/animals", fetchParams)
             const data = await response.json()
             return data
       } catch (error) {
@@ -184,7 +184,7 @@ export async function DeleteAnimalById(id: string): Promise<void> {
 
 export async function GetAllShots(): Promise<Shot[]> {
       try {
-            const response = await fetch("http://localhost:8080/shots")
+            const response = await fetch("/api/shots")
             const data = await response.json()
             return data
       } catch (error) {

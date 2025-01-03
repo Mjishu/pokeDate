@@ -12,12 +12,13 @@ import (
 )
 
 type AuthUser struct {
-	Username           string
-	Password           string
-	Expires_in_seconds int
+	Username           string `json:"Username"`
+	Password           string `json:"Password"`
+	Expires_in_seconds int    `json:"exp_seconds"`
 }
 
 func UserController(w http.ResponseWriter, r *http.Request, jwtSecret string) {
+	SetHeader(w)
 	w.Header().Set("Content-Type", "application/json")
 	if r.URL.Path == "/users" {
 		handleUsers(w, r)
@@ -59,6 +60,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request, jwtSecret string) { //? d
 	maxExpireTime := time.Duration(1 * time.Hour)
 	checkAuthUser(w, r, &incomingUser)
 
+	fmt.Printf("incoming user is %v\n", incomingUser)
 	storedUser, err := database.GetUser(incomingUser.Username) //this password should be hashed(i.e user.Password)
 	if err != nil {
 		fmt.Fprint(w, "Error getting user from database", http.StatusInternalServerError)

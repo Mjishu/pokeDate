@@ -8,9 +8,10 @@ export default defineConfig({
 		include: ['src/**/*.{test,spec}.{js,ts}']
 	}, server: {
 		proxy: {
-			"/api": {
+			'/api': {
 				target: "http://localhost:8080",
-				changeOrigin: true
+				changeOrigin: true,
+				rewrite: (path) => path.replace(/^\/api/, ''),
 			}
 		}
 	}
