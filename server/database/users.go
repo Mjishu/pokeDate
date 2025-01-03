@@ -35,10 +35,10 @@ type NewUser struct {
 // city_id INT REFERENCES locations(id) ON DELETE SET NULL,
 // profile_pi
 
-func GetUser(id any) (User, error) {
+func GetUser(username any) (User, error) {
 	ctx, pool := createConnection()
 	var user User
-	err := pool.QueryRow(ctx, "SELECT id,username,password from users WHERE username = $1", id).Scan( // add email,date_of_birth
+	err := pool.QueryRow(ctx, "SELECT id,username,password from users WHERE username = $1", username).Scan( // add email,date_of_birth
 		&user.Id, &user.Username, &user.HashPassword,
 	)
 
@@ -47,6 +47,19 @@ func GetUser(id any) (User, error) {
 		return User{}, err
 	}
 
+	return user, nil
+}
+
+func GetUserById(id uuid.UUID) (User, error) {
+	ctx, pool := createConnection()
+	var user User
+	err := pool.QueryRow(ctx, "SELECT id,username FROM users WHERE id = $1", id).Scan(
+		&user.Id, &user.Username,
+	)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Query row failed in getuserbyid %v\n", err)
+		return User{}, err
+	}
 	return user, nil
 }
 

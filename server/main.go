@@ -30,7 +30,7 @@ func main() {
 		controller.UserController(w, r, config.jwt_secret)
 	})
 	mux.HandleFunc("/cards", func(w http.ResponseWriter, r *http.Request) {
-		err := auth.UserValid(r.Header, config.jwt_secret)
+		_, err := auth.UserValid(r.Header, config.jwt_secret)
 		if err != nil {
 			http.Error(w, "unable to validate jwt", http.StatusBadRequest)
 			return

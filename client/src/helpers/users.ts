@@ -7,7 +7,7 @@ export type userData = {
 
 export type incomingUser = {
       Username: string;
-
+      Id: string;
 }
 
 export async function userFormSubmit(url: string, method: string, formData: userData): Promise<boolean> {

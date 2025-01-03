@@ -149,9 +149,14 @@ func CreateUser(w http.ResponseWriter, r *http.Request) { //? how to get this to
 func GetCurrentUser(w http.ResponseWriter, r *http.Request, jwtSecret string) {
 	switch r.Method {
 	case http.MethodPost:
-		err := auth.UserValid(r.Header, jwtSecret)
+		tokenUserId, err := auth.UserValid(r.Header, jwtSecret)
 		if err != nil {
 			http.Error(w, "unable to validate jwt", http.StatusBadRequest)
+			return
+		}
+		storedUser, err := database.GetUserById(tokenUserId)
+		if err != nil {
+			http.Error(w, "error finding stored user", http.StatusInternalServerError)
 			return
 		}
 		/*
@@ -159,7 +164,8 @@ func GetCurrentUser(w http.ResponseWriter, r *http.Request, jwtSecret string) {
 		*/
 
 		response := map[string]interface{}{
-			"username": "user",
+			"Id":       storedUser.Id,
+			"Username": storedUser.Username,
 		}
 
 		if err := json.NewEncoder(w).Encode(response); err != nil {
