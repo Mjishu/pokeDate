@@ -1,17 +1,23 @@
 package auth
 
 import (
+	"errors"
+	"fmt"
+	"net/http"
+	"strings"
+	"time"
+
+	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
-	"github.com/golang-jwt/jwt" // go get this (should be this one https://github.com/golang-jwt/jwt
 )
 
 // go get uuid?
 
 type CustomClaims struct {
-	Id uuid.UUID`json:"Id"`
+	Id uuid.UUID `json:"sub"`
 	jwt.RegisteredClaims
 }
-
 
 func HashPassword(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 0)
@@ -26,38 +32,55 @@ func CheckPasswordHash(password, hash string) error {
 }
 
 func MakeJWT(userID uuid.UUID, tokenSecret string, expiresIn time.Duration) (string, error) {
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, 
-			 jwt.RegisteredClaims{
-				 "iss": "pokeFind-api",
-				 "iat": time.currentTime //utc
-				 "exp": time.currentTime + expiresIn
-				 "sub" : string(userID) //stringify user id
-			 })
-	tokenString, err := token.SignedString(tokenSecret)
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
+		Issuer:    "pokeFind-api",
+		Subject:   userID.String(),
+		IssuedAt:  jwt.NewNumericDate(time.Now()),
+		ExpiresAt: jwt.NewNumericDate(time.Now().Add(expiresIn)),
+	})
+	tokenString, err := token.SignedString([]byte(tokenSecret))
+	if err != nil {
+		fmt.Printf("there was an error trying to sign the token: %v", err)
+		return "", err
+	}
+	return tokenString, nil
 }
 
 // further implement the validate function
 // ADD UNIT TESTS !!!!!
-func ValidateJWT(tokenString, tokenSecret string) (uuid.UUID,error) {
-	token, err := jwt.ParseWithClaims(tokenString,&CustomClaims{}, func(token *jwt.Token)(interface{}, error) {
-		return []byte("allyourbase), nil //default return given by docs
-	}
+func ValidateJWT(tokenString, tokenSecret string) (uuid.UUID, error) {
+	token, err := jwt.ParseWithClaims(tokenString, &CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(tokenSecret), nil //default return given by docs
+	}, jwt.WithLeeway(5*time.Second))
 	if err != nil {
-		log.Fatal(err)
-		} else if claims, ok := token.Claims.(*CustomClaims); ok { //this is my token.Claims
-			fmt.Println(claims.Id, claims.RegisteredClaims.Issuer)// gets issuer be want id?	
-	} else {
-		log.Fatal("unknown claims type, cannot proceed")
-		}		      
+		return uuid.UUID{}, fmt.Errorf("error parsing token: %v", err)
+	}
+
+	claims, ok := token.Claims.(*CustomClaims)
+	if !ok || !token.Valid {
+		return uuid.UUID{}, errors.New("invalid token")
+	}
+
+	return claims.Id, nil
 }
 
 func GetBearerToken(headers http.Header) (string, error) {
-	// look for auth header in headers and return the token_string from bearer
-	// get the string and then split it based on spaces and then return length -1?
-	if !headers.Authorization {
-		return "", new error("Could not find authorization header")
-		}
-	bearerToken := strings.Split(headers.Authorization, " ")
-	return strings.TrimSpace(bearerToken[len(bearerToken) - 1]), nil
+	authToken := headers.Get("Authorization") // if field has multiple: headers["Authorization"] -> returns a struct of strings
+	if authToken == "" {
+		return "", errors.New("could not find authorization header")
+	}
+	bearerToken := strings.Split(authToken, " ")
+	return strings.TrimSpace(bearerToken[len(bearerToken)-1]), nil
 }
-			      
+
+func UserValid(header http.Header, jwtSecret string) error {
+	bearerToken, err := GetBearerToken(header)
+	if err != nil {
+		return err
+	}
+	_, err = ValidateJWT(bearerToken, jwtSecret)
+	if err != nil {
+		return err
+	}
+	return nil
+}

@@ -15,10 +15,11 @@ export async function userFormSubmit(url: string, method: string, formData: user
       };
 
       try {
-            const response = await fetch('/api/' + url, fetchParams);
+            const response = await fetch('http://localhost:8080/users/' + url, fetchParams);
             const data = await response.json();
-            if (data.success) {
-                  return true
+            if (data.status == 200) {
+                  console.log("status 200")
+                  localStorage.setItem("token", data.token)
             }
       } catch (error) {
             console.error('There was an error creating user: ' + error);

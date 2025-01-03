@@ -12,16 +12,19 @@ import (
 )
 
 type AuthUser struct {
-	Username string
-	Password string
-	Expires_in_seconds time.Time
+	Username           string
+	Password           string
+	Expires_in_seconds int
 }
 
-func UserController(w http.ResponseWriter, r *http.Request) {
+func UserController(w http.ResponseWriter, r *http.Request, jwtSecret string) {
+	w.Header().Set("Content-Type", "application/json")
 	if r.URL.Path == "/users" {
 		handleUsers(w, r)
+		return
 	} else if r.URL.Path == "/users/login" {
-		LoginUser(w, r)
+		LoginUser(w, r, jwtSecret)
+		return
 	} else if r.URL.Path == "/users/create" {
 		switch r.Method {
 		case http.MethodPost:
@@ -29,6 +32,7 @@ func UserController(w http.ResponseWriter, r *http.Request) {
 		case http.MethodGet:
 			fmt.Fprint(w, "no get route setup")
 		}
+		return
 	}
 }
 
@@ -49,10 +53,10 @@ func handleUsers(w http.ResponseWriter, r *http.Request) database.User { //? how
 	return database.User{}
 }
 
-func LoginUser(w http.ResponseWriter, r *http.Request) {
+func LoginUser(w http.ResponseWriter, r *http.Request, jwtSecret string) { //? does this properly check if the usernames are the same before logging in?
 	var incomingUser AuthUser
-	var expiresIn time.Time //! might cause error need to figure out what format time.Time is in
-	maxExpireTime := 3600
+	var expiresIn time.Duration
+	maxExpireTime := time.Duration(1 * time.Hour)
 	checkAuthUser(w, r, &incomingUser)
 
 	storedUser, err := database.GetUser(incomingUser.Username) //this password should be hashed(i.e user.Password)
@@ -67,20 +71,32 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// checks if time is > than max expire time if so set expiresIn to maxTime
-	if incomingUser.Expires_in_seconds == nil {
+	expiresTime := time.Duration(incomingUser.Expires_in_seconds) * time.Second
+	if expiresTime == 0 {
 		expiresIn = maxExpireTime // seconds * minutes = 1 hour
-	} else if incomingUser.Expires_in_seconds > maxExpireTime {
+	} else if expiresTime > maxExpireTime { // shuld reject anything past 3600
 		expiresIn = maxExpireTime
-		} else {
-		expiresIn = incomingUser.Expires_in_seconds
-		}
+	} else {
+		expiresIn = expiresTime
+	}
+	fmt.Printf("Expires in: %v\n", expiresIn)
 	// need to call the token somewhere here
 
+	token, err := auth.MakeJWT(storedUser.Id, jwtSecret, expiresIn)
+	if err != nil {
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{"success": false}); err != nil {
+			http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+			return
+		}
+		fmt.Printf("error finding json token %v", err)
+		return
+	}
 
 	response := map[string]interface{}{
 		"username": storedUser.Username,
 		"id":       storedUser.Id,
 		"status":   http.StatusOK,
+		"token":    token,
 	}
 
 	if err := json.NewEncoder(w).Encode(response); err != nil {
@@ -88,7 +104,6 @@ func LoginUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-
 
 func CreateUser(w http.ResponseWriter, r *http.Request) { //? how to get this to work so that it passes the user of body to createUser
 

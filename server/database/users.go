@@ -1,13 +1,17 @@
 package database
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"time"
+
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type User struct {
-	Id            string
+	Id            uuid.UUID
 	Username      string
 	HashPassword  string
 	Email         string
@@ -34,12 +38,12 @@ type NewUser struct {
 func GetUser(id any) (User, error) {
 	ctx, pool := createConnection()
 	var user User
-	err := pool.QueryRow(ctx, "SELECT id,username,password,email,date_of_birth from users WHERE id = $1", id).Scan(
-		&user.Id, &user.Username, &user.HashPassword, &user.Email, &user.Date_of_birth,
+	err := pool.QueryRow(ctx, "SELECT id,username,password from users WHERE username = $1", id).Scan( // add email,date_of_birth
+		&user.Id, &user.Username, &user.HashPassword,
 	)
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "QueryRow failed!: %v\n", err)
+		fmt.Fprintf(os.Stderr, "QueryRow failed in getUser!: %v\n", err)
 		return User{}, err
 	}
 
@@ -47,10 +51,37 @@ func GetUser(id any) (User, error) {
 }
 
 func CreateUser(user NewUser, hashedPassword string) {
-	sql := `INSERT INTO users(username,password) VALUES ($1,$2)`
-
 	ctx, pool := createConnection()
 
-	_, err := pool.Exec(ctx, sql, user.Username, hashedPassword) //add other options for new user like dob and email
+	exists, err := UserExists(ctx, pool, user.Username)
+	if err != nil { //todo beef up this error handler
+		fmt.Printf("error checking user exists: %v\n", err)
+		return
+	}
+	if exists {
+		return
+	}
+	sql := `INSERT INTO users(username,password) VALUES ($1,$2)`
+
+	_, err = pool.Exec(ctx, sql, user.Username, hashedPassword) //add other options for new user like dob and email
 	inserQueryFail(err, "creating user")
+}
+
+func UserExists(ctx context.Context, pool *pgxpool.Pool, username string) (bool, error) {
+	rows, err := pool.Query(ctx, "SELECT * FROM users WHERE username = $1 LIMIT 1", username)
+	if err != nil {
+		return false, err
+	}
+
+	rowsProcessed := 0
+	for rows.Next() {
+		rowsProcessed++
+	}
+	if err := rows.Err(); err != nil {
+		return false, err
+	}
+	if rowsProcessed < 1 {
+		return false, nil
+	}
+	return true, nil
 }
