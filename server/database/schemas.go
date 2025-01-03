@@ -82,6 +82,8 @@ func createUsers(ctx context.Context, pool *pgxpool.Pool) {
 			state_id INT REFERENCES locations(id) ON DELETE SET NULL,
 			city_id INT REFERENCES locations(id) ON DELETE SET NULL,
 			profile_picture_src TEXT
+			created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+			updated_at TIMESTAMPTZ DEFAULT now() NOT NULL,
 		);
 	`
 	_, err := pool.Exec(ctx, sql)
@@ -156,6 +158,21 @@ func createUserAnimals(ctx context.Context, pool *pgxpool.Pool) {
 	`
 	_, err := pool.Exec(ctx, sql)
 	queryFail(err, "user animals")
+}
+
+func createRefreshTokens(ctx context.Context, pool *pgxpool.Pool) {
+	sql := `
+		CREATE TABLE IF NOT EXISTS refresh_tokens (
+			token TEXT PRIMARY KEY NOT NULL,
+			created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+			updated_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+			user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+			expires_at TIMESTAMPTZ NOT NULL,
+			revoked_at TIMESTAMPTZ DEFAULT NULL
+		)
+	`
+	_, err := pool.Exec(ctx, sql)
+	queryFail(err, "refresh tokens")
 }
 
 // ! todo: add messages, conversation, conversation_member
