@@ -19,7 +19,9 @@ type User struct {
 }
 
 type UpdatedUser struct {
-	Username string `json:"Username"`
+	Username      string    `json:"Username"`
+	Email         string    `json:"Email"`
+	Date_of_birth time.Time `json:"Date_of_birth"`
 }
 
 type NewUser struct {
@@ -107,9 +109,9 @@ func UpdateUser(userId uuid.UUID, userInfo UpdatedUser) error {
 	ctx, pool := createConnection()
 
 	// check if user exists?
-	sql := `UPDATE USERS SET username = $1 WHERE id = $2`
+	sql := `UPDATE users SET username = $1, email = $2, date_of_birth = $3, updated_at = NOW() WHERE id = $4`
 
-	_, err := pool.Exec(ctx, sql, userInfo.Username, userId)
+	_, err := pool.Exec(ctx, sql, userInfo.Username, userInfo.Email, userInfo.Date_of_birth, userId)
 	if err != nil {
 		return err
 	}

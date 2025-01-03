@@ -9,7 +9,7 @@ export type incomingUser = {
       Id: string;
       Username: string;
       Email: string;
-      Date_of_birth: Date | null;
+      Date_of_birth: string;
 }
 
 export async function userFormSubmit(url: string, method: string, formData: userData): Promise<boolean> {
@@ -113,6 +113,7 @@ export async function GetTokens(): Promise<void> {
 }
 
 export async function GetCurrentUser(): Promise<incomingUser | null> {
+      await GetTokens()
       try {
             const token = localStorage.getItem('token');
             const bearerToken = 'Bearer ' + token;
@@ -139,7 +140,7 @@ export async function GetCurrentUser(): Promise<incomingUser | null> {
 type updatedUser = {
       Username: string;
       Email: string;
-      Date_of_birth: Date | null;
+      Date_of_birth: string;
 }
 
 export async function UpdateUser(userBody: updatedUser): Promise<void> {

@@ -2,12 +2,13 @@
 	import type { incomingUser } from '../../helpers/users';
 	import { GetCurrentUser, UpdateUser } from '../../helpers/users';
 	import { onMount } from 'svelte';
+	import { formatISO } from 'date-fns';
 
 	let userData: incomingUser | null = $state(null);
 	let updatedUserData = $state({
 		Username: '',
 		Email: '',
-		Date_of_birth: null as Date | null
+		Date_of_birth: ''
 	});
 	let options = $state({
 		showEdit: false
@@ -16,15 +17,21 @@
 	onMount(async () => {
 		userData = await GetCurrentUser();
 		updatedUserData = {
-			Username: userData?.Username ? userData?.Username : '',
+			Username: userData?.Username ? userData?.Username : 'i',
 			Email: userData?.Email ? userData?.Email : '',
-			Date_of_birth: userData?.Date_of_birth ? userData?.Date_of_birth : null
+			Date_of_birth: userData?.Date_of_birth ? userData?.Date_of_birth : ''
 		};
 	});
 
 	async function submitForm(e: Event) {
 		e.preventDefault();
-		await UpdateUser(updatedUserData);
+		const formattedUser = {
+			...$state.snapshot(updatedUserData),
+			Date_of_birth: updatedUserData.Date_of_birth
+				? formatISO(new Date(updatedUserData.Date_of_birth))
+				: ''
+		};
+		await UpdateUser(formattedUser);
 	}
 </script>
 
@@ -47,7 +54,7 @@
 				<div class="input-holder">
 					<label for="dob">Date of Birth</label>
 					<input
-						type="text"
+						type="date"
 						placeholder="date of birth"
 						bind:value={updatedUserData.Date_of_birth}
 					/>
