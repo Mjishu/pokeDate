@@ -1,6 +1,7 @@
 package database
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"time"
@@ -74,7 +75,7 @@ func InsertAnimalShots(shot NewAnimalShot) {
 	inserQueryFail(err, "Inserting shot")
 }
 
-func UpdateAnimal(animal UpdateAnimalStruct) {
+func UpdateAnimal2(animal UpdateAnimalStruct) {
 	sql := `
 		UPDATE animals SET name = $1, date_of_birth = $2, price = $3, available = $4 WHERE id = $5
 	`
@@ -82,6 +83,19 @@ func UpdateAnimal(animal UpdateAnimalStruct) {
 	ctx, pool := createConnection()
 	_, err := pool.Exec(ctx, sql, animal.Name, animal.Date_of_birth, animal.Price, animal.Available, animal.Id) //? Why is this giving an error?
 	inserQueryFail(err, "Updating Animal")
+}
+
+func UpdateAnimal(animal Animal) error {
+	sql := `
+		UPDATE animals set name = $1, date_of_birth = $2, price = $3, available = $4, image_src = $5 WHERE id = $5
+	`
+
+	_, pool := createConnection()
+	_, err := pool.Exec(context.TODO(), sql, animal.Name, animal.Date_of_birth, animal.Price, animal.Available, animal.Image_src, animal.Id)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func inserQueryFail(err error, name string) {

@@ -25,7 +25,7 @@ func GetLocations() Location {
 	return location
 }
 
-func GetAnimal(id any) Animal {
+func GetAnimal(id any) (Animal, error) {
 	ctx, pool := createConnection()
 	var animal Animal
 	err := pool.QueryRow(ctx, "SELECT a.*, ai.image_src FROM animals AS a LEFT JOIN animal_images as ai ON a.id = ai.animal_id WHERE a.id = $1", id).Scan(
@@ -34,12 +34,12 @@ func GetAnimal(id any) Animal {
 	)
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "QueryRow failed!: %v\n", err)
+		return Animal{}, err
 	}
 
 	SelectShots(&animal, ctx, pool)
 
-	return animal
+	return animal, nil
 }
 
 func GetAnimalByName(animal_name string) string {

@@ -58,7 +58,9 @@ func MainAnimalOperations(w http.ResponseWriter, r *http.Request) {
 			database.InsertAnimalShots(newShot)
 		}
 		fmt.Printf("the animal given is %v\n", updatedAnimal)
-		database.UpdateAnimal(updatedAnimal)
+		//!!
+		database.UpdateAnimal2(updatedAnimal) //TODO UPDATE THIS TO USE UPDATEANIMAL NOT 2
+		//!!
 		fmt.Fprintf(w, "Animal updated successfully")
 	case http.MethodDelete:
 		w.Header().Set("Content-Type", "application/json")

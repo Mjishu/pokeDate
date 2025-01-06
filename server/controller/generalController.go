@@ -37,8 +37,13 @@ func OrganizationController(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
 		hasId, id := checkForBodyItem("id", w, r)
+		animal, err := database.GetAnimal(id)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, "could not find animal", err)
+			return
+		}
 		if hasId {
-			if err := json.NewEncoder(w).Encode(database.GetAnimal(id)); err != nil {
+			if err := json.NewEncoder(w).Encode(animal); err != nil {
 				http.Error(w, "unable to encode response", http.StatusInternalServerError)
 			}
 			return
@@ -53,4 +58,3 @@ func OrganizationController(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 }
-
