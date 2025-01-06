@@ -56,29 +56,6 @@ export type UpdatedAnimal = {
       Shots: NewShot[];
 }
 
-export async function createAnimalImage(image_data: File, animal_id: string, newImage: boolean) {
-      if (image_data) {
-            const data = new FormData();
-            data.append("Image_src", image_data);
-            data.append("Animal_id", animal_id);
-            console.log(data);
-            const fetchParams = {
-                  method: newImage ? "POST" : "PUT",
-                  body: JSON.stringify(data)
-            }
-
-            try {
-                  const response = await fetch("/api/animals/images", fetchParams)
-                  if (!response.ok) {
-                        console.error(`Error trying to create image: ${response.statusText}`)
-                  }
-                  return data;
-            } catch (error) {
-                  console.error(`error uploading image ${error}`)
-            }
-      }
-}
-
 export async function createAnimal(animal: NewAnimal, image: File) {
       //! Switch date_birth to be in the 2024-10-09T00:00:00Z format
       console.log(animal)
@@ -136,7 +113,7 @@ export async function getAnimalById(id: string) {
       }
 }
 
-export async function updateAnimalById(id: string, updatedAnimal: UpdatedAnimal, image_src: string): Promise<void> {
+export async function updateAnimalById(id: string, updatedAnimal: UpdatedAnimal): Promise<void> {
       const fetchParams = {
             method: "PUT",
             headers: {
@@ -151,12 +128,6 @@ export async function updateAnimalById(id: string, updatedAnimal: UpdatedAnimal,
             console.log(fetchParams.body)
             const response = await fetch("/api/animals", fetchParams)
             const data = await response.json()
-            try {
-                  createAnimalImage(image_src, data.Id, true)
-            } catch (error) {
-                  console.error(`error trying to create animal image ${error}`)
-                  return
-            }
             return data
       } catch (error) {
             console.error(`error trying to update animal: ${error}`)

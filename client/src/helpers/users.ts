@@ -9,6 +9,7 @@ export type incomingUser = {
       Id: string;
       Username: string;
       Email: string;
+      Profile_picture: string;
       Date_of_birth: string;
 }
 

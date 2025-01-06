@@ -17,7 +17,7 @@ import (
 	"github.com/mjishu/pokeDate/database"
 )
 
-func handleUserImageUpload(w http.ResponseWriter, r *http.Request, JWTToken, s3Bucket, s3Region string, s3Client *s3.Client) {
+func HandleUserImageUpload(w http.ResponseWriter, r *http.Request, JWTToken, s3Bucket, s3Region string, s3Client *s3.Client) {
 	userIdString := r.PathValue("userID")
 	userId, err := uuid.Parse(userIdString)
 	if err != nil {

@@ -56,7 +56,7 @@ func main() {
 	if s3Region == "" {
 		log.Fatal("s3Region variable not set")
 	}
-	s3CfDist := os.Getenv("S3_CF_DISTRIBUTION")
+	s3CfDist := os.Getenv("S3_CF_DISTRO")
 	if s3CfDist == "" {
 		log.Fatal("s3 cf variable dist not set")
 	}
@@ -77,9 +77,14 @@ func main() {
 		s3Client:         s3Client,
 	}
 
+	// user info
 	mux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
 		controller.UserController(w, r, config.jwt_secret)
 	})
+	mux.HandleFunc("POST /users/profile_pictures/{userID}", func(w http.ResponseWriter, r *http.Request) {
+		controller.HandleUserImageUpload(w, r, config.jwt_secret, config.s3Bucket, config.s3Region, config.s3Client)
+	})
+
 	mux.HandleFunc("/cards", func(w http.ResponseWriter, r *http.Request) {
 		_, err := auth.UserValid(r.Header, config.jwt_secret)
 		if err != nil {

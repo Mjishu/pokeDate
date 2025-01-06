@@ -5,6 +5,7 @@
 	import { formatISO } from 'date-fns';
 
 	let userData: incomingUser | null = $state(null);
+	let profilePicture: FileList | undefined = $state();
 	let updatedUserData = $state({
 		Username: '',
 		Email: '',
@@ -13,14 +14,16 @@
 	let options = $state({
 		showEdit: false
 	});
+	let loading = $state(true);
 
 	onMount(async () => {
 		userData = await GetCurrentUser();
 		updatedUserData = {
 			Username: userData?.Username ? userData?.Username : 'i',
 			Email: userData?.Email ? userData?.Email : '',
-			Date_of_birth: userData?.Date_of_birth ? userData?.Date_of_birth : ''
+			Date_of_birth: userData?.Date_of_birth ? userData.Date_of_birth.split('T')[0] : ''
 		};
+		loading = false;
 	});
 
 	async function submitForm(e: Event) {
@@ -32,42 +35,80 @@
 				: ''
 		};
 		await UpdateUser(formattedUser);
+
+		if (profilePicture != undefined && userData != null) {
+			const formData = new FormData();
+			formData.append('profile_image', profilePicture[0]);
+			try {
+				const response = await fetch(`/api/users/profile_pictures/${userData.Id}`, {
+					method: 'POST',
+					headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+					body: formData
+				});
+				if (!response.ok) {
+					const data = await response.json();
+					throw new Error(`failed to upload profile picture, error: ${data.error}`);
+				}
+				console.log('video uploaded');
+				userData = await GetCurrentUser();
+			} catch (error: any) {
+				alert(`Error: ${error.message}`);
+			}
+		}
 	}
 </script>
 
-<main>
-	<h1>Profile</h1>
-	<p>Hello {userData?.Username}!</p>
+{#if loading}
+	<p>Loading...</p>
+{:else if userData != null}
+	<main>
+		<h1>Profile</h1>
+		<div class="user-info">
+			<p>Hello {userData.Username}!</p>
+			<img src={userData.Profile_picture} />
+		</div>
 
-	<button onclick={() => (options.showEdit = !options.showEdit)}>Edit</button>
-	{#if options.showEdit}
-		<form onsubmit={submitForm} autocomplete="off">
-			<div class="inputs">
-				<div class="input-holder">
-					<label for="username">New Username</label>
-					<input type="text" placeholder="username" bind:value={updatedUserData.Username} />
+		<button onclick={() => (options.showEdit = !options.showEdit)}>Edit</button>
+		{#if options.showEdit}
+			<form onsubmit={submitForm} autocomplete="off">
+				<div class="inputs">
+					<div class="input-holder">
+						<label for="username">New Username</label>
+						<input type="text" placeholder="username" bind:value={updatedUserData.Username} />
+					</div>
+					<div class="input-holder">
+						<label for="email">Email</label>
+						<input type="text" placeholder="email" bind:value={updatedUserData.Email} />
+					</div>
+					<div class="input-holder">
+						<label for="dob">Date of Birth</label>
+						<input
+							type="date"
+							placeholder="date of birth"
+							bind:value={updatedUserData.Date_of_birth}
+						/>
+					</div>
+					<div class="input-holder">
+						<label for="profile-picture">Profile Picture</label>
+						<input
+							type="file"
+							class="profile-picture"
+							name="profile-picture"
+							multiple={false}
+							accept="image/*"
+							bind:files={profilePicture}
+						/>
+					</div>
 				</div>
-				<div class="input-holder">
-					<label for="email">Email</label>
-					<input type="text" placeholder="email" bind:value={updatedUserData.Email} />
-				</div>
-				<div class="input-holder">
-					<label for="dob">Date of Birth</label>
-					<input
-						type="date"
-						placeholder="date of birth"
-						bind:value={updatedUserData.Date_of_birth}
-					/>
-				</div>
-			</div>
 
-			<div class="button-holder">
-				<button type="button" onclick={() => (options.showEdit = false)}>Cancel</button>
-				<button type="submit">Submit</button>
-			</div>
-		</form>
-	{/if}
-</main>
+				<div class="button-holder">
+					<button type="button" onclick={() => (options.showEdit = false)}>Cancel</button>
+					<button type="submit">Submit</button>
+				</div>
+			</form>
+		{/if}
+	</main>
+{/if}
 
 <style>
 	main {
@@ -77,6 +118,7 @@
 		align-items: center;
 		padding: 0px;
 		margin: 0px;
+		gap: 2rem;
 	}
 
 	form {
@@ -87,6 +129,18 @@
 		gap: 2rem;
 		align-items: center;
 	}
+	img {
+		width: 5rem;
+		height: 5rem;
+		border-radius: 50%;
+	}
+
+	.user-info {
+		display: flex;
+		align-items: center;
+		gap: 2rem;
+	}
+
 	.inputs {
 		display: grid;
 		gap: 2rem;
@@ -101,6 +155,10 @@
 		height: 1.5rem;
 		border: 1px solid rgb(119, 119, 119);
 		border-radius: 5px;
+	}
+	.profile-picture {
+		border: none !important;
+		font-size: 12px;
 	}
 	button {
 		width: 10rem;

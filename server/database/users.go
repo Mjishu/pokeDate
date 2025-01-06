@@ -54,8 +54,8 @@ func GetUser(username any) (User, error) {
 func GetUserById(id uuid.UUID) (User, error) {
 	ctx, pool := createConnection()
 	var user User
-	err := pool.QueryRow(ctx, "SELECT id,username FROM users WHERE id = $1", id).Scan(
-		&user.Id, &user.Username,
+	err := pool.QueryRow(ctx, "SELECT id,username,email,date_of_birth, profile_picture_src FROM users WHERE id = $1", id).Scan(
+		&user.Id, &user.Username, &user.Email, &user.Date_of_birth, &user.Profile_picture,
 	)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Query row failed in getuserbyid %v\n", err)
@@ -104,7 +104,7 @@ func UpdateUser(userInfo User) error {
 	ctx, pool := createConnection()
 
 	// check if user exists?
-	sql := `UPDATE users SET username = $1, email = $2, date_of_birth = $3, profile_picture_src = $ 4, updated_at = NOW() WHERE id = $5`
+	sql := `UPDATE users SET username = $1, email = $2, date_of_birth = $3, profile_picture_src = $4, updated_at = NOW() WHERE id = $5`
 
 	_, err := pool.Exec(ctx, sql, userInfo.Username, userInfo.Email, userInfo.Date_of_birth, userInfo.Profile_picture, userInfo.Id)
 	if err != nil {

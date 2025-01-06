@@ -46,11 +46,16 @@ func UpdateUser(w http.ResponseWriter, r *http.Request, jwtSecret string) {
 		http.Error(w, "unable to validate jwt", http.StatusBadRequest)
 		return
 	}
-	var user database.UpdatedUser
+	var user database.User
 	checkUpdateUser(w, r, &user)
 	fmt.Printf("user body is %v\n with id %v\n", user, tokenUserId)
 
-	database.UpdateUser(tokenUserId, user)
+	err = database.UpdateUser(user)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not update user", err)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }
 
 func LoginUser(w http.ResponseWriter, r *http.Request, jwtSecret string) { //? does this properly check if the usernames are the same before logging in?
@@ -140,15 +145,7 @@ func GetCurrentUser(w http.ResponseWriter, r *http.Request, jwtSecret string) {
 			return
 		}
 
-		response := map[string]interface{}{
-			"Id":       storedUser.Id,
-			"Username": storedUser.Username,
-		}
-
-		if err := json.NewEncoder(w).Encode(response); err != nil {
-			http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-			return
-		}
+		respondWithJSON(w, http.StatusOK, storedUser)
 	case http.MethodPut:
 		UpdateUser(w, r, jwtSecret)
 	}
@@ -176,6 +173,6 @@ func checkAuthUser(w http.ResponseWriter, r *http.Request, user *AuthUser) error
 	return checkUser(w, r, user)
 }
 
-func checkUpdateUser(w http.ResponseWriter, r *http.Request, user *database.UpdatedUser) error {
+func checkUpdateUser(w http.ResponseWriter, r *http.Request, user *database.User) error {
 	return checkUser(w, r, user)
 }
