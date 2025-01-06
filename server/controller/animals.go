@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -10,7 +9,6 @@ import (
 	"os"
 	"strings"
 
-	"github.com/cloudinary/cloudinary-go/v2"
 	"github.com/joho/godotenv"
 	"github.com/mjishu/pokeDate/database"
 )
@@ -76,17 +74,17 @@ func MainAnimalOperations(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func AnimalController(w http.ResponseWriter, r *http.Request, cld *cloudinary.Cloudinary, ctx context.Context) {
+func AnimalController(w http.ResponseWriter, r *http.Request) {
 	SetHeader(w)
 
 	if r.URL.Path == "/animals" {
 		MainAnimalOperations(w, r)
 	} else if r.URL.Path == "/animals/images" {
-		AnimalImageOperations(w, r, cld, ctx)
+		AnimalImageOperations(w, r)
 	}
 }
 
-func AnimalImageOperations(w http.ResponseWriter, r *http.Request, cld *cloudinary.Cloudinary, ctx context.Context) {
+func AnimalImageOperations(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
 		err := r.ParseMultipartForm(10 << 20)

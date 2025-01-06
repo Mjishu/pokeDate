@@ -13,18 +13,38 @@ import (
 )
 
 type apiConfig struct {
-	jwt_secret string
+	jwt_secret   string
+	assetPath    string
+	database_url string
 }
 
 func main() {
 	mux := http.NewServeMux()
-	cld, ctx := database.Credentials()
-	config := &apiConfig{}
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
-	config.loadParams()
+
+	// * load params
+	jwt_secret := os.Getenv("JWT_SECRET")
+	if jwt_secret == "" {
+		log.Fatal("jwt secret is emtpy!")
+
+	}
+	assetPath := os.Getenv("ASSET_PATH")
+	if assetPath == "" {
+		log.Fatal("asset path is empty")
+	}
+	databaseURL := os.Getenv("DATABASE_URL")
+	if databaseURL == "" {
+		log.Fatal("Could not find database path")
+	}
+
+	config := apiConfig{
+		jwt_secret:   jwt_secret,
+		assetPath:    assetPath,
+		database_url: databaseURL,
+	}
 
 	mux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
 		controller.UserController(w, r, config.jwt_secret)
@@ -40,7 +60,7 @@ func main() {
 		controller.CardsController(w, r)
 	})
 	mux.HandleFunc("/animals/", func(w http.ResponseWriter, r *http.Request) {
-		controller.AnimalController(w, r, cld, ctx)
+		controller.AnimalController(w, r)
 	})
 	mux.HandleFunc("/organizations/animals", controller.OrganizationController) //? change to /orgnaizations and make a new controller called organizations Cotnroller
 	mux.HandleFunc("/shots", controller.ShotController)
@@ -56,8 +76,4 @@ func main() {
 	fmt.Println("listening on port " + port)
 	err = http.ListenAndServe(port, mux)
 	log.Fatal(err)
-}
-
-func (config *apiConfig) loadParams() {
-	config.jwt_secret = os.Getenv("JWT_SECRET")
 }
