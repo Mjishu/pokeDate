@@ -142,9 +142,10 @@ type updatedUser = {
       Username: string;
       Email: string;
       Date_of_birth: string;
+      Id: string;
 }
 
-export async function UpdateUser(userBody: updatedUser): Promise<void> {
+export async function UpdateUser(userBody: updatedUser): Promise<number> {
       try {
             let token = localStorage.getItem('token');
             let bearerToken = 'Bearer ' + token;
@@ -157,10 +158,13 @@ export async function UpdateUser(userBody: updatedUser): Promise<void> {
                   body: JSON.stringify(userBody)
             };
             const response = await fetch('/api/users/current', fetchParams);
-            const data = await response.json();
-            console.log(data);
-      } catch (error) {
+            if (!response.ok) {
+                  const data = await response.json();
+                  alert(`error: ${data.message}`)
+            }
+            return response.status
+      } catch (error: any) {
             console.error(`error trying to update user ${error}`);
-            return;
+            return error.status;
       }
 }

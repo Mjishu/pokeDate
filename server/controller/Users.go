@@ -39,25 +39,6 @@ func UserController(w http.ResponseWriter, r *http.Request, jwtSecret string) {
 	}
 }
 
-func UpdateUser(w http.ResponseWriter, r *http.Request, jwtSecret string) {
-	fmt.Println("put was called")
-	tokenUserId, err := auth.UserValid(r.Header, jwtSecret)
-	if err != nil {
-		http.Error(w, "unable to validate jwt", http.StatusBadRequest)
-		return
-	}
-	var user database.User
-	checkUpdateUser(w, r, &user)
-	fmt.Printf("user body is %v\n with id %v\n", user, tokenUserId)
-
-	err = database.UpdateUser(user)
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "could not update user", err)
-		return
-	}
-	w.WriteHeader(http.StatusOK)
-}
-
 func LoginUser(w http.ResponseWriter, r *http.Request, jwtSecret string) { //? does this properly check if the usernames are the same before logging in?
 	var incomingUser AuthUser
 	var expiresIn time.Duration
@@ -136,12 +117,12 @@ func GetCurrentUser(w http.ResponseWriter, r *http.Request, jwtSecret string) {
 	case http.MethodPost:
 		tokenUserId, err := auth.UserValid(r.Header, jwtSecret)
 		if err != nil {
-			http.Error(w, "unable to validate jwt", http.StatusBadRequest)
+			respondWithError(w, http.StatusUnauthorized, "could not find jwt", err)
 			return
 		}
 		storedUser, err := database.GetUserById(tokenUserId)
 		if err != nil {
-			http.Error(w, "error finding stored user", http.StatusInternalServerError)
+			respondWithError(w, http.StatusBadRequest, "could not find user by id", err)
 			return
 		}
 
@@ -149,6 +130,45 @@ func GetCurrentUser(w http.ResponseWriter, r *http.Request, jwtSecret string) {
 	case http.MethodPut:
 		UpdateUser(w, r, jwtSecret)
 	}
+}
+
+func UpdateUser(w http.ResponseWriter, r *http.Request, jwtSecret string) { //todo this func isnt working, maybe turn it to
+	//todo it gets the userid from jwt auth, then it searches that user in the database and we change the entries like if (database.username != body.username)
+	//todo database.username = newUsername, then updateUser with this new databaseUser
+	fmt.Println("put was called")
+	userIdToken, err := auth.UserValid(r.Header, jwtSecret)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "could not find JWT", err)
+		return
+	}
+
+	userData, err := database.GetUserById(userIdToken)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not find user with id", err)
+		return
+	}
+
+	var incomingUser database.User
+	checkUpdateUser(w, r, &incomingUser)
+
+	if userData.Username != incomingUser.Username {
+		userData.Username = incomingUser.Username
+	}
+	if userData.Email != incomingUser.Email {
+		userData.Email = incomingUser.Email
+	}
+	if userData.Date_of_birth != incomingUser.Date_of_birth {
+		userData.Date_of_birth = incomingUser.Date_of_birth
+	}
+
+	fmt.Printf("updated user is %v\n", userData)
+
+	err = database.UpdateUser(userData)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not update user", err)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }
 
 //? -------------------- GETS item from body

@@ -7,6 +7,7 @@
 	let userData: incomingUser | null = $state(null);
 	let profilePicture: FileList | undefined = $state();
 	let updatedUserData = $state({
+		Id: '',
 		Username: '',
 		Email: '',
 		Date_of_birth: ''
@@ -19,7 +20,8 @@
 	onMount(async () => {
 		userData = await GetCurrentUser();
 		updatedUserData = {
-			Username: userData?.Username ? userData?.Username : 'i',
+			Id: userData?.Id ? userData?.Id : '',
+			Username: userData?.Username ? userData?.Username : '',
 			Email: userData?.Email ? userData?.Email : '',
 			Date_of_birth: userData?.Date_of_birth ? userData.Date_of_birth.split('T')[0] : ''
 		};
@@ -34,7 +36,7 @@
 				? formatISO(new Date(updatedUserData.Date_of_birth))
 				: ''
 		};
-		await UpdateUser(formattedUser);
+		let statusCode = await UpdateUser(formattedUser);
 
 		if (profilePicture != undefined && userData != null) {
 			const formData = new FormData();
@@ -47,13 +49,19 @@
 				});
 				if (!response.ok) {
 					const data = await response.json();
+					profilePicture = undefined;
 					throw new Error(`failed to upload profile picture, error: ${data.error}`);
 				}
 				console.log('video uploaded');
 				userData = await GetCurrentUser();
+				profilePicture = undefined;
 			} catch (error: any) {
 				alert(`Error: ${error.message}`);
 			}
+		}
+
+		if (statusCode == 200) {
+			console.log('success');
 		}
 	}
 </script>

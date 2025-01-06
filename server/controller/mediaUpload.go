@@ -9,6 +9,7 @@ import (
 	"mime"
 	"net/http"
 	"os"
+	"path"
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
@@ -97,7 +98,8 @@ func HandleUserImageUpload(w http.ResponseWriter, r *http.Request, JWTToken, s3B
 		respondWithError(w, http.StatusInternalServerError, "unable to make random byte", err)
 		return
 	}
-	key := base64.RawURLEncoding.EncodeToString(newByte) + extension
+	folder_path := "profile_pictures"
+	key := path.Join(folder_path, base64.RawURLEncoding.EncodeToString(newByte)+extension)
 
 	tempFile.Seek(0, io.SeekStart)
 
