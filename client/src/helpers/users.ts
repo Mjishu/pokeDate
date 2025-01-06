@@ -86,7 +86,6 @@ export async function LogoutUser() {
 }
 
 export async function GetTokens(): Promise<void> {
-      console.log('get tokens called');
       try {
             const refreshToken = localStorage.getItem('refresh_token');
             const bearerToken = 'Bearer ' + refreshToken;

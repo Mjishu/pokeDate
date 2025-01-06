@@ -3,6 +3,7 @@
 	import { GetCurrentUser, UpdateUser } from '../../helpers/users';
 	import { onMount } from 'svelte';
 	import { formatISO } from 'date-fns';
+	import Navbar from '../../components/Navbar.svelte';
 
 	let userData: incomingUser | null = $state(null);
 	let profilePicture: FileList | undefined = $state();
@@ -69,53 +70,57 @@
 {#if loading}
 	<p>Loading...</p>
 {:else if userData != null}
-	<main>
-		<h1>Profile</h1>
-		<div class="user-info">
-			<p>Hello {userData.Username}!</p>
-			<img src={userData.Profile_picture} />
-		</div>
+	<div class="content">
+		<Navbar />
+		<main>
+			<h1>Profile</h1>
+			<div class="user-info">
+				<p>Hello {userData.Username}!</p>
+				<!-- svelte-ignore a11y_missing_attribute -->
+				<img src={userData.Profile_picture} />
+			</div>
 
-		<button onclick={() => (options.showEdit = !options.showEdit)}>Edit</button>
-		{#if options.showEdit}
-			<form onsubmit={submitForm} autocomplete="off">
-				<div class="inputs">
-					<div class="input-holder">
-						<label for="username">New Username</label>
-						<input type="text" placeholder="username" bind:value={updatedUserData.Username} />
+			<button onclick={() => (options.showEdit = !options.showEdit)}>Edit</button>
+			{#if options.showEdit}
+				<form onsubmit={submitForm} autocomplete="off">
+					<div class="inputs">
+						<div class="input-holder">
+							<label for="username">New Username</label>
+							<input type="text" placeholder="username" bind:value={updatedUserData.Username} />
+						</div>
+						<div class="input-holder">
+							<label for="email">Email</label>
+							<input type="text" placeholder="email" bind:value={updatedUserData.Email} />
+						</div>
+						<div class="input-holder">
+							<label for="dob">Date of Birth</label>
+							<input
+								type="date"
+								placeholder="date of birth"
+								bind:value={updatedUserData.Date_of_birth}
+							/>
+						</div>
+						<div class="input-holder">
+							<label for="profile-picture">Profile Picture</label>
+							<input
+								type="file"
+								class="profile-picture"
+								name="profile-picture"
+								multiple={false}
+								accept="image/*"
+								bind:files={profilePicture}
+							/>
+						</div>
 					</div>
-					<div class="input-holder">
-						<label for="email">Email</label>
-						<input type="text" placeholder="email" bind:value={updatedUserData.Email} />
-					</div>
-					<div class="input-holder">
-						<label for="dob">Date of Birth</label>
-						<input
-							type="date"
-							placeholder="date of birth"
-							bind:value={updatedUserData.Date_of_birth}
-						/>
-					</div>
-					<div class="input-holder">
-						<label for="profile-picture">Profile Picture</label>
-						<input
-							type="file"
-							class="profile-picture"
-							name="profile-picture"
-							multiple={false}
-							accept="image/*"
-							bind:files={profilePicture}
-						/>
-					</div>
-				</div>
 
-				<div class="button-holder">
-					<button type="button" onclick={() => (options.showEdit = false)}>Cancel</button>
-					<button type="submit">Submit</button>
-				</div>
-			</form>
-		{/if}
-	</main>
+					<div class="button-holder">
+						<button type="button" onclick={() => (options.showEdit = false)}>Cancel</button>
+						<button type="submit">Submit</button>
+					</div>
+				</form>
+			{/if}
+		</main>
+	</div>
 {/if}
 
 <style>
@@ -127,6 +132,12 @@
 		padding: 0px;
 		margin: 0px;
 		gap: 2rem;
+	}
+	.content {
+		display: grid;
+		grid-template-columns: 17.25rem 1fr;
+		height: 100%;
+		gap: 5rem;
 	}
 
 	form {
