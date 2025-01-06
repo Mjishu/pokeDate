@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"os"
 	"time"
+
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 type NewAnimal struct {
@@ -42,26 +44,23 @@ type UpdateAnimalStruct struct {
 	Shots         []NewShotFromClient `json:"Shots"`
 }
 
-func InsertAnimal(animal NewAnimal) {
+func InsertAnimal(pool *pgxpool.Pool, animal NewAnimal) {
 	sql := `
 		INSERT INTO animals (name,species,date_of_birth,sex,price,available,breed) VALUES (
 			$1, $2, $3, $4, $5, $6, $7
 		);
 	`
-	ctx, pool := createConnection()
-	_, err := pool.Exec(ctx, sql, animal.Name, animal.Species, animal.Date_of_birth, animal.Sex, animal.Price, animal.Available, animal.Breed)
+	_, err := pool.Exec(context.TODO(), sql, animal.Name, animal.Species, animal.Date_of_birth, animal.Sex, animal.Price, animal.Available, animal.Breed)
 	inserQueryFail(err, "inserting animal")
 }
 
-func InsertAnimalShots(shot NewAnimalShot) {
-
-	ctx, pool := createConnection()
+func InsertAnimalShots(pool *pgxpool.Pool, shot NewAnimalShot) {
 
 	//! This isn't working properly to check if shot exists, i create new shot and it goes to the isShot if statement
-	_, isShot := GetShot(shot.Animal_id, shot.Shot_id)
+	_, isShot := GetShot(pool, shot.Animal_id, shot.Shot_id)
 	if isShot {
 		fmt.Println("is shot is true")
-		_, err := pool.Exec(ctx, `UPDATE animal_shots SET next_due = $1, date_given = $2 WHERE animal_id = $3 AND shots_id = $4 `, shot.Date_due, shot.Date_given, shot.Animal_id, shot.Shot_id)
+		_, err := pool.Exec(context.TODO(), `UPDATE animal_shots SET next_due = $1, date_given = $2 WHERE animal_id = $3 AND shots_id = $4 `, shot.Date_due, shot.Date_given, shot.Animal_id, shot.Shot_id)
 		inserQueryFail(err, "Updating shot")
 		return
 	}
@@ -71,26 +70,24 @@ func InsertAnimalShots(shot NewAnimalShot) {
 	sql := `
 		INSERT INTO animal_shots(animal_id, shots_id, date_given, next_due) VALUES ($1, $2, $3, $4)
 		`
-	_, err := pool.Exec(ctx, sql, shot.Animal_id, shot.Shot_id, shot.Date_given, shot.Date_due)
+	_, err := pool.Exec(context.TODO(), sql, shot.Animal_id, shot.Shot_id, shot.Date_given, shot.Date_due)
 	inserQueryFail(err, "Inserting shot")
 }
 
-func UpdateAnimal2(animal UpdateAnimalStruct) { //todo REMOVE THIS FUNC. USER UpdateAnimal INSTEAD
+func UpdateAnimal2(pool *pgxpool.Pool, animal UpdateAnimalStruct) { //todo REMOVE THIS FUNC. USER UpdateAnimal INSTEAD
 	sql := `
 		UPDATE animals SET name = $1, date_of_birth = $2, price = $3, available = $4 WHERE id = $5
 	`
 	fmt.Printf("the updated animal is %v\n and the animal_id = %v\n", animal, animal.Id)
-	ctx, pool := createConnection()
-	_, err := pool.Exec(ctx, sql, animal.Name, animal.Date_of_birth, animal.Price, animal.Available, animal.Id) //? Why is this giving an error?
+	_, err := pool.Exec(context.TODO(), sql, animal.Name, animal.Date_of_birth, animal.Price, animal.Available, animal.Id) //? Why is this giving an error?
 	inserQueryFail(err, "Updating Animal")
 }
 
-func UpdateAnimal(animal Animal) error {
+func UpdateAnimal(pool *pgxpool.Pool, animal Animal) error {
 	sql := `
 		UPDATE animals set name = $1, date_of_birth = $2, price = $3, available = $4, image_src = $5 WHERE id = $5
 	`
 
-	_, pool := createConnection()
 	_, err := pool.Exec(context.TODO(), sql, animal.Name, animal.Date_of_birth, animal.Price, animal.Available, animal.Image_src, animal.Id)
 	if err != nil {
 		return err
@@ -105,11 +102,10 @@ func inserQueryFail(err error, name string) {
 	fmt.Printf("command  '%s' created successfully\n", name)
 }
 
-func DeleteAnimal(id interface{}) {
+func DeleteAnimal(pool *pgxpool.Pool, id interface{}) {
 	sql := `
 		DELETE FROM animals WHERE id = $1
 	`
-	ctx, pool := createConnection()
-	_, err := pool.Exec(ctx, sql, id)
+	_, err := pool.Exec(context.TODO(), sql, id)
 	inserQueryFail(err, "deleting animal")
 }

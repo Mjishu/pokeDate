@@ -14,11 +14,12 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/mjishu/pokeDate/auth"
 	"github.com/mjishu/pokeDate/database"
 )
 
-func HandleUserImageUpload(w http.ResponseWriter, r *http.Request, JWTToken, s3Bucket, s3Region string, s3Client *s3.Client) {
+func HandleUserImageUpload(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, JWTToken, s3Bucket, s3Region string, s3Client *s3.Client) {
 	userIdString := r.PathValue("userID")
 	userId, err := uuid.Parse(userIdString)
 	if err != nil {
@@ -85,7 +86,7 @@ func HandleUserImageUpload(w http.ResponseWriter, r *http.Request, JWTToken, s3B
 		return
 	}
 
-	userData, err := database.GetUserById(userId)
+	userData, err := database.GetUserById(pool, userId)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "unable to get animal", err)
 		return
@@ -117,7 +118,7 @@ func HandleUserImageUpload(w http.ResponseWriter, r *http.Request, JWTToken, s3B
 
 	imageURL := "https://" + s3Bucket + ".s3." + s3Region + ".amazonaws.com/" + key
 	userData.Profile_picture = &imageURL
-	err = database.UpdateUser(userData)
+	err = database.UpdateUser(pool, userData)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "could not update user", err)
 		return

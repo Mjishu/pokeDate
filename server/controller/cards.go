@@ -6,6 +6,7 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/mjishu/pokeDate/database"
 )
 
@@ -27,7 +28,7 @@ type Card struct {
 	Animal_info     Animal `json:"animal_info"`
 }
 
-func CardsController(w http.ResponseWriter, r *http.Request) {
+func CardsController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool) {
 	if r.URL.Path != "/cards" {
 		http.NotFound(w, r)
 		return
@@ -40,7 +41,7 @@ func CardsController(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		w.Header().Set("Content-Type", "application/json")
 
-		animal := database.GetRandomAnimal()
+		animal := database.GetRandomAnimal(pool)
 
 		w.WriteHeader(http.StatusOK)
 		if err := json.NewEncoder(w).Encode(animal); err != nil {
@@ -52,7 +53,7 @@ func CardsController(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		id := GetIdFromBody("id", w, r)
 
-		animal, err := database.GetAnimal(id)
+		animal, err := database.GetAnimal(pool, id)
 		if err != nil {
 			respondWithError(w, http.StatusBadRequest, "could not find animal", err)
 			return

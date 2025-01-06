@@ -6,11 +6,12 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/mjishu/pokeDate/auth"
 	"github.com/mjishu/pokeDate/database"
 )
 
-func RefreshToken(w http.ResponseWriter, r *http.Request, jwtSecret string) {
+func RefreshToken(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
 	SetHeader(w)
 
 	switch r.Method {
@@ -22,7 +23,7 @@ func RefreshToken(w http.ResponseWriter, r *http.Request, jwtSecret string) {
 			return
 		}
 
-		exists, userId := database.GetRefreshToken(refresh_token)
+		exists, userId := database.GetRefreshToken(pool, refresh_token)
 		if !exists {
 			http.Error(w, "refresh token not valid", http.StatusUnauthorized)
 			fmt.Printf("userId from refreshToken %v\n refreshToken exists %v\n", userId, exists)
@@ -42,11 +43,11 @@ func RefreshToken(w http.ResponseWriter, r *http.Request, jwtSecret string) {
 	}
 }
 
-func RevokeToken(w http.ResponseWriter, r *http.Request) {
+func RevokeToken(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool) {
 	SetHeader(w)
 	switch r.Method {
 	case http.MethodPost:
-		err := DestroyToken(r.Header)
+		err := DestroyToken(r.Header, pool)
 		if err != nil {
 			http.Error(w, "cannot find the refresh token", http.StatusBadRequest)
 			return
@@ -55,12 +56,12 @@ func RevokeToken(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func DestroyToken(header http.Header) error {
+func DestroyToken(header http.Header, pool *pgxpool.Pool) error {
 	refresh_token, err := auth.GetBearerToken(header)
 	if err != nil {
 		return err
 	}
-	err = database.RevokeToken(refresh_token)
+	err = database.RevokeToken(pool, refresh_token)
 	if err != nil {
 		fmt.Printf("error revoking token: %v\n", err)
 		return err

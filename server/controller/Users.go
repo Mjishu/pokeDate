@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/mjishu/pokeDate/auth"
 	"github.com/mjishu/pokeDate/database"
 )
@@ -16,22 +17,22 @@ type AuthUser struct {
 	Password string `json:"Password"`
 }
 
-func UserController(w http.ResponseWriter, r *http.Request, jwtSecret string) {
+func UserController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
 	SetHeader(w)
 	switch r.URL.Path {
 	case "/users/login":
-		LoginUser(w, r, jwtSecret)
+		LoginUser(w, r, pool, jwtSecret)
 		return
 	case "/users/create":
 		switch r.Method {
 		case http.MethodPost:
-			CreateUser(w, r)
+			CreateUser(w, r, pool)
 		case http.MethodGet:
 			fmt.Fprint(w, "no get route setup")
 		}
 		return
 	case "/users/current":
-		GetCurrentUser(w, r, jwtSecret)
+		GetCurrentUser(w, r, pool, jwtSecret)
 		return
 	default: // ! THIS WONT CHANGE FROM A GET REQ?
 		fmt.Println("This is the default path")
@@ -39,13 +40,12 @@ func UserController(w http.ResponseWriter, r *http.Request, jwtSecret string) {
 	}
 }
 
-func LoginUser(w http.ResponseWriter, r *http.Request, jwtSecret string) { //? does this properly check if the usernames are the same before logging in?
+func LoginUser(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) { //? does this properly check if the usernames are the same before logging in?
 	var incomingUser AuthUser
 	var expiresIn time.Duration
 	checkAuthUser(w, r, &incomingUser) //* gets req body
 
-	fmt.Printf("incoming user is %v\n", incomingUser)
-	storedUser, err := database.GetUser(incomingUser.Username) //this password should be hashed(i.e user.Password)
+	storedUser, err := database.GetUser(pool, incomingUser.Username) //this password should be hashed(i.e user.Password)
 	if err != nil {
 		fmt.Fprint(w, "Error getting user from database", http.StatusInternalServerError)
 	}
@@ -79,7 +79,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request, jwtSecret string) { //? d
 		fmt.Printf("error finding getting refresh token %v\n ", err)
 		return
 	}
-	_, err = database.CreateRefreshToken(refresh_token, storedUser.Id)
+	_, err = database.CreateRefreshToken(pool, refresh_token, storedUser.Id)
 	if err != nil {
 		http.Error(w, "error creating refresh token", http.StatusInternalServerError)
 		return
@@ -99,7 +99,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request, jwtSecret string) { //? d
 	}
 }
 
-func CreateUser(w http.ResponseWriter, r *http.Request) { //? how to get this to work so that it passes the user of body to createUser
+func CreateUser(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool) { //? how to get this to work so that it passes the user of body to createUser
 	var user database.NewUser
 	checkUser(w, r, &user)
 
@@ -108,11 +108,11 @@ func CreateUser(w http.ResponseWriter, r *http.Request) { //? how to get this to
 		fmt.Fprint(w, "error trying to hash password", http.StatusInternalServerError)
 		return
 	}
-	database.CreateUser(user, hashedPassword)
+	database.CreateUser(pool, user, hashedPassword)
 	fmt.Printf("hash is %s\n", hashedPassword)
 }
 
-func GetCurrentUser(w http.ResponseWriter, r *http.Request, jwtSecret string) {
+func GetCurrentUser(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
 	switch r.Method {
 	case http.MethodPost:
 		tokenUserId, err := auth.UserValid(r.Header, jwtSecret)
@@ -120,7 +120,7 @@ func GetCurrentUser(w http.ResponseWriter, r *http.Request, jwtSecret string) {
 			respondWithError(w, http.StatusUnauthorized, "could not find jwt", err)
 			return
 		}
-		storedUser, err := database.GetUserById(tokenUserId)
+		storedUser, err := database.GetUserById(pool, tokenUserId)
 		if err != nil {
 			respondWithError(w, http.StatusBadRequest, "could not find user by id", err)
 			return
@@ -128,13 +128,11 @@ func GetCurrentUser(w http.ResponseWriter, r *http.Request, jwtSecret string) {
 
 		respondWithJSON(w, http.StatusOK, storedUser)
 	case http.MethodPut:
-		UpdateUser(w, r, jwtSecret)
+		UpdateUser(w, r, pool, jwtSecret)
 	}
 }
 
-func UpdateUser(w http.ResponseWriter, r *http.Request, jwtSecret string) { //todo this func isnt working, maybe turn it to
-	//todo it gets the userid from jwt auth, then it searches that user in the database and we change the entries like if (database.username != body.username)
-	//todo database.username = newUsername, then updateUser with this new databaseUser
+func UpdateUser(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
 	fmt.Println("put was called")
 	userIdToken, err := auth.UserValid(r.Header, jwtSecret)
 	if err != nil {
@@ -142,7 +140,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request, jwtSecret string) { //to
 		return
 	}
 
-	userData, err := database.GetUserById(userIdToken)
+	userData, err := database.GetUserById(pool, userIdToken)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "could not find user with id", err)
 		return
@@ -163,7 +161,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request, jwtSecret string) { //to
 
 	fmt.Printf("updated user is %v\n", userData)
 
-	err = database.UpdateUser(userData)
+	err = database.UpdateUser(pool, userData)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "could not update user", err)
 		return

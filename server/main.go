@@ -77,12 +77,14 @@ func main() {
 		s3Client:         s3Client,
 	}
 
+	_, pool := database.CreateConnection()
+
 	// user info
 	mux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
-		controller.UserController(w, r, config.jwt_secret)
+		controller.UserController(w, r, pool, config.jwt_secret)
 	})
 	mux.HandleFunc("POST /users/profile_pictures/{userID}", func(w http.ResponseWriter, r *http.Request) {
-		controller.HandleUserImageUpload(w, r, config.jwt_secret, config.s3Bucket, config.s3Region, config.s3Client)
+		controller.HandleUserImageUpload(w, r, pool, config.jwt_secret, config.s3Bucket, config.s3Region, config.s3Client)
 	})
 
 	mux.HandleFunc("/cards", func(w http.ResponseWriter, r *http.Request) {
@@ -93,19 +95,25 @@ func main() {
 		}
 
 		//* CONTROLLER
-		controller.CardsController(w, r)
+		controller.CardsController(w, r, pool)
 	})
 	mux.HandleFunc("/animals/", func(w http.ResponseWriter, r *http.Request) {
-		controller.AnimalController(w, r)
+		controller.AnimalController(w, r, pool)
 	})
-	mux.HandleFunc("/organizations/animals", controller.OrganizationController) //? change to /orgnaizations and make a new controller called organizations Cotnroller
-	mux.HandleFunc("/shots", controller.ShotController)
+	mux.HandleFunc("/organizations/animals", func(w http.ResponseWriter, r *http.Request) {
+		controller.OrganizationController(w, r, pool)
+	}) //? change to /orgnaizations and make a new controller called organizations Cotnroller
+	mux.HandleFunc("/shots", func(w http.ResponseWriter, r *http.Request) {
+		controller.ShotController(w, r, pool)
+	})
 	mux.HandleFunc("/refresh", func(w http.ResponseWriter, r *http.Request) {
-		controller.RefreshToken(w, r, config.jwt_secret)
+		controller.RefreshToken(w, r, pool, config.jwt_secret)
 	})
-	mux.HandleFunc("/revoke", controller.RevokeToken)
+	mux.HandleFunc("/revoke", func(w http.ResponseWriter, r *http.Request) {
+		controller.RevokeToken(w, r, pool)
+	})
 
-	database.Database()
+	database.Database(pool)
 
 	port := ":8080"
 

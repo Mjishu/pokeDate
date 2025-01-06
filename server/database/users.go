@@ -36,10 +36,9 @@ type NewUser struct {
 // city_id INT REFERENCES locations(id) ON DELETE SET NULL,
 // profile_pi
 
-func GetUser(username any) (User, error) {
-	ctx, pool := createConnection()
+func GetUser(pool *pgxpool.Pool, username any) (User, error) {
 	var user User
-	err := pool.QueryRow(ctx, "SELECT id,username,password from users WHERE username = $1", username).Scan( // add email,date_of_birth
+	err := pool.QueryRow(context.TODO(), "SELECT id,username,password from users WHERE username = $1", username).Scan( // add email,date_of_birth
 		&user.Id, &user.Username, &user.HashPassword,
 	)
 
@@ -51,10 +50,9 @@ func GetUser(username any) (User, error) {
 	return user, nil
 }
 
-func GetUserById(id uuid.UUID) (User, error) {
-	ctx, pool := createConnection()
+func GetUserById(pool *pgxpool.Pool, id uuid.UUID) (User, error) {
 	var user User
-	err := pool.QueryRow(ctx, "SELECT id,username,email,date_of_birth, profile_picture_src FROM users WHERE id = $1", id).Scan(
+	err := pool.QueryRow(context.TODO(), "SELECT id,username,email,date_of_birth, profile_picture_src FROM users WHERE id = $1", id).Scan(
 		&user.Id, &user.Username, &user.Email, &user.Date_of_birth, &user.Profile_picture,
 	)
 	if err != nil {
@@ -64,10 +62,9 @@ func GetUserById(id uuid.UUID) (User, error) {
 	return user, nil
 }
 
-func CreateUser(user NewUser, hashedPassword string) {
-	ctx, pool := createConnection()
+func CreateUser(pool *pgxpool.Pool, user NewUser, hashedPassword string) {
 
-	exists, err := UserExists(ctx, pool, user.Username)
+	exists, err := UserExists(pool, user.Username)
 	if err != nil { //todo beef up this error handler
 		fmt.Printf("error checking user exists: %v\n", err)
 		return
@@ -77,12 +74,12 @@ func CreateUser(user NewUser, hashedPassword string) {
 	}
 	sql := `INSERT INTO users(username,password) VALUES ($1,$2)`
 
-	_, err = pool.Exec(ctx, sql, user.Username, hashedPassword) //add other options for new user like dob and email
+	_, err = pool.Exec(context.TODO(), sql, user.Username, hashedPassword) //add other options for new user like dob and email
 	inserQueryFail(err, "creating user")
 }
 
-func UserExists(ctx context.Context, pool *pgxpool.Pool, username string) (bool, error) {
-	rows, err := pool.Query(ctx, "SELECT * FROM users WHERE username = $1 LIMIT 1", username)
+func UserExists(pool *pgxpool.Pool, username string) (bool, error) {
+	rows, err := pool.Query(context.TODO(), "SELECT * FROM users WHERE username = $1 LIMIT 1", username)
 	if err != nil {
 		return false, err
 	}
@@ -100,13 +97,12 @@ func UserExists(ctx context.Context, pool *pgxpool.Pool, username string) (bool,
 	return true, nil
 }
 
-func UpdateUser(userInfo User) error {
-	ctx, pool := createConnection()
+func UpdateUser(pool *pgxpool.Pool, userInfo User) error {
 
 	// check if user exists?
 	sql := `UPDATE users SET username = $1, email = $2, date_of_birth = $3, profile_picture_src = $4, updated_at = NOW() WHERE id = $5`
 
-	_, err := pool.Exec(ctx, sql, userInfo.Username, userInfo.Email, userInfo.Date_of_birth, userInfo.Profile_picture, userInfo.Id)
+	_, err := pool.Exec(context.TODO(), sql, userInfo.Username, userInfo.Email, userInfo.Date_of_birth, userInfo.Profile_picture, userInfo.Id)
 	if err != nil {
 		return err
 	}

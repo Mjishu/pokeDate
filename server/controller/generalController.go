@@ -5,10 +5,11 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/mjishu/pokeDate/database"
 )
 
-func ShotController(w http.ResponseWriter, r *http.Request) {
+func ShotController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool) {
 	if r.URL.Path != "/shots" {
 		fmt.Fprintf(w, "Incorrect Path")
 		return
@@ -18,13 +19,13 @@ func ShotController(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(database.GetAllShots()); err != nil {
+		if err := json.NewEncoder(w).Encode(database.GetAllShots(pool)); err != nil {
 			http.Error(w, "unable to encode response", http.StatusInternalServerError)
 		}
 	}
 }
 
-func OrganizationController(w http.ResponseWriter, r *http.Request) {
+func OrganizationController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool) {
 	if r.URL.Path != "/organizations/animals" {
 		fmt.Fprintf(w, "Incorrect Path")
 		return
@@ -37,7 +38,7 @@ func OrganizationController(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 
 		hasId, id := checkForBodyItem("id", w, r)
-		animal, err := database.GetAnimal(id)
+		animal, err := database.GetAnimal(pool, id)
 		if err != nil {
 			respondWithError(w, http.StatusBadRequest, "could not find animal", err)
 			return
@@ -52,7 +53,7 @@ func OrganizationController(w http.ResponseWriter, r *http.Request) {
 
 	case http.MethodGet:
 		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(database.GetAllAnimals()); err != nil {
+		if err := json.NewEncoder(w).Encode(database.GetAllAnimals(pool)); err != nil {
 			http.Error(w, "unable to encode response", http.StatusInternalServerError)
 		}
 		return

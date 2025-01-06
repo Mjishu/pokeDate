@@ -17,7 +17,7 @@ type Location struct {
 	Parent_id     *int
 }
 
-func createConnection() (context.Context, *pgxpool.Pool) {
+func CreateConnection() (context.Context, *pgxpool.Pool) {
 	ctx := context.Background()
 	dbpool, err := pgxpool.New(ctx, GetItemFromENV("DATABASE_URL"))
 	if err != nil {
@@ -27,13 +27,12 @@ func createConnection() (context.Context, *pgxpool.Pool) {
 	return ctx, dbpool
 }
 
-func Database() {
-	ctx, dbpool := createConnection()
-	defer dbpool.Close()
+func Database(pool *pgxpool.Pool) {
+	// defer pool.Close()
 
-	// callSchemas(ctx, dbpool)
-	PopulateDB(ctx, dbpool)
-	// getLocations(ctx, dbpool)
+	// callSchemas(context.TODO(), pool)
+	PopulateDB(context.TODO(), pool)
+	// getLocations(context.TODO(), pool)
 }
 
 func GetItemFromENV(key string) string {

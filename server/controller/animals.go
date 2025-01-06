@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/mjishu/pokeDate/database"
 )
@@ -20,7 +21,7 @@ func GetImagePublicId(image_url string) string {
 	return finalString[0]
 }
 
-func MainAnimalOperations(w http.ResponseWriter, r *http.Request) {
+func MainAnimalOperations(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool) {
 	switch r.Method {
 	case http.MethodPost:
 		w.Header().Set("Content-Type", "application/json")
@@ -35,14 +36,13 @@ func MainAnimalOperations(w http.ResponseWriter, r *http.Request) {
 		// 	return //! get rid of this to make everything else work
 		// }
 
-		database.InsertAnimal(animal)
+		database.InsertAnimal(pool, animal)
 
-		animal_id := database.GetAnimalByName(animal.Name)
+		animal_id := database.GetAnimalByName(pool, animal.Name)
 
 		for _, values := range animal.Shots {
-
 			newShot := database.NewAnimalShot{Animal_id: animal_id, Shot_id: values.Shot_id, Date_given: values.Date_given, Date_due: values.Date_due}
-			database.InsertAnimalShots(newShot)
+			database.InsertAnimalShots(pool, newShot)
 		}
 
 		fmt.Fprintf(w, "Animal created Successfully!: %v\n", animal)
@@ -55,11 +55,11 @@ func MainAnimalOperations(w http.ResponseWriter, r *http.Request) {
 			fmt.Printf("Shot number: %v\n", i)
 			newShot := database.NewAnimalShot{Animal_id: updatedAnimal.Id, Shot_id: values.Shot_id, Date_given: values.Date_given, Date_due: values.Date_due}
 			fmt.Printf("the new shot is: %v\n", newShot)
-			database.InsertAnimalShots(newShot)
+			database.InsertAnimalShots(pool, newShot)
 		}
 		fmt.Printf("the animal given is %v\n", updatedAnimal)
 		//!!
-		database.UpdateAnimal2(updatedAnimal) //TODO UPDATE THIS TO USE UPDATEANIMAL NOT 2
+		database.UpdateAnimal2(pool, updatedAnimal) //TODO UPDATE THIS TO USE UPDATEANIMAL NOT 2
 		//!!
 		fmt.Fprintf(w, "Animal updated successfully")
 	case http.MethodDelete:
@@ -68,7 +68,7 @@ func MainAnimalOperations(w http.ResponseWriter, r *http.Request) {
 		hasId, id := checkForBodyItem("id", w, r)
 
 		if hasId {
-			database.DeleteAnimal(id)
+			database.DeleteAnimal(pool, id)
 			fmt.Fprintf(w, "Animal was removed successfully")
 			return
 		}
@@ -76,11 +76,11 @@ func MainAnimalOperations(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func AnimalController(w http.ResponseWriter, r *http.Request) {
+func AnimalController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool) {
 	SetHeader(w)
 
 	if r.URL.Path == "/animals" {
-		MainAnimalOperations(w, r)
+		MainAnimalOperations(w, r, pool)
 	} else if r.URL.Path == "/animals/images" {
 		AnimalImageOperations(w, r)
 	}
