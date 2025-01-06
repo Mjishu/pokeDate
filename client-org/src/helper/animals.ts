@@ -56,7 +56,7 @@ export type UpdatedAnimal = {
       Shots: NewShot[];
 }
 
-export async function createAnimal(animal: NewAnimal, image: File) {
+export async function createAnimal(animal: NewAnimal) {
       //! Switch date_birth to be in the 2024-10-09T00:00:00Z format
       console.log(animal)
       if (animal == undefined) {
@@ -162,4 +162,8 @@ export async function GetAllShots(): Promise<Shot[]> {
             console.error(`there was an error trying to fetch all shots: ${error}`)
             return []
       }
+}
+
+export async function createAnimalImage() {
+      console.log("create animal image")
 }

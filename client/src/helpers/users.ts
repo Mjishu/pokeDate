@@ -28,6 +28,7 @@ export async function userFormSubmit(url: string, method: string, formData: user
             if (data.status == 200) {
                   console.log("status 200")
                   localStorage.setItem("token", data.token)
+                  return true;
             }
       } catch (error) {
             console.error('There was an error creating user: ' + error);
