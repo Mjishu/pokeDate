@@ -2,23 +2,24 @@ package controller
 
 import (
 	"bytes"
+	"context"
 	"crypto/rand"
 	"encoding/base64"
 	"io"
 	"mime"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strings"
 
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/google/uuid"
 	"github.com/mjishu/pokeDate/auth"
 	"github.com/mjishu/pokeDate/database"
 )
 
-func handleAnimalImageUpload(w http.ResponseWriter, r *http.Request, JWTToken string, assetsRoot string) {
-	animalIdString := r.PathValue("animalID")
-	animalId, err := uuid.Parse(animalIdString)
+func handleUserImageUpload(w http.ResponseWriter, r *http.Request, JWTToken, s3Bucket, s3Region string, s3Client *s3.Client) {
+	userIdString := r.PathValue("userID")
+	userId, err := uuid.Parse(userIdString)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "could not find animal id ", err)
 		return
@@ -31,7 +32,7 @@ func handleAnimalImageUpload(w http.ResponseWriter, r *http.Request, JWTToken st
 	}
 
 	//* check to make sure its an org and not a regular user
-	_, err = auth.ValidateJWT(token, JWTToken) //gets org id
+	_, err = auth.ValidateJWT(token, JWTToken) //gets user id
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "not a valid JWT", err)
 		return
@@ -40,7 +41,7 @@ func handleAnimalImageUpload(w http.ResponseWriter, r *http.Request, JWTToken st
 	const maxMemory = 10 << 20
 	r.ParseMultipartForm(maxMemory)
 
-	file, header, err := r.FormFile("image")
+	file, header, err := r.FormFile("profile_image")
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "unable to parse form file", err)
 		return
@@ -53,10 +54,22 @@ func handleAnimalImageUpload(w http.ResponseWriter, r *http.Request, JWTToken st
 		respondWithError(w, http.StatusBadRequest, "unable to get mimeType from header", err)
 		return
 	}
-	if !(mimeType == "jpeg" || mimeType == "jpg" || mimeType == "webp" || mimeType == "png") { //* add more MIMETYPE here if i need
+	if !(mimeType == "image/jpeg" || mimeType == "image/jpg" || mimeType == "image/webp" || mimeType == "image/png") { //* add more MIMETYPE here if i need
 		respondWithError(w, http.StatusBadRequest, "invalid mime type", err)
 		return
 	}
+
+	extensionArr := strings.Split(mediaType, "/")
+	extension := extensionArr[len(extensionArr)-1]
+
+	// create temp file here
+	tempFile, err := os.CreateTemp("", "profile-pic-upload."+extension)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "could not create temp file", err)
+		return
+	}
+	defer os.Remove(tempFile.Name())
+	defer tempFile.Close()
 
 	fileData, err := io.ReadAll(file)
 	if err != nil {
@@ -64,7 +77,14 @@ func handleAnimalImageUpload(w http.ResponseWriter, r *http.Request, JWTToken st
 		return
 	}
 
-	animalData, err := database.GetAnimal(animalId)
+	//copy data
+	_, err = io.Copy(tempFile, bytes.NewReader(fileData))
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "could not copy data", err)
+		return
+	}
+
+	userData, err := database.GetUserById(userId)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "unable to get animal", err)
 		return
@@ -77,27 +97,29 @@ func handleAnimalImageUpload(w http.ResponseWriter, r *http.Request, JWTToken st
 		respondWithError(w, http.StatusInternalServerError, "unable to make random byte", err)
 		return
 	}
-	randomId := base64.RawURLEncoding.EncodeToString(newByte)
+	key := base64.RawURLEncoding.EncodeToString(newByte) + extension
 
-	extensionArr := strings.Split(mediaType, "/")
-	imagePath := randomId + "." + extensionArr[len(extensionArr)-1]
-	fp := filepath.Join(assetsRoot, imagePath)
+	tempFile.Seek(0, io.SeekStart)
 
-	openFile, err := os.Create(fp)
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "could not create new image file", err)
-		return
+	input := &s3.PutObjectInput{
+		Bucket:      &s3Bucket,
+		Key:         &key,
+		Body:        tempFile,
+		ContentType: &mimeType,
 	}
-	defer openFile.Close()
-
-	_, err = io.Copy(openFile, bytes.NewBuffer(fileData))
+	_, err = s3Client.PutObject(context.TODO(), input)
 	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "could not copy data to file", err)
+		respondWithError(w, http.StatusInternalServerError, "could not store image", err)
 		return
 	}
 
-	animalData.Image_src = &imagePath
-	err = database.UpdateAnimal(animalData)
+	imageURL := "https://" + s3Bucket + ".s3." + s3Region + ".amazonaws.com/" + key
+	userData.Profile_picture = &imageURL
+	err = database.UpdateUser(userData)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "could not update user", err)
+		return
+	}
 
-	respondWithJSON(w, http.StatusOK, animalData)
+	respondWithJSON(w, http.StatusOK, userData)
 }

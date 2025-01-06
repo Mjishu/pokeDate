@@ -1,11 +1,14 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/joho/godotenv"
 	"github.com/mjishu/pokeDate/auth"
 	"github.com/mjishu/pokeDate/controller"
@@ -13,10 +16,16 @@ import (
 )
 
 type apiConfig struct {
-	jwt_secret   string
-	assetPath    string
-	database_url string
+	jwt_secret       string
+	assetPath        string
+	database_url     string
+	s3Bucket         string
+	s3Region         string
+	s3CfDistribution string
+	s3Client         *s3.Client
 }
+
+// set up s3
 
 func main() {
 	mux := http.NewServeMux()
@@ -39,11 +48,33 @@ func main() {
 	if databaseURL == "" {
 		log.Fatal("Could not find database path")
 	}
+	s3Bucket := os.Getenv("S3_BUCKET")
+	if s3Bucket == "" {
+		log.Fatal("s3Bucket variable not set")
+	}
+	s3Region := os.Getenv("S3_REGION")
+	if s3Region == "" {
+		log.Fatal("s3Region variable not set")
+	}
+	s3CfDist := os.Getenv("S3_CF_DISTRIBUTION")
+	if s3CfDist == "" {
+		log.Fatal("s3 cf variable dist not set")
+	}
+
+	awscfg, err := config.LoadDefaultConfig(context.TODO(), config.WithRegion(s3Region))
+	if err != nil {
+		log.Fatal("unable to detect aws profile")
+	}
+	s3Client := s3.NewFromConfig(awscfg)
 
 	config := apiConfig{
-		jwt_secret:   jwt_secret,
-		assetPath:    assetPath,
-		database_url: databaseURL,
+		jwt_secret:       jwt_secret,
+		assetPath:        assetPath,
+		database_url:     databaseURL,
+		s3Bucket:         s3Bucket,
+		s3Region:         s3Region,
+		s3CfDistribution: s3CfDist,
+		s3Client:         s3Client,
 	}
 
 	mux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {

@@ -75,7 +75,7 @@ func InsertAnimalShots(shot NewAnimalShot) {
 	inserQueryFail(err, "Inserting shot")
 }
 
-func UpdateAnimal2(animal UpdateAnimalStruct) {
+func UpdateAnimal2(animal UpdateAnimalStruct) { //todo REMOVE THIS FUNC. USER UpdateAnimal INSTEAD
 	sql := `
 		UPDATE animals SET name = $1, date_of_birth = $2, price = $3, available = $4 WHERE id = $5
 	`

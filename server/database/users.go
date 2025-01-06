@@ -11,17 +11,12 @@ import (
 )
 
 type User struct {
-	Id            uuid.UUID
-	Username      string
-	HashPassword  string
-	Email         string
-	Date_of_birth time.Time
-}
-
-type UpdatedUser struct {
-	Username      string    `json:"Username"`
-	Email         string    `json:"Email"`
-	Date_of_birth time.Time `json:"Date_of_birth"`
+	Id              uuid.UUID
+	Username        string
+	HashPassword    string
+	Email           string
+	Profile_picture *string
+	Date_of_birth   time.Time
 }
 
 type NewUser struct {
@@ -105,13 +100,13 @@ func UserExists(ctx context.Context, pool *pgxpool.Pool, username string) (bool,
 	return true, nil
 }
 
-func UpdateUser(userId uuid.UUID, userInfo UpdatedUser) error {
+func UpdateUser(userInfo User) error {
 	ctx, pool := createConnection()
 
 	// check if user exists?
-	sql := `UPDATE users SET username = $1, email = $2, date_of_birth = $3, updated_at = NOW() WHERE id = $4`
+	sql := `UPDATE users SET username = $1, email = $2, date_of_birth = $3, profile_picture_src = $ 4, updated_at = NOW() WHERE id = $5`
 
-	_, err := pool.Exec(ctx, sql, userInfo.Username, userInfo.Email, userInfo.Date_of_birth, userId)
+	_, err := pool.Exec(ctx, sql, userInfo.Username, userInfo.Email, userInfo.Date_of_birth, userInfo.Profile_picture, userInfo.Id)
 	if err != nil {
 		return err
 	}
