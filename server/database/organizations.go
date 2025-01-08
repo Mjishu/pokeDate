@@ -37,9 +37,10 @@ func GetOrganization(pool *pgxpool.Pool, id uuid.UUID) Organization {
 	return organization
 }
 
+// * this returns nil nil
 func GetOrganizationByName(pool *pgxpool.Pool, name string) Organization {
 	sql := `
-		SELECT id, name, email FROM organization WHERE name = $1
+		SELECT id, name, email, password FROM organization WHERE name = $1
 	`
 	var organization Organization
 	pool.QueryRow(context.TODO(), sql, name).Scan(&organization.Id, &organization.Name, &organization.Email)

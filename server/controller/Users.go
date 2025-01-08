@@ -17,7 +17,7 @@ type AuthUser struct {
 	Password string `json:"Password"`
 }
 
-func UserController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
+func UserController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret, s3Bucket, s3Region string) {
 	SetHeader(w)
 	switch r.URL.Path {
 	case "/users/login":
@@ -34,7 +34,7 @@ func UserController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, 
 	case "/users/current":
 		switch r.Method {
 		case http.MethodPost:
-			GetCurrentUser(w, r.Header, pool, jwtSecret)
+			GetCurrentUser(w, r.Header, pool, jwtSecret, s3Bucket, s3Region)
 		case http.MethodPut:
 			UpdateUser(w, r, pool, jwtSecret)
 		}
@@ -67,26 +67,18 @@ func LoginUser(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSe
 
 	token, err := auth.MakeJWT(storedUser.Id, jwtSecret, expiresIn)
 	if err != nil {
-		if err := json.NewEncoder(w).Encode(map[string]interface{}{"success": false}); err != nil {
-			http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-			return
-		}
-		fmt.Printf("error finding json token %v\n ", err)
+		respondWithError(w, http.StatusBadRequest, "could not create JWT", err)
 		return
 	}
 
 	refresh_token, err := auth.MakeRefreshToken()
 	if err != nil {
-		if err := json.NewEncoder(w).Encode(map[string]interface{}{"success": false}); err != nil {
-			http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-			return
-		}
-		fmt.Printf("error finding getting refresh token %v\n ", err)
+		respondWithError(w, http.StatusBadRequest, "could not create refresh token", err)
 		return
 	}
 	_, err = database.CreateRefreshToken(pool, refresh_token, storedUser.Id)
 	if err != nil {
-		http.Error(w, "error creating refresh token", http.StatusInternalServerError)
+		respondWithError(w, http.StatusInternalServerError, "could not store refresh token", err)
 		return
 	}
 
@@ -98,10 +90,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSe
 		"refresh_token": refresh_token,
 	}
 
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
-		return
-	}
+	respondWithJSON(w, http.StatusOK, response)
 }
 
 func CreateUser(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool) { //? how to get this to work so that it passes the user of body to createUser
@@ -114,10 +103,9 @@ func CreateUser(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool) { //
 		return
 	}
 	database.CreateUser(pool, user, hashedPassword)
-	fmt.Printf("hash is %s\n", hashedPassword)
 }
 
-func GetCurrentUser(w http.ResponseWriter, header http.Header, pool *pgxpool.Pool, jwtSecret string) {
+func GetCurrentUser(w http.ResponseWriter, header http.Header, pool *pgxpool.Pool, jwtSecret, s3Bucket, s3Region string) {
 	tokenUserId, err := auth.UserValid(header, jwtSecret)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "could not find jwt", err)
@@ -127,6 +115,10 @@ func GetCurrentUser(w http.ResponseWriter, header http.Header, pool *pgxpool.Poo
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "could not find user by id", err)
 		return
+	}
+	if storedUser.Profile_picture == nil || *storedUser.Profile_picture == "" {
+		fmt.Println("profile picture was empty providing default")
+		*storedUser.Profile_picture = "https://" + s3Bucket + ".s3." + s3Region + ".amazonaws.com/profile_pictures/default.webp"
 	}
 	respondWithJSON(w, http.StatusOK, storedUser)
 }

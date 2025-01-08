@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/mjishu/pokeDate/auth"
@@ -15,9 +16,15 @@ func OrganizationController(w http.ResponseWriter, r *http.Request, pool *pgxpoo
 
 	switch r.URL.Path {
 	case "/organizations/login":
-		HandleOrganizationLogin(w, r, pool, jwtSecret)
+		switch r.Method {
+		case http.MethodPost:
+			HandleOrganizationLogin(w, r, pool, jwtSecret)
+		}
 	case "/organizations/create":
-		HandleOrganizationCreate(w, r, pool)
+		switch r.Method {
+		case http.MethodPost:
+			HandleOrganizationCreate(w, r, pool, jwtSecret)
+		}
 	case "/organizations/animals":
 		HandleAnimals(w, r, pool)
 	}
@@ -51,7 +58,10 @@ func HandleAnimals(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool) {
 	}
 }
 
-func HandleOrganizationCreate(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool) {
+func HandleOrganizationCreate(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
+
+	//TODO check if org with name already exists
+
 	var organization database.Organization
 	checkBody(w, r, &organization)
 
@@ -74,11 +84,80 @@ func HandleOrganizationCreate(w http.ResponseWriter, r *http.Request, pool *pgxp
 		return
 	}
 
-	respondWithJSON(w, http.StatusOK, storedOrg)
+	//* -------------------------------- Creates JWT and Refresh Token for frontend
+	expiresIn := time.Duration(15 * time.Minute)
+
+	token, err := auth.MakeJWT(*storedOrg.Id, jwtSecret, expiresIn)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not create JWT", err)
+		return
+	}
+
+	refresh_token, err := auth.MakeRefreshToken()
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not create refresh token", err)
+		return
+	}
+
+	_, err = database.CreateRefreshToken(pool, refresh_token, *organization.Id)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "could not store refresh token", err)
+		return
+	}
+
+	response := map[string]interface{}{
+		"name":          storedOrg.Name,
+		"id":            storedOrg.Id,
+		"status":        http.StatusOK,
+		"token":         token,
+		"refresh_token": refresh_token,
+	}
+
+	respondWithJSON(w, http.StatusOK, response)
 }
 
 func HandleOrganizationLogin(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
 	// logic for creating login
+	var organization database.Organization
+	checkBody(w, r, &organization)
+
+	storedOrg := database.GetOrganization(pool, *organization.Id)
+
+	err := auth.CheckPasswordHash(organization.Password, storedOrg.Password)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "passwords do not match", err)
+		return
+	}
+
+	expiresIn := time.Duration(15 * time.Minute)
+
+	token, err := auth.MakeJWT(*storedOrg.Id, jwtSecret, expiresIn)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not create JWT", err)
+		return
+	}
+
+	refresh_token, err := auth.MakeRefreshToken()
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not create refresh token", err)
+		return
+	}
+
+	_, err = database.CreateRefreshToken(pool, refresh_token, *organization.Id)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "could not store refresh token", err)
+		return
+	}
+
+	response := map[string]interface{}{
+		"name":          storedOrg.Name,
+		"id":            storedOrg.Id,
+		"status":        http.StatusOK,
+		"token":         token,
+		"refresh_token": refresh_token,
+	}
+
+	respondWithJSON(w, http.StatusOK, response)
 }
 
 func GetCurrentOrganization(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {

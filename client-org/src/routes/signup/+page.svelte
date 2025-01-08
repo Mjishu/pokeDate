@@ -2,18 +2,36 @@
 	import { goto } from '$app/navigation';
 	import { CreateOrganization } from '../../helper/auth';
 
-	let formData = {
+	let passwordValid: boolean = $state(true);
+
+	let formData = $state({
 		Name: '',
 		Email: '',
 		Password: '',
 		C_password: ''
-	};
+	});
 
 	async function submitForm(e: Event) {
 		e.preventDefault();
-		if (await CreateOrganization(formData)) {
-			goto('/');
+		if (passwordValid === true) {
+			if (await CreateOrganization(formData)) {
+				goto('/');
+			}
+		} else {
+			alert('fix your form');
 		}
+	}
+
+	function checkPasswords() {
+		if (formData.Password !== formData.C_password) {
+			if (formData.C_password.length == 0) {
+				passwordValid = true;
+				return;
+			}
+			passwordValid = false;
+			return;
+		}
+		passwordValid = true;
 	}
 </script>
 
@@ -23,16 +41,22 @@
 	<form onsubmit={submitForm}>
 		<div class="input-grandparent">
 			<div class="input-parent">
-				<label for="username">Username</label>
+				<label for="username">Organization Name</label>
 				<input bind:value={formData.Name} type="text" id="username" name="username" />
 			</div>
 			<div class="input-parent">
 				<label for="email">Email</label>
-				<input bind:value={formData.Email} type="email" id="email" name="email" />
+				<input bind:value={formData.Email} type="email" id="email" name="email" required />
 			</div>
 			<div class="input-parent">
 				<label for="password">Password</label>
-				<input bind:value={formData.Password} type="password" id="password" name="password" />
+				<input
+					bind:value={formData.Password}
+					type="password"
+					id="password"
+					name="password"
+					required
+				/>
 			</div>
 			<div class="input-parent">
 				<label for="confirm-password">Confirm Password</label>
@@ -41,7 +65,13 @@
 					type="password"
 					id="confirm-password"
 					name="confirm-password"
+					required
+					class={passwordValid ? 'valid-password' : 'invalid-password'}
+					onchange={checkPasswords}
 				/>
+				{#if !passwordValid}
+					<p>passwords do not match</p>
+				{/if}
 			</div>
 		</div>
 
@@ -98,35 +128,6 @@
 		color: #fff;
 	}
 
-	.org-button {
-		background: transparent;
-		border: none;
-		color: #96a0de;
-		transition: ease-in-out 400ms color;
-	}
-
-	.org-button:hover {
-		background: none;
-		color: #747caf;
-	}
-
-	.org-div {
-		display: flex;
-		width: 18rem;
-		border-bottom: 1px solid #96a0de;
-		color: #96a0de;
-		align-items: center;
-		opacity: 0.8;
-		transition:
-			ease-in-out 400ms border,
-			ease-in-out 300ms opacity;
-	}
-
-	.org-div:hover {
-		opacity: 1;
-		border-bottom: 1px solid #747caf;
-	}
-
 	h2 {
 		font-size: 4rem;
 		letter-spacing: 10%;
@@ -148,8 +149,7 @@
 		border: 1px solid rgb(185, 185, 185);
 	}
 
-	p {
-		font-size: 2rem;
-		font-weight: 100;
+	.invalid-password {
+		border: 1px solid red !important;
 	}
 </style>

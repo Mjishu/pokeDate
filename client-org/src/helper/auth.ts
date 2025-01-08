@@ -27,12 +27,13 @@ export async function CreateOrganization(formdata: orgData): Promise<boolean> {
                   throw new Error("could not create new user")
             }
             // TODO log user in and store token in local storage? (maybe this is done on backend -> respond with token so localstorage.setitem(data.token))
-            if (data.token) {
+            if (data.token && data.refresh_token) {
                   localStorage.setItem('token', data.token)
+                  localStorage.setItem("refresh_token", data.refresh_token)
+                  return true
             } else {
                   throw new Error("could not find token in response")
             }
-            return true
       } catch (error) {
             throw new Error("could not create new user")
       }
@@ -87,7 +88,7 @@ export async function LogoutOrganization() {
       }
 }
 
-export async function GetTokens(): Promise<void> {
+export async function GetTokens(): Promise<{ statusCode: number }> {
       try {
             const fetchParams = {
                   method: 'POST',
@@ -101,10 +102,12 @@ export async function GetTokens(): Promise<void> {
             const data = await response.json();
             if (data.token) {
                   localStorage.setItem('token', data.token);
+                  return { statusCode: 200 }
             }
+            return { statusCode: 400 }
       } catch (error) {
             console.error(`error fetching tokens ${error}`);
-            return;
+            return { statusCode: 400 };
       }
 }
 

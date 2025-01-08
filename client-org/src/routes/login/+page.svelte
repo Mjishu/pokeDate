@@ -7,11 +7,11 @@
 		Password: ''
 	});
 
-	let logos = [
-		{ name: 'google', path: '/icons/Google.svg' },
-		{ name: 'github', path: '/icons/Github.svg' },
-		{ name: 'facebook', path: '/icons/Facebook.svg' }
-	];
+	// let logos = [
+	// 	{ name: 'google', path: '/icons/Google.svg' },
+	// 	{ name: 'github', path: '/icons/Github.svg' },
+	// 	{ name: 'facebook', path: '/icons/Facebook.svg' }
+	// ];
 
 	async function formSubmit(e: Event) {
 		e.preventDefault();
@@ -42,11 +42,11 @@
 	<p>OR</p>
 	<button onclick={() => goto('/signup')} class="action-button">Create Organization</button>
 
-	<div class="logo-parent">
+	<!-- <div class="logo-parent">
 		{#each logos as logo}
 			<img src={logo.path} alt={`sign in with ${logo.name}`} />
 		{/each}
-	</div>
+	</div> -->
 </main>
 
 <style>
@@ -84,11 +84,11 @@
 		gap: 1.5rem;
 	}
 
-	.logo-parent {
+	/* .logo-parent {
 		display: flex;
 		gap: 3rem;
 		padding-top: 1.5rem;
-	}
+	} */
 
 	.action-button {
 		background-color: #fff;

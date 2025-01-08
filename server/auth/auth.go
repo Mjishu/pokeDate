@@ -33,10 +33,10 @@ func CheckPasswordHash(password, hash string) error {
 	return nil
 }
 
-func MakeJWT(userID uuid.UUID, tokenSecret string, expiresIn time.Duration) (string, error) {
+func MakeJWT(Id uuid.UUID, tokenSecret string, expiresIn time.Duration) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
 		Issuer:    "pokeFind-api",
-		Subject:   userID.String(),
+		Subject:   Id.String(),
 		IssuedAt:  jwt.NewNumericDate(time.Now()),
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(expiresIn)),
 	})

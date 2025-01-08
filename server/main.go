@@ -81,7 +81,7 @@ func main() {
 
 	// user info
 	mux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
-		controller.UserController(w, r, pool, config.jwt_secret)
+		controller.UserController(w, r, pool, config.jwt_secret, config.s3Bucket, config.s3Region)
 	})
 	mux.HandleFunc("POST /users/profile_pictures/{userID}", func(w http.ResponseWriter, r *http.Request) {
 		controller.HandleUserImageUpload(w, r, pool, config.jwt_secret, config.s3Bucket, config.s3Region, config.s3Client)
@@ -100,7 +100,7 @@ func main() {
 	mux.HandleFunc("/animals/", func(w http.ResponseWriter, r *http.Request) {
 		controller.AnimalController(w, r, pool)
 	})
-	mux.HandleFunc("/organizations/animals", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/organizations/", func(w http.ResponseWriter, r *http.Request) {
 		controller.OrganizationController(w, r, pool, config.jwt_secret)
 	}) //? change to /orgnaizations and make a new controller called organizations Cotnroller
 	mux.HandleFunc("/shots", func(w http.ResponseWriter, r *http.Request) {

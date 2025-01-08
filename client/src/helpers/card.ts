@@ -19,11 +19,10 @@ export async function cardResponse(liked: boolean, id: string) {
 
 export async function getRandomCard() {
       try {
-            const token = localStorage.getItem("token")
             const fetchParams = {
                   method: "GET",
                   headers: {
-                        "Authorization": token ? token : ""
+                        "Authorization": `Bearer ${localStorage.getItem("token")}`
                   }
             }
             const response = await fetch("/api/cards", fetchParams)

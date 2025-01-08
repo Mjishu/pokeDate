@@ -16,4 +16,6 @@
 ## Backend
 
 - [x] set up a route that returns a random animal? (route could be GET /cards instead of POST)
-- [ ] users route should check for post and then  
+- [x] users route should check for post and then  
+- [ ] organizations should have a pfp aswell/ main picture
+- [ ] LOGIN GIVES INVALID MEMORY ADDRESS

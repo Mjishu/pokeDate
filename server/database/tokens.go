@@ -10,13 +10,13 @@ import (
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func CreateRefreshToken(pool *pgxpool.Pool, token string, user_id uuid.UUID) (bool, error) {
+func CreateRefreshToken(pool *pgxpool.Pool, token string, id uuid.UUID) (bool, error) {
 
 	sql := `
 		INSERT INTO refresh_tokens (token, user_id,expires_at) VALUES ($1,$2,$3)
 	`
 
-	_, err := pool.Exec(context.TODO(), sql, token, user_id, time.Now().Add(60*24*time.Hour))
+	_, err := pool.Exec(context.TODO(), sql, token, id, time.Now().Add(60*24*time.Hour))
 	if err != nil {
 		return false, errors.New("issue inserting refresh token into table")
 	}
