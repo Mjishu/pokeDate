@@ -32,7 +32,12 @@ func UserController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, 
 		}
 		return
 	case "/users/current":
-		GetCurrentUser(w, r, pool, jwtSecret)
+		switch r.Method {
+		case http.MethodPost:
+			GetCurrentUser(w, r.Header, pool, jwtSecret)
+		case http.MethodPut:
+			UpdateUser(w, r, pool, jwtSecret)
+		}
 		return
 	default: // ! THIS WONT CHANGE FROM A GET REQ?
 		fmt.Println("This is the default path")
@@ -112,24 +117,18 @@ func CreateUser(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool) { //
 	fmt.Printf("hash is %s\n", hashedPassword)
 }
 
-func GetCurrentUser(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
-	switch r.Method {
-	case http.MethodPost:
-		tokenUserId, err := auth.UserValid(r.Header, jwtSecret)
-		if err != nil {
-			respondWithError(w, http.StatusUnauthorized, "could not find jwt", err)
-			return
-		}
-		storedUser, err := database.GetUserById(pool, tokenUserId)
-		if err != nil {
-			respondWithError(w, http.StatusBadRequest, "could not find user by id", err)
-			return
-		}
-
-		respondWithJSON(w, http.StatusOK, storedUser)
-	case http.MethodPut:
-		UpdateUser(w, r, pool, jwtSecret)
+func GetCurrentUser(w http.ResponseWriter, header http.Header, pool *pgxpool.Pool, jwtSecret string) {
+	tokenUserId, err := auth.UserValid(header, jwtSecret)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "could not find jwt", err)
+		return
 	}
+	storedUser, err := database.GetUserById(pool, tokenUserId)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not find user by id", err)
+		return
+	}
+	respondWithJSON(w, http.StatusOK, storedUser)
 }
 
 func UpdateUser(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
