@@ -95,7 +95,8 @@ func createOrganization(ctx context.Context, pool *pgxpool.Pool) {
 		CREATE TABLE IF NOT EXISTS organization (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
 			name VARCHAR(50) NOT NULL,
-			password VARCHAR(100) NOT NULL,
+			email varchar(100),
+			password text NOT NULL,
 			country_id INT REFERENCES locations(id) ON DELETE SET NULL,
 			state_id INT REFERENCES locations(id) ON DELETE SET NULL,
 			city_id INT REFERENCES locations(id) ON DELETE SET NULL,

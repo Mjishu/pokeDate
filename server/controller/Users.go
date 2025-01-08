@@ -101,7 +101,7 @@ func LoginUser(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSe
 
 func CreateUser(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool) { //? how to get this to work so that it passes the user of body to createUser
 	var user database.NewUser
-	checkUser(w, r, &user)
+	checkBody(w, r, &user)
 
 	hashedPassword, err := auth.HashPassword(user.Password)
 	if err != nil {
@@ -171,7 +171,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtS
 
 //? -------------------- GETS item from body
 
-func checkUser(w http.ResponseWriter, r *http.Request, user interface{}) error {
+func checkBody(w http.ResponseWriter, r *http.Request, user interface{}) error {
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
 		http.Error(w, "unable to read body", http.StatusInternalServerError)
@@ -188,9 +188,9 @@ func checkUser(w http.ResponseWriter, r *http.Request, user interface{}) error {
 
 // Modify the existing functions to use the new checkUser function
 func checkAuthUser(w http.ResponseWriter, r *http.Request, user *AuthUser) error {
-	return checkUser(w, r, user)
+	return checkBody(w, r, user)
 }
 
 func checkUpdateUser(w http.ResponseWriter, r *http.Request, user *database.User) error {
-	return checkUser(w, r, user)
+	return checkBody(w, r, user)
 }

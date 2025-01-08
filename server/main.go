@@ -101,7 +101,7 @@ func main() {
 		controller.AnimalController(w, r, pool)
 	})
 	mux.HandleFunc("/organizations/animals", func(w http.ResponseWriter, r *http.Request) {
-		controller.OrganizationController(w, r, pool)
+		controller.OrganizationController(w, r, pool, config.jwt_secret)
 	}) //? change to /orgnaizations and make a new controller called organizations Cotnroller
 	mux.HandleFunc("/shots", func(w http.ResponseWriter, r *http.Request) {
 		controller.ShotController(w, r, pool)

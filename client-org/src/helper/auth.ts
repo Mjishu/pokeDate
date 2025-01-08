@@ -21,12 +21,17 @@ export async function CreateOrganization(formdata: orgData): Promise<boolean> {
             body: JSON.stringify(formdata)
       }
       try {
-            const response = await fetch("/api/organizations/signup", fetchParams) // would like data to have new org ID so i can do the json verify
-            const data = response.json()
+            const response = await fetch("/api/organizations/create", fetchParams) // would like data to have new org ID so i can do the json verify
+            const data = await response.json()
             if (response.status != 200) {
                   throw new Error("could not create new user")
             }
             // TODO log user in and store token in local storage? (maybe this is done on backend -> respond with token so localstorage.setitem(data.token))
+            if (data.token) {
+                  localStorage.setItem('token', data.token)
+            } else {
+                  throw new Error("could not find token in response")
+            }
             return true
       } catch (error) {
             throw new Error("could not create new user")
