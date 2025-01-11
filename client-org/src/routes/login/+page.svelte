@@ -117,10 +117,10 @@
 		gap: 2.675rem;
 	}
 
-	img {
+	/* img {
 		width: 3rem;
 		height: 3rem;
-	}
+	} */
 
 	button {
 		width: 22rem;

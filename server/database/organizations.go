@@ -29,11 +29,11 @@ func CreateOrganization(pool *pgxpool.Pool, org Organization) error {
 
 func GetOrganization(pool *pgxpool.Pool, id uuid.UUID) Organization {
 	sql := `
-		SELECT id, username, email FROM users WHERE id = $1 AND is_organization = true
+		select id, username, email from users where id = $1 AND is_organization = true
 	`
 
 	var organization Organization
-	pool.QueryRow(context.TODO(), sql, id)
+	pool.QueryRow(context.TODO(), sql, id).Scan(&organization.Id, &organization.Name, &organization.Email)
 	return organization
 }
 

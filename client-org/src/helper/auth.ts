@@ -132,3 +132,27 @@ export async function GetCurrentOrganization(): Promise<Organization | null> {
             throw new Error(`error fetching current Organization Data ${error}`)
       }
 }
+
+export async function UpdateOrganization(orgData: Organization): Promise<number> {
+      try {
+            const fetchParams = {
+                  method: "PUT",
+                  headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${localStorage.getItem("token")}`
+                  },
+                  body: JSON.stringify(orgData)
+            }
+
+            const response = await fetch("/api/organizations/update", fetchParams)
+            const data = await response.json()
+            if (!response.ok) {
+                  console.error("response was not ok")
+                  return 400
+            }
+            return 200
+      } catch (error) {
+            console.error(`error trying to update organization ${error}`)
+            return 400
+      }
+}

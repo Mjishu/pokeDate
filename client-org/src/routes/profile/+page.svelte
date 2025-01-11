@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { formatISO } from 'date-fns';
 	import Navbar from '../../components/navbar.svelte';
+	import { GetCurrentOrganization, UpdateOrganization } from '../../helper/auth';
 
 	type incomingOrganization = {
 		Id?: string;
@@ -10,7 +11,7 @@
 	};
 
 	let profilePicture: FileList | undefined = $state();
-	let orgData: incomingOrganization | undefined = $state();
+	let orgData: incomingOrganization | null = $state(null);
 	let updatedOrgData = $state({
 		Id: '',
 		Name: '',
@@ -21,16 +22,15 @@
 	});
 	let loading = $state(true);
 
-	// onMount(async () => {
-	// 	userData = await GetCurrentUser();
-	// 	updatedUserData = {
-	// 		Id: userData?.Id ? userData?.Id : '',
-	// 		Username: userData?.Username ? userData?.Username : '',
-	// 		Email: userData?.Email ? userData?.Email : '',
-	// 		Date_of_birth: userData?.Date_of_birth ? userData.Date_of_birth.split('T')[0] : ''
-	// 	};
-	// 	loading = false;
-	// });
+	onMount(async () => {
+		orgData = await GetCurrentOrganization();
+		updatedOrgData = {
+			Id: orgData?.Id ? orgData?.Id : '',
+			Name: orgData?.Name ? orgData?.Name : '',
+			Email: orgData?.Email ? orgData?.Email : ''
+		};
+		loading = false;
+	});
 
 	// async function submitForm(e: Event) {
 	// 	e.preventDefault();
@@ -68,8 +68,13 @@
 	// 		console.log('success');
 	// 	}
 	// }
-	function submitForm(e: Event) {
+	async function submitForm(e: Event) {
 		e.preventDefault();
+
+		let statusResponse = await UpdateOrganization(updatedOrgData);
+		if (statusResponse == 200) {
+			location.reload();
+		}
 	}
 </script>
 
@@ -91,7 +96,7 @@
 				<form onsubmit={submitForm} autocomplete="off">
 					<div class="inputs">
 						<div class="input-holder">
-							<label for="username">New Username</label>
+							<label for="username">Organization Name</label>
 							<input type="text" placeholder="username" bind:value={updatedOrgData.Name} />
 						</div>
 						<div class="input-holder">

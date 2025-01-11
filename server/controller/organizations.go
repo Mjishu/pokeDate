@@ -32,6 +32,11 @@ func OrganizationController(w http.ResponseWriter, r *http.Request, pool *pgxpoo
 		case http.MethodPost:
 			GetCurrentOrganization(w, r, pool, jwtSecret)
 		}
+	case "/organizations/update":
+		switch r.Method {
+		case http.MethodPut:
+			UpdateOrganization(w, r, pool, jwtSecret)
+		}
 	case "/organizations/animals":
 		HandleAnimals(w, r, pool)
 	}
@@ -115,7 +120,6 @@ func HandleOrganizationLogin(w http.ResponseWriter, r *http.Request, pool *pgxpo
 		return
 	}
 
-	fmt.Printf("the organizations id is %v\n", storedOrg.Id)
 	_, err = database.CreateRefreshToken(pool, refresh_token, storedOrg.Id)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "could not store refresh token", err)
@@ -175,4 +179,46 @@ func GetCurrentOrganizationAnimals(w http.ResponseWriter, r *http.Request, pool 
 	}
 
 	respondWithJSON(w, http.StatusOK, animals)
+}
+
+func UpdateOrganization(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
+	token, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not get bearer token", err)
+		return
+	}
+
+	orgId, err := auth.ValidateJWT(token, jwtSecret)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "could not validate JWT", err)
+		return
+	}
+
+	var incomingOrg database.Organization
+	err = checkBody(w, r, &incomingOrg)
+	if err != nil || incomingOrg.Id != orgId {
+		respondWithError(w, http.StatusBadRequest, "error trying to get incoming org", err)
+		return
+	}
+
+	storedOrg := database.GetOrganization(pool, orgId)
+	if (storedOrg == database.Organization{}) {
+		respondWithError(w, http.StatusBadRequest, "could not find stored orgnaization with that id", err)
+		return
+	}
+
+	if storedOrg.Name != incomingOrg.Name {
+		storedOrg.Name = incomingOrg.Name
+	}
+	if storedOrg.Email != incomingOrg.Email {
+		storedOrg.Email = incomingOrg.Email
+	}
+
+	err = database.UpdateOrganization(pool, storedOrg)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "could not update user", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, storedOrg)
 }
