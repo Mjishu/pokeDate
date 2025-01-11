@@ -19,3 +19,4 @@
 - [x] users route should check for post and then  
 - [ ] organizations should have a pfp aswell/ main picture
 - [ ] LOGIN GIVES INVALID MEMORY ADDRESS
+- [ ] Compress images given from frontend

@@ -23,9 +23,9 @@ export async function CreateOrganization(formdata: orgData): Promise<boolean> {
       try {
             const response = await fetch("/api/organizations/create", fetchParams) // would like data to have new org ID so i can do the json verify
             const data = await response.json()
-            if (response.status != 200) {
-                  throw new Error("could not create new user")
-            }
+            // if (response.status != 200) {
+            //       throw new Error("could not create new user")
+            // }
             // TODO log user in and store token in local storage? (maybe this is done on backend -> respond with token so localstorage.setitem(data.token))
             if (data.token && data.refresh_token) {
                   localStorage.setItem('token', data.token)
@@ -94,7 +94,7 @@ export async function GetTokens(): Promise<{ statusCode: number }> {
                   method: 'POST',
                   headers: {
                         'Content-Type': 'application/json',
-                        Authorization: `Bearer ${localStorage.getItem("token")}`
+                        Authorization: `Bearer ${localStorage.getItem("refresh_token")}`
                   }
             };
 

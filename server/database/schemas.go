@@ -11,7 +11,7 @@ import (
 func callSchemas(ctx context.Context, pool *pgxpool.Pool) {
 	createLocations(ctx, pool)
 	createUsers(ctx, pool)
-	createOrganization(ctx, pool)
+	// createOrganization(ctx, pool)
 	createShots(ctx, pool)
 	createAnimals(ctx, pool)
 	createAnimalImages(ctx, pool)
@@ -81,7 +81,8 @@ func createUsers(ctx context.Context, pool *pgxpool.Pool) {
 			country_id INT REFERENCES locations(id) ON DELETE SET NULL,
 			state_id INT REFERENCES locations(id) ON DELETE SET NULL,
 			city_id INT REFERENCES locations(id) ON DELETE SET NULL,
-			profile_picture_src TEXT
+			profile_picture_src TEXT,
+			is_organization BOOLEAN NOT NULL,
 			created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
 			updated_at TIMESTAMPTZ DEFAULT now() NOT NULL,
 		);
@@ -90,22 +91,22 @@ func createUsers(ctx context.Context, pool *pgxpool.Pool) {
 	queryFail(err, "users")
 }
 
-func createOrganization(ctx context.Context, pool *pgxpool.Pool) {
-	sql := `
-		CREATE TABLE IF NOT EXISTS organization (
-			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			name VARCHAR(50) NOT NULL,
-			email varchar(100),
-			password text NOT NULL,
-			country_id INT REFERENCES locations(id) ON DELETE SET NULL,
-			state_id INT REFERENCES locations(id) ON DELETE SET NULL,
-			city_id INT REFERENCES locations(id) ON DELETE SET NULL,
-			website_url text
-		)
-	`
-	_, err := pool.Exec(ctx, sql)
-	queryFail(err, "organization")
-}
+// func createOrganization(ctx context.Context, pool *pgxpool.Pool) {
+// 	sql := `
+// 		CREATE TABLE IF NOT EXISTS organization (
+// 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+// 			name VARCHAR(50) NOT NULL,
+// 			email varchar(100),
+// 			password text NOT NULL,
+// 			country_id INT REFERENCES locations(id) ON DELETE SET NULL,
+// 			state_id INT REFERENCES locations(id) ON DELETE SET NULL,
+// 			city_id INT REFERENCES locations(id) ON DELETE SET NULL,
+// 			website_url text
+// 		)
+// 	`
+// 	_, err := pool.Exec(ctx, sql)
+// 	queryFail(err, "organization")
+// }
 
 func createAnimalImages(ctx context.Context, pool *pgxpool.Pool) {
 	sql := `

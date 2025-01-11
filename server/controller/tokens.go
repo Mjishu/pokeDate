@@ -23,7 +23,10 @@ func RefreshToken(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jw
 			return
 		}
 
-		exists, userId := database.GetRefreshToken(pool, refresh_token)
+		exists, userId, err := database.GetRefreshToken(pool, refresh_token)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, "could not get refresh token", err)
+		}
 		if !exists {
 			http.Error(w, "refresh token not valid", http.StatusUnauthorized)
 			fmt.Printf("userId from refreshToken %v\n refreshToken exists %v\n", userId, exists)

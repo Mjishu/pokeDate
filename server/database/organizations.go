@@ -9,15 +9,15 @@ import (
 )
 
 type Organization struct {
-	Id       *uuid.UUID `json:"Id"`
-	Name     string     `json:"Name"`
-	Password string     `json:"Password"`
-	Email    *string    `json:"Email"`
+	Id       uuid.UUID `json:"Id"`
+	Name     string    `json:"Name"`
+	Password string    `json:"Password"`
+	Email    *string   `json:"Email"`
 }
 
 func CreateOrganization(pool *pgxpool.Pool, org Organization) error {
 	sql := `
-		INSERT INTO organization (name,password,email) VALUES ($1, $2, $3)
+		INSERT INTO users (username,password,email, is_organization) VALUES ($1, $2, $3, true)
 	`
 
 	_, err := pool.Exec(context.TODO(), sql, org.Name, org.Password, org.Email)
@@ -29,7 +29,7 @@ func CreateOrganization(pool *pgxpool.Pool, org Organization) error {
 
 func GetOrganization(pool *pgxpool.Pool, id uuid.UUID) Organization {
 	sql := `
-		SELECT id, name, email FROM organization WHERE id = $1
+		SELECT id, username, email FROM users WHERE id = $1 AND is_organization = true
 	`
 
 	var organization Organization
@@ -38,20 +38,20 @@ func GetOrganization(pool *pgxpool.Pool, id uuid.UUID) Organization {
 }
 
 // * this returns nil nil
-func GetOrganizationByName(pool *pgxpool.Pool, name string) Organization {
+func GetOrganizationByName(pool *pgxpool.Pool, name string) Organization { //* should be fixed, got 4 items instead of 3 so maybe
 	sql := `
-		SELECT id, name, email, password FROM organization WHERE name = $1
+		SELECT id, username FROM users WHERE username = $1 AND is_organization = true
 	`
 	var organization Organization
-	pool.QueryRow(context.TODO(), sql, name).Scan(&organization.Id, &organization.Name, &organization.Email)
+	pool.QueryRow(context.TODO(), sql, name).Scan(&organization.Id, &organization.Name)
 
-	fmt.Printf("stored organization is %v\n", organization)
+	fmt.Printf("stored organization is %v\n", organization) // this gives big null error?
 	return organization
 }
 
 func UpdateOrganization(pool *pgxpool.Pool, org Organization) error {
 	sql := `
-		UPDATE organization SET name = $1, email = $2 WHERE id = $3
+		UPDATE users SET username = $1, email = $2 WHERE id = $3 AND is_organization = true
 	`
 	_, err := pool.Exec(context.TODO(), sql, org.Name, org.Email, org.Id)
 	if err != nil {
