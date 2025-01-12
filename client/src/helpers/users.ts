@@ -87,6 +87,7 @@ export async function LogoutUser() {
 }
 
 export async function GetTokens(): Promise<void> {
+      console.log("get tokenscalled")
       try {
             const refreshToken = localStorage.getItem('refresh_token');
             const bearerToken = 'Bearer ' + refreshToken;
@@ -98,7 +99,7 @@ export async function GetTokens(): Promise<void> {
                   method: 'POST',
                   headers: {
                         'Content-Type': 'application/json',
-                        Authorization: bearerToken
+                        "Authorization": bearerToken
                   }
             };
 
@@ -122,7 +123,7 @@ export async function GetCurrentUser(): Promise<incomingUser | null> {
                   method: 'POST',
                   headers: {
                         'Content-Type': 'application/json',
-                        Authorization: bearerToken
+                        "Authorization": bearerToken
                   }
             };
             const response = await fetch('/api/users/current', fetchParams);
@@ -153,7 +154,7 @@ export async function UpdateUser(userBody: updatedUser): Promise<number> {
                   method: 'PUT',
                   headers: {
                         'Content-Type': 'application/json',
-                        Authorization: bearerToken
+                        "Authorization": bearerToken
                   },
                   body: JSON.stringify(userBody)
             };

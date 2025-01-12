@@ -1,4 +1,5 @@
 import { formatISO } from "date-fns";
+import { GetTokens } from "./auth";
 
 export type Animal = {
       Id: string;
@@ -67,6 +68,7 @@ export async function createAnimal(animal: NewAnimal) {
             method: "POST",
             headers: {
                   "Content-Type": "application/json",
+                  "Authorization": `Bearer ${localStorage.getItem("token")}`
             },
             body: JSON.stringify({ ...animal })
       }
@@ -85,6 +87,7 @@ export async function createAnimal(animal: NewAnimal) {
 }
 
 export async function getOrganizationAnimals() {
+      GetTokens()
       try {
             const fetchParams = {
                   method: "POST",

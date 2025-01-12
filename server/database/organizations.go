@@ -62,8 +62,9 @@ func UpdateOrganization(pool *pgxpool.Pool, org Organization) error {
 }
 
 func GetOrganizationAnimals(pool *pgxpool.Pool, id uuid.UUID) ([]Animal, error) {
-	sql := `
-		SELECT a.id,a.name, ai.breed FROM organization_animals oa LEFT JOIN animals a WHERE oa.organization_id = $1
+	//! ISSUE WITH THIS WHERE STATEMENT
+	sql := ` 
+		SELECT a.id,a.name, a.breed, a.species, a.date_of_birth, a.sex, a.price, a.available FROM organization_animals oa LEFT JOIN animals a ON oa.animal_id = a.id WHERE oa.organization_id = $1
 	`
 
 	rows, err := pool.Query(context.TODO(), sql, id)
@@ -74,7 +75,16 @@ func GetOrganizationAnimals(pool *pgxpool.Pool, id uuid.UUID) ([]Animal, error) 
 	var animals []Animal
 	for rows.Next() {
 		var animal Animal
-		err := rows.Scan(&animal.Id, &animal.Name, &animal.Breed)
+		err := rows.Scan(
+			&animal.Id,
+			&animal.Name,
+			&animal.Breed,
+			&animal.Species,
+			&animal.Date_of_birth,
+			&animal.Sex,
+			&animal.Price,
+			&animal.Available,
+		)
 		if err != nil {
 			return []Animal{}, err
 		}
