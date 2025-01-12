@@ -16,16 +16,25 @@ type Organization struct {
 	Email    *string   `json:"Email"`
 }
 
-func CreateOrganization(pool *pgxpool.Pool, org Organization) error {
+func CreateOrganization(pool *pgxpool.Pool, org Organization) (uuid.UUID, error) {
 	sql := `
-		INSERT INTO users (username,password,email, is_organization) VALUES ($1, $2, $3, true)
+		INSERT INTO users (username,password,email, is_organization) VALUES ($1, $2, $3, true) RETURNING id
 	`
 
-	_, err := pool.Exec(context.TODO(), sql, org.Name, org.Password, org.Email)
-	if err != nil {
-		return err
+	//* checks if org with same name exists
+	var orgExists string
+	row := pool.QueryRow(context.TODO(), "SELECT * FROM users WHERE username = $1 AND is_organization = true", org.Name)
+	err := row.Scan(&orgExists)
+	if err == nil {
+		return uuid.UUID{}, errors.New("an organization with that name already exists")
 	}
-	return nil
+
+	var orgId uuid.UUID
+	pool.QueryRow(context.TODO(), sql, org.Name, org.Password, org.Email).Scan(&orgId)
+	if (orgId == uuid.UUID{}) {
+		return uuid.UUID{}, errors.New("new organization id is empty")
+	}
+	return orgId, nil
 }
 
 func GetOrganization(pool *pgxpool.Pool, id uuid.UUID) Organization {
