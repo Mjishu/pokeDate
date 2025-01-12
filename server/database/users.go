@@ -2,11 +2,13 @@ package database
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -20,9 +22,10 @@ type User struct {
 }
 
 type NewUser struct {
+	Id       uuid.UUID
 	Username string `json:"Username"`
 	Password string `json:"Password"`
-	// Email         string    `json:"Email"`
+	Email    string `json:"Email"`
 	// Date_of_birth time.Time `json:"Date_of_birth"`
 }
 
@@ -50,32 +53,46 @@ func GetUser(pool *pgxpool.Pool, username any) (User, error) {
 	return user, nil
 }
 
-func GetUserById(pool *pgxpool.Pool, id uuid.UUID) (User, error) {
+func GetUserById(pool *pgxpool.Pool, id uuid.UUID) (User, error) { //! ERROR HERE
 	var user User
-	err := pool.QueryRow(context.TODO(), "SELECT id,username,email,date_of_birth, profile_picture_src FROM users WHERE id = $1", id).Scan(
-		&user.Id, &user.Username, &user.Email, &user.Date_of_birth, &user.Profile_picture,
+	var dateOfBirth pgtype.Date
+
+	rows := pool.QueryRow(context.TODO(), "SELECT id,username,email, profile_picture_src, date_of_birth FROM users WHERE id = $1", id)
+	err := rows.Scan(
+		&user.Id, &user.Username, &user.Email, &user.Profile_picture, &dateOfBirth,
 	)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Query row failed in getuserbyid %v\n", err)
+		fmt.Fprintf(os.Stderr, "Query row failed in GetUserById %v\n", err)
 		return User{}, err
 	}
+
+	if dateOfBirth.Status == pgtype.Present {
+		user.Date_of_birth = dateOfBirth.Time
+	} else {
+		user.Date_of_birth = time.Now()
+	}
+
 	return user, nil
 }
 
-func CreateUser(pool *pgxpool.Pool, user NewUser, hashedPassword string) {
+func CreateUser(pool *pgxpool.Pool, user User) (uuid.UUID, error) {
 
 	exists, err := UserExists(pool, user.Username)
 	if err != nil { //todo beef up this error handler
 		fmt.Printf("error checking user exists: %v\n", err)
-		return
+		return uuid.UUID{}, err
 	}
 	if exists {
-		return
+		return uuid.UUID{}, errors.New("user already exists")
 	}
-	sql := `INSERT INTO users(username,password) VALUES ($1,$2)`
+	sql := `INSERT INTO users(username,password,email,profile_picture_src) VALUES ($1,$2, $3, $4) RETURNING id`
 
-	_, err = pool.Exec(context.TODO(), sql, user.Username, hashedPassword) //add other options for new user like dob and email
-	inserQueryFail(err, "creating user")
+	var storedId uuid.UUID
+	pool.QueryRow(context.TODO(), sql, user.Username, user.HashPassword, user.Email, user.Profile_picture).Scan(&storedId) //add other options for new user like dob and email
+	if (storedId == uuid.UUID{}) {
+		return uuid.UUID{}, errors.New("users Stored Id came out as empty")
+	}
+	return storedId, nil
 }
 
 func UserExists(pool *pgxpool.Pool, username string) (bool, error) {

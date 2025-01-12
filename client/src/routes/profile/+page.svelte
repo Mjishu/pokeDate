@@ -63,6 +63,7 @@
 
 		if (statusCode == 200) {
 			console.log('success');
+			location.reload();
 		}
 	}
 </script>

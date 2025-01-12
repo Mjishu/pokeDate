@@ -13,22 +13,29 @@ export type incomingUser = {
       Date_of_birth: string;
 }
 
-export async function userFormSubmit(url: string, method: string, formData: userData): Promise<boolean> {
+export async function CreateUser(formData: userData): Promise<boolean> {
+      if (formData.Password != formData.C_password) {
+            alert("passwords do not match")
+            return false
+      }
       const fetchParams = {
             method: "POST",
             headers: {
                   'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ formData, exp_seconds: 3600 })
+            body: JSON.stringify({ Username: formData.Username, Email: formData.Email, Password: formData.Password })
       };
 
       try {
-            const response = await fetch('/api/users' + url, fetchParams);
+            const response = await fetch('/api/users/create', fetchParams);
             const data = await response.json();
-            if (data.status == 200) {
-                  console.log("status 200")
+            if (data.status != 200) {
+                  return false
+            }
+            if (data.token && data.refresh_token) {
                   localStorage.setItem("token", data.token)
-                  return true;
+                  localStorage.setItem("refresh_token", data.refresh_token)
+                  return true
             }
       } catch (error) {
             console.error('There was an error creating user: ' + error);

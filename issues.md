@@ -2,7 +2,10 @@
 
 ## General Issues
 
+- [ ] when on sign in or login page it shows the profile picture layout in the top right, figure out how to remove this on these pages.
 - [x] sending update request from frontend to backend does not properly send information, works with postman though
+- [ ] when creating a USER account, it is just empty and then still logs us in, need to find out why it 
+            doesnt return with an error and why it is giving us an error.
 
 ## Frontend Issues
 

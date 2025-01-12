@@ -26,7 +26,7 @@ func UserController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, 
 	case "/users/create":
 		switch r.Method {
 		case http.MethodPost:
-			CreateUser(w, r, pool)
+			CreateUser(w, r, pool, jwtSecret, s3Bucket, s3Region)
 		case http.MethodGet:
 			fmt.Fprint(w, "no get route setup")
 		}
@@ -52,17 +52,17 @@ func LoginUser(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSe
 
 	storedUser, err := database.GetUser(pool, incomingUser.Username) //this password should be hashed(i.e user.Password)
 	if err != nil {
-		fmt.Fprint(w, "Error getting user from database", http.StatusInternalServerError)
+		respondWithError(w, http.StatusBadRequest, "could not find user", err)
 	}
 
 	//* checks password. useful code goes after this
 	err = auth.CheckPasswordHash(incomingUser.Password, storedUser.HashPassword)
 	if err != nil {
-		fmt.Fprint(w, "issue checking passwords", http.StatusBadRequest)
+		respondWithError(w, http.StatusUnauthorized, "invalid password", err)
 		return
 	}
 
-	// Token information
+	//* Token information
 	expiresIn = time.Duration(15 * time.Minute)
 
 	token, err := auth.MakeJWT(storedUser.Id, jwtSecret, expiresIn)
@@ -93,16 +93,58 @@ func LoginUser(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSe
 	respondWithJSON(w, http.StatusOK, response)
 }
 
-func CreateUser(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool) { //? how to get this to work so that it passes the user of body to createUser
-	var user database.NewUser
+// !  THIS CREATED AN EMPTY USER WITH NO INFO BESIDES ID?
+func CreateUser(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret, s3Bucket, s3Region string) { //? how to get this to work so that it passes the user of body to createUser
+	var user database.User
 	checkBody(w, r, &user)
+	fmt.Printf("user in body is %v\n", user) // this is responding with a nil uuid
 
-	hashedPassword, err := auth.HashPassword(user.Password)
+	hashedPassword, err := auth.HashPassword(user.HashPassword)
 	if err != nil {
-		fmt.Fprint(w, "error trying to hash password", http.StatusInternalServerError)
+		respondWithError(w, http.StatusBadRequest, "could not hash password", err)
 		return
 	}
-	database.CreateUser(pool, user, hashedPassword)
+
+	defaultPfp := "https://" + s3Bucket + ".s3." + s3Region + ".amazonaws.com/profile_pictures/default.webp"
+	user.Profile_picture = &defaultPfp
+
+	// creates user
+	user.HashPassword = hashedPassword
+	storedId, err := database.CreateUser(pool, user)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not create user", err)
+		return
+	}
+
+	//* Token information
+	expiresIn := time.Duration(15 * time.Minute)
+
+	token, err := auth.MakeJWT(storedId, jwtSecret, expiresIn)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not create JWT", err)
+		return
+	}
+
+	refresh_token, err := auth.MakeRefreshToken()
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not create refresh token", err)
+		return
+	}
+	_, err = database.CreateRefreshToken(pool, refresh_token, storedId)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "could not store refresh token", err)
+		return
+	}
+
+	response := map[string]interface{}{
+		"username":      user.Username,
+		"id":            user.Id,
+		"status":        http.StatusOK,
+		"token":         token,
+		"refresh_token": refresh_token,
+	}
+
+	respondWithJSON(w, http.StatusOK, response)
 }
 
 func GetCurrentUser(w http.ResponseWriter, header http.Header, pool *pgxpool.Pool, jwtSecret, s3Bucket, s3Region string) {
@@ -116,10 +158,10 @@ func GetCurrentUser(w http.ResponseWriter, header http.Header, pool *pgxpool.Poo
 		respondWithError(w, http.StatusBadRequest, "could not find user by id", err)
 		return
 	}
-	if storedUser.Profile_picture == nil || *storedUser.Profile_picture == "" { //! default pfp
-		fmt.Println("profile picture was empty providing default")
-		*storedUser.Profile_picture = "https://" + s3Bucket + ".s3." + s3Region + ".amazonaws.com/profile_pictures/default.webp"
-	}
+	// if storedUser.Profile_picture == nil || *storedUser.Profile_picture == "" { //! default pfp
+	// 	fmt.Println("profile picture was empty providing default")
+	// 	*storedUser.Profile_picture = "https://" + s3Bucket + ".s3." + s3Region + ".amazonaws.com/profile_pictures/default.webp" //!this giving error
+	// }
 	respondWithJSON(w, http.StatusOK, storedUser)
 }
 
