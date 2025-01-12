@@ -72,7 +72,7 @@ export async function createAnimal(animal: NewAnimal) {
       }
       console.log(fetchParams.body)
       try {
-            const response = await fetch("/api/animals", fetchParams)
+            const response = await fetch("/api/organizations/animals/create", fetchParams)
             if (!response.ok) {
                   throw new Error(`issue uploading animal: ${response.statusText}`)
             }
@@ -86,7 +86,14 @@ export async function createAnimal(animal: NewAnimal) {
 
 export async function getOrganizationAnimals() {
       try {
-            const response = await fetch("/api/organizations/animals")
+            const fetchParams = {
+                  method: "POST",
+                  headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${localStorage.getItem("token")}`
+                  }
+            }
+            const response = await fetch("/api/organizations/animals", fetchParams)
             const data = await response.json()
             return data
       } catch (error) {

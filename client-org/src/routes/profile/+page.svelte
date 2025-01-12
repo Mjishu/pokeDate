@@ -2,7 +2,11 @@
 	import { onMount } from 'svelte';
 	import { formatISO } from 'date-fns';
 	import Navbar from '../../components/navbar.svelte';
-	import { GetCurrentOrganization, UpdateOrganization } from '../../helper/auth';
+	import {
+		GetCurrentOrganization,
+		LogoutOrganization,
+		UpdateOrganization
+	} from '../../helper/auth';
 
 	type incomingOrganization = {
 		Id?: string;
@@ -122,6 +126,7 @@
 					</div>
 				</form>
 			{/if}
+			<button type="button" onclick={LogoutOrganization}>Logout</button>
 		</main>
 	</div>
 {/if}

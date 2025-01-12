@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -38,36 +37,54 @@ func OrganizationController(w http.ResponseWriter, r *http.Request, pool *pgxpoo
 			UpdateOrganization(w, r, pool, jwtSecret)
 		}
 	case "/organizations/animals":
-		HandleAnimals(w, r, pool)
+		switch r.Method {
+		case http.MethodPost:
+			GetCurrentOrganizationAnimals(w, r, pool, jwtSecret)
+		}
+	case "/organizations/animals/create":
+		switch r.Method {
+		case http.MethodPost:
+			CreateNewAnimal(w, r, pool, jwtSecret)
+		}
 	}
 }
 
-func HandleAnimals(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool) {
-	switch r.Method {
-	case http.MethodPost:
-		w.Header().Set("Content-Type", "application/json")
+func CreateNewAnimal(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
+	SetHeader(w)
 
-		hasId, id := checkForBodyItem("id", w, r)
-		animal, err := database.GetAnimal(pool, id)
-		if err != nil {
-			respondWithError(w, http.StatusBadRequest, "could not find animal", err)
-			return
-		}
-		if hasId {
-			if err := json.NewEncoder(w).Encode(animal); err != nil {
-				http.Error(w, "unable to encode response", http.StatusInternalServerError)
-			}
-			return
-		}
-		fmt.Fprintf(w, "Body does not have an id!")
-
-	case http.MethodGet:
-		w.Header().Set("Content-Type", "application/json")
-		if err := json.NewEncoder(w).Encode(database.GetAllAnimals(pool)); err != nil {
-			http.Error(w, "unable to encode response", http.StatusInternalServerError)
-		}
+	token, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not find JWT in header", err)
 		return
 	}
+
+	orgId, err := auth.ValidateJWT(token, jwtSecret)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "could not validate JWT", err)
+		return
+	}
+
+	var incomingAnimal database.Animal
+	err = checkBody(w, r, &incomingAnimal)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "did not find animal in body", err)
+		return
+	}
+
+	storedAnimalId, err := database.CreateNewAnimal(pool, incomingAnimal)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "error creating new animal", err)
+		return
+	}
+
+	_, err = database.CreateOrganizationAnimal(pool, orgId, storedAnimalId)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "could not create organization animal link", err)
+		return
+	}
+
+	fmt.Fprintf(w, "Body does not have an id!")
+
 }
 
 func HandleOrganizationCreate(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {

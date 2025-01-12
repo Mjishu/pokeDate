@@ -64,7 +64,7 @@ export async function loginOrganization(formData: orgData): Promise<boolean> {
       return false;
 }
 
-export async function LogoutOrganization() {
+export async function LogoutOrganization(): Promise<number> {
       try {
             const refreshToken = localStorage.getItem("refresh_token")
             const bearerToken = "Bearer " + refreshToken
@@ -77,14 +77,16 @@ export async function LogoutOrganization() {
             const response = await fetch("/api/revoke", fetchParams)
             if (response.status != 204) {
                   alert("issue revoking token")
-                  return
+                  return 400
             }
 
             localStorage.removeItem("token")
             localStorage.removeItem("refresh_token")
+            location.reload()
+            return 204
       } catch (error) {
             console.error(`error trying to sign you out ${error}`)
-            return
+            return 400
       }
 }
 

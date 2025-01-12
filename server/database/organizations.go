@@ -2,6 +2,7 @@ package database
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -81,4 +82,31 @@ func GetOrganizationAnimals(pool *pgxpool.Pool, id uuid.UUID) ([]Animal, error) 
 	}
 
 	return animals, nil
+}
+
+func CreateNewAnimal(pool *pgxpool.Pool, animal Animal) (uuid.UUID, error) {
+	sql := `
+		INSERT INTO animals(name,species,date_of_birth,sex,price,available,breed) VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING id
+	`
+
+	var newAnimalId uuid.UUID
+	pool.QueryRow(context.TODO(), sql, animal.Name, animal.Species, animal.Date_of_birth, animal.Sex, animal.Price, animal.Available, animal.Breed).Scan(&newAnimalId)
+	if (newAnimalId == uuid.UUID{}) {
+		return uuid.UUID{}, errors.New("error querying rows")
+	}
+
+	return newAnimalId, nil
+}
+
+func CreateOrganizationAnimal(pool *pgxpool.Pool, orgId, animalId uuid.UUID) (bool, error) {
+	sql := `
+		INSERT INTO organization_animals (organization_id, animal_id) VALUES ($1, $2)
+	`
+
+	_, err := pool.Exec(context.TODO(), sql, orgId, animalId)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
 }

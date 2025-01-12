@@ -33,7 +33,6 @@
 				Next_due: formatISO(new Date(shot.Next_due))
 			}))
 		};
-		console.log(formattedAnimal);
 		await createAnimal(formattedAnimal);
 		showNewAnimal = false;
 

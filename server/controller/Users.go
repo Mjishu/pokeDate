@@ -116,7 +116,7 @@ func GetCurrentUser(w http.ResponseWriter, header http.Header, pool *pgxpool.Poo
 		respondWithError(w, http.StatusBadRequest, "could not find user by id", err)
 		return
 	}
-	if storedUser.Profile_picture == nil || *storedUser.Profile_picture == "" {
+	if storedUser.Profile_picture == nil || *storedUser.Profile_picture == "" { //! default pfp
 		fmt.Println("profile picture was empty providing default")
 		*storedUser.Profile_picture = "https://" + s3Bucket + ".s3." + s3Region + ".amazonaws.com/profile_pictures/default.webp"
 	}

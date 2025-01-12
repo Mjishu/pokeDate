@@ -6,9 +6,8 @@
 
 ## Frontend Issues
 
-- [ ] when using +layout.ts and +page.svelte, i cant pass data down it just says undefined?
-- [x] moving over to sveltekit for organizations the image route isnt working for trash can and searchi con, fix it, same with global styles
-- [x] add part to only use sveltekit for frontend and turn off ssr
+- [ ] when creating an account on both clients, it should auto sign in the newly created user.
+- [ ] where to call get tokens, so that it updates whenever i reload/switch the page? 
 
 ## Backend Issues
 

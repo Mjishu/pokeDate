@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -24,7 +25,7 @@ type AnimalShot struct {
 }
 
 type Animal struct {
-	Id            string
+	Id            uuid.UUID
 	Name          string
 	Species       string
 	Date_of_birth time.Time
