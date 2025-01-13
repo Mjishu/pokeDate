@@ -10,7 +10,7 @@ import (
 	"github.com/mjishu/pokeDate/database"
 )
 
-func OrganizationController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
+func OrganizationController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret, s3Bucket, s3Region string) {
 	SetHeader(w)
 
 	switch r.URL.Path {
@@ -24,7 +24,7 @@ func OrganizationController(w http.ResponseWriter, r *http.Request, pool *pgxpoo
 	case "/organizations/create":
 		switch r.Method {
 		case http.MethodPost:
-			HandleOrganizationCreate(w, r, pool, jwtSecret)
+			HandleOrganizationCreate(w, r, pool, jwtSecret, s3Bucket, s3Region)
 		}
 	case "/organizations/current":
 		switch r.Method {
@@ -87,7 +87,7 @@ func CreateNewAnimal(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool,
 
 }
 
-func HandleOrganizationCreate(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
+func HandleOrganizationCreate(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret, s3Bucket, s3Region string) {
 
 	var organization database.Organization
 	checkBody(w, r, &organization)
@@ -97,6 +97,9 @@ func HandleOrganizationCreate(w http.ResponseWriter, r *http.Request, pool *pgxp
 		respondWithError(w, http.StatusBadRequest, "could not hash password", err)
 		return
 	}
+
+	defaultPfp := "https://" + s3Bucket + ".s3." + s3Region + ".amazonaws.com/profile_pictures/default.webp"
+	organization.Profile_picture = defaultPfp
 
 	organization.Password = hashedPassword
 	storedId, err := database.CreateOrganization(pool, organization) //* nil error here?

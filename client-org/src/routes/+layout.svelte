@@ -1,15 +1,15 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import type { incomingUser } from '../helpers/users.js';
-	import { GetCurrentUser } from '../helpers/users.js';
+	import { GetCurrentOrganization } from '../helper/auth';
+	import type { Organization } from '../helper/auth.ts';
 
-	let userData: incomingUser | null = $state(null);
+	let orgData: Organization | null = $state(null);
 	let loading: boolean = $state(true);
 	let { children } = $props();
 
 	onMount(async () => {
-		userData = await GetCurrentUser();
+		orgData = await GetCurrentOrganization();
 		loading = false;
 	});
 
@@ -23,7 +23,7 @@
 {:else}
 	<button class="pfp-holder" onclick={pfpClick}>
 		<!-- svelte-ignore a11y_missing_attribute -->
-		<img class="pfp" src={userData?.Profile_picture} />
+		<img class="pfp" src={orgData?.Profile_picture} />
 	</button>
 {/if}
 

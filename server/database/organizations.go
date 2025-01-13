@@ -10,15 +10,16 @@ import (
 )
 
 type Organization struct {
-	Id       uuid.UUID `json:"Id"`
-	Name     string    `json:"Name"`
-	Password string    `json:"Password"`
-	Email    *string   `json:"Email"`
+	Id              uuid.UUID `json:"Id"`
+	Name            string    `json:"Name"`
+	Password        string    `json:"Password"`
+	Email           *string   `json:"Email"`
+	Profile_picture string
 }
 
 func CreateOrganization(pool *pgxpool.Pool, org Organization) (uuid.UUID, error) {
 	sql := `
-		INSERT INTO users (username,password,email, is_organization) VALUES ($1, $2, $3, true) RETURNING id
+		INSERT INTO users (username,password,email, is_organization, profile_picture_src) VALUES ($1, $2, $3, true, $4) RETURNING id
 	`
 
 	//* checks if org with same name exists
@@ -30,7 +31,7 @@ func CreateOrganization(pool *pgxpool.Pool, org Organization) (uuid.UUID, error)
 	}
 
 	var orgId uuid.UUID
-	pool.QueryRow(context.TODO(), sql, org.Name, org.Password, org.Email).Scan(&orgId)
+	pool.QueryRow(context.TODO(), sql, org.Name, org.Password, org.Email, org.Profile_picture).Scan(&orgId)
 	if (orgId == uuid.UUID{}) {
 		return uuid.UUID{}, errors.New("new organization id is empty")
 	}
@@ -39,11 +40,11 @@ func CreateOrganization(pool *pgxpool.Pool, org Organization) (uuid.UUID, error)
 
 func GetOrganization(pool *pgxpool.Pool, id uuid.UUID) Organization {
 	sql := `
-		select id, username, email from users where id = $1 AND is_organization = true
+		select id, username, email, profile_picture_src from users where id = $1 AND is_organization = true
 	`
 
 	var organization Organization
-	pool.QueryRow(context.TODO(), sql, id).Scan(&organization.Id, &organization.Name, &organization.Email)
+	pool.QueryRow(context.TODO(), sql, id).Scan(&organization.Id, &organization.Name, &organization.Email, &organization.Profile_picture)
 	return organization
 }
 

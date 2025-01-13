@@ -12,6 +12,7 @@
 		Id?: string;
 		Name: string;
 		Email: string;
+		Profile_picture?: string;
 	};
 
 	let profilePicture: FileList | undefined = $state();
@@ -36,46 +37,32 @@
 		loading = false;
 	});
 
-	// async function submitForm(e: Event) {
-	// 	e.preventDefault();
-	// 	const formattedUser = {
-	// 		...$state.snapshot(updatedUserData),
-	// 		Date_of_birth: updatedUserData.Date_of_birth
-	// 			? formatISO(new Date(updatedUserData.Date_of_birth))
-	// 			: ''
-	// 	};
-	// 	let statusCode = await UpdateUser(formattedUser);
-
-	// 	if (profilePicture != undefined && userData != null) {
-	// 		const formData = new FormData();
-	// 		formData.append('profile_image', profilePicture[0]);
-	// 		try {
-	// 			const response = await fetch(`/api/users/profile_pictures/${userData.Id}`, {
-	// 				method: 'POST',
-	// 				headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
-	// 				body: formData
-	// 			});
-	// 			if (!response.ok) {
-	// 				const data = await response.json();
-	// 				profilePicture = undefined;
-	// 				throw new Error(`failed to upload profile picture, error: ${data.error}`);
-	// 			}
-	// 			console.log('video uploaded');
-	// 			userData = await GetCurrentUser();
-	// 			profilePicture = undefined;
-	// 		} catch (error: any) {
-	// 			alert(`Error: ${error.message}`);
-	// 		}
-	// 	}
-
-	// 	if (statusCode == 200) {
-	// 		console.log('success');
-	// 	}
-	// }
 	async function submitForm(e: Event) {
 		e.preventDefault();
 
 		let statusResponse = await UpdateOrganization(updatedOrgData);
+
+		if (profilePicture != undefined && orgData != null) {
+			const formData = new FormData();
+			formData.append('profile_image', profilePicture[0]);
+			try {
+				const response = await fetch(`/api/users/profile_pictures/${orgData.Id}`, {
+					method: 'POST',
+					headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+					body: formData
+				});
+				if (!response.ok) {
+					const data = await response.json();
+					profilePicture = undefined;
+					throw new Error(`failed to upload profile picture, error: ${data.error}`);
+				}
+				orgData = await GetCurrentOrganization();
+				profilePicture = undefined;
+			} catch (error: any) {
+				alert(`Error: ${error.message}`);
+			}
+		}
+
 		if (statusResponse == 200) {
 			location.reload();
 		}
@@ -92,7 +79,7 @@
 			<div class="user-info">
 				<p>Hello {orgData.Name}!</p>
 				<!-- svelte-ignore a11y_missing_attribute -->
-				<!-- <img src={userData.Profile_picture} /> -->
+				<img src={orgData?.Profile_picture} />
 			</div>
 
 			<button onclick={() => (options.showEdit = !options.showEdit)}>Edit</button>
@@ -134,11 +121,11 @@
 <style>
 	main {
 		height: 100%;
+		padding: 0;
+		margin: 0;
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		padding: 0px;
-		margin: 0px;
 		gap: 2rem;
 	}
 	.content {

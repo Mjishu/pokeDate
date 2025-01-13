@@ -29,16 +29,6 @@ type NewUser struct {
 	// Date_of_birth time.Time `json:"Date_of_birth"`
 }
 
-// id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-// username VARCHAR(40) NOT NULL,
-// email VARCHAR(100) ,
-// password VARCHAR(50) NOT NULL,
-// date_of_birth DATE,
-// country_id INT REFERENCES locations(id) ON DELETE SET NULL,
-// state_id INT REFERENCES locations(id) ON DELETE SET NULL,
-// city_id INT REFERENCES locations(id) ON DELETE SET NULL,
-// profile_pi
-
 func GetUser(pool *pgxpool.Pool, username any) (User, error) {
 	var user User
 	err := pool.QueryRow(context.TODO(), "SELECT id,username,password from users WHERE username = $1", username).Scan( // add email,date_of_birth
@@ -53,7 +43,7 @@ func GetUser(pool *pgxpool.Pool, username any) (User, error) {
 	return user, nil
 }
 
-func GetUserById(pool *pgxpool.Pool, id uuid.UUID) (User, error) { //! ERROR HERE
+func GetUserById(pool *pgxpool.Pool, id uuid.UUID) (User, error) {
 	var user User
 	var dateOfBirth pgtype.Date
 

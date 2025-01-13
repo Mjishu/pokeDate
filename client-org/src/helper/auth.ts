@@ -6,10 +6,11 @@ export type orgData = {
       C_password?: string;
 }
 
-type Organization = {
+export type Organization = {
       Id?: string;
       Name: string;
       Email: string;
+      Profile_picture?: string;
 }
 
 export async function CreateOrganization(formdata: orgData): Promise<boolean> {

@@ -101,7 +101,7 @@ func main() {
 		controller.AnimalController(w, r, pool)
 	})
 	mux.HandleFunc("/organizations/", func(w http.ResponseWriter, r *http.Request) {
-		controller.OrganizationController(w, r, pool, config.jwt_secret)
+		controller.OrganizationController(w, r, pool, config.jwt_secret, s3Bucket, s3Region)
 	})
 	mux.HandleFunc("/shots", func(w http.ResponseWriter, r *http.Request) {
 		controller.ShotController(w, r, pool)

@@ -19,6 +19,8 @@
 		Shots: []
 	});
 
+	let speciesOptions = ['Cat', 'Dog', 'Rabbit', 'Snake', 'Lizard'];
+
 	async function handleCreateAnimal(e: Event) {
 		e.preventDefault();
 
@@ -78,7 +80,12 @@
 		</div>
 		<div>
 			<label for="species">Species</label>
-			<input type="text" name="species" bind:value={newAnimal.Species} required />
+			<select name="species" bind:value={newAnimal.Species} required>
+				<option value="" disabled selected>species</option>
+				{#each speciesOptions as opt}
+					<option value={opt}>{opt}</option>
+				{/each}
+			</select>
 		</div>
 		<div>
 			<label for="date_of_birth">Date of Birth</label>
