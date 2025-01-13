@@ -18,31 +18,66 @@
 	}
 </script>
 
-{#if loading}
+	{#if loading}
 	<p>loading...</p>
-{:else}
+	{:else}
 	<button class="pfp-holder" onclick={pfpClick}>
 		<!-- svelte-ignore a11y_missing_attribute -->
 		<img class="pfp" src={orgData?.Profile_picture} />
 	</button>
-{/if}
-
-{@render children()}
+	{/if}
+	
+	{@render children()}
 
 <!-- <slot {userData} /> -->
 
 <style>
 	.pfp {
-		position: absolute;
-		right: 1rem;
-		top: 1rem;
+		/* z-index: 3; */
+		position: relative;
 		width: 3rem;
 		height: 3rem;
 		border-radius: 50%;
+		padding: 0;
+		margin: 0;
 	}
 
 	.pfp-holder {
+		position: absolute;
+		top: 0.5rem;
+		right: 1rem;
+		width: 3rem;
+		height: 3rem;
+		padding: 0;
+		margin: 0;
 		border: none;
 		background-color: transparent;
 	}
+
+	:global(body) {
+    margin: 0;
+    padding: 0;
+  }
+
+  :global(*) {
+    box-sizing: border-box;
+  }
+
+  .pfp {
+    position: absolute;
+    right: 1rem;
+    top: 1rem;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+  }
+
+  .pfp-holder {
+    padding: 0;
+    margin: 0;
+    border: none;
+    background-color: transparent;
+  }
+
+	
 </style>

@@ -33,16 +33,25 @@
 
 <style>
 	.pfp {
-		position: absolute;
-		right: 1rem;
-		top: 1rem;
+		/* z-index: 3; */
+		position: relative;
 		width: 3rem;
 		height: 3rem;
 		border-radius: 50%;
+		padding: 0;
+		margin: 0;
 	}
 
 	.pfp-holder {
+		position: absolute;
+		top: 1rem;
+		right: 1rem;
+		width: 3rem;
+		height: 3rem;
+		padding: 0;
+		margin: 0;
 		border: none;
 		background-color: transparent;
+
 	}
 </style>

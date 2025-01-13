@@ -10,6 +10,8 @@
 	.navbar {
 		width: 17.25rem;
 		height: 100%;
+		margin: 0;
+		padding: 0;
 		background: #94949413;
 		border-right: 1px solid rgba(126, 126, 126, 0.301);
 		text-align: center;
@@ -33,4 +35,6 @@
 		border-radius: 5px;
 		margin-top: 2rem;
 	}
+
+	
 </style>

@@ -36,7 +36,7 @@ export async function CreateOrganization(formdata: orgData): Promise<boolean> {
                   throw new Error("could not find token in response")
             }
       } catch (error) {
-            throw new Error("could not create new user")
+            throw new Error("could not create new user, " + error)
       }
       return false
 }
@@ -153,6 +153,7 @@ export async function UpdateOrganization(orgData: Organization): Promise<number>
                   console.error("response was not ok")
                   return 400
             }
+            console.log(data)
             return 200
       } catch (error) {
             console.error(`error trying to update organization ${error}`)

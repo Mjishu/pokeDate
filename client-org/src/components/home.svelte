@@ -67,9 +67,11 @@
 
 <style>
       main {
+            height: 100%;
+            padding: 0;
+            margin: 0;
             display: grid;
             grid-template-columns: 17.25rem 1fr;
-            height: 100%;
             gap: 5rem;
       }
 

@@ -155,13 +155,11 @@ type updatedUser = {
 
 export async function UpdateUser(userBody: updatedUser): Promise<number> {
       try {
-            let token = localStorage.getItem('token');
-            let bearerToken = 'Bearer ' + token;
             const fetchParams = {
                   method: 'PUT',
                   headers: {
                         'Content-Type': 'application/json',
-                        "Authorization": bearerToken
+                        "Authorization": `Bearer ${localStorage.getItem("token")}`
                   },
                   body: JSON.stringify(userBody)
             };
@@ -171,8 +169,8 @@ export async function UpdateUser(userBody: updatedUser): Promise<number> {
                   alert(`error: ${data.message}`)
             }
             return response.status
-      } catch (error: any) {
+      } catch (error: unknown) {
             console.error(`error trying to update user ${error}`);
-            return error.status;
+            return 400;
       }
 }
