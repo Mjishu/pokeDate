@@ -102,10 +102,13 @@ func inserQueryFail(err error, name string) {
 	fmt.Printf("command  '%s' created successfully\n", name)
 }
 
-func DeleteAnimal(pool *pgxpool.Pool, id interface{}) {
+func DeleteAnimal(pool *pgxpool.Pool, id interface{}) error {
 	sql := `
 		DELETE FROM animals WHERE id = $1
 	`
 	_, err := pool.Exec(context.TODO(), sql, id)
-	inserQueryFail(err, "deleting animal")
+	if err != nil {
+		return err
+	}
+	return nil
 }

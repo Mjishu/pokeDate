@@ -105,7 +105,7 @@ func main() {
 		controller.CardsController(w, r, pool)
 	})
 	mux.HandleFunc("/animals/", func(w http.ResponseWriter, r *http.Request) {
-		controller.AnimalController(w, r, pool, jwt_secret)
+		controller.AnimalController(w, r, pool, jwt_secret, config.s3Bucket, config.s3Client)
 	})
 
 	mux.HandleFunc("/shots", func(w http.ResponseWriter, r *http.Request) {

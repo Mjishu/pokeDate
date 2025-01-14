@@ -17,7 +17,8 @@ const config = {
 			fallback: undefined,
 			precompress: false,
 			strict: true
-		})
+		}),
+		ssr:false
 	}
 };
 

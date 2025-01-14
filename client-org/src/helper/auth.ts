@@ -92,12 +92,15 @@ export async function LogoutOrganization(): Promise<number> {
 }
 
 export async function GetTokens(): Promise<{ statusCode: number }> {
+      const refresh_token = localStorage.getItem("refresh_token")
+      if (refresh_token == null) return {statusCode:400}
+      console.log("get tokens called")
       try {
             const fetchParams = {
                   method: 'POST',
                   headers: {
                         'Content-Type': 'application/json',
-                        Authorization: `Bearer ${localStorage.getItem("refresh_token")}`
+                        Authorization: `Bearer ${refresh_token}`
                   }
             };
 
@@ -115,7 +118,10 @@ export async function GetTokens(): Promise<{ statusCode: number }> {
 }
 
 export async function GetCurrentOrganization(): Promise<Organization | null> {
-      await GetTokens();
+      const tokenStatus = await GetTokens();
+      if(tokenStatus.statusCode == 400) {
+            return null
+      }
       try {
             const fetchParams = {
                   method: "POST",
@@ -132,7 +138,8 @@ export async function GetCurrentOrganization(): Promise<Organization | null> {
                   return null;
             }
       } catch (error) {
-            throw new Error(`error fetching current Organization Data ${error}`)
+            console.error(`error fetching current Organization Data ${error}`)
+            return null
       }
 }
 

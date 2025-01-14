@@ -5,11 +5,15 @@
 	import type { Organization } from '../helper/auth.ts';
 
 	let orgData: Organization | null = $state(null);
+	let signedIn: boolean = $state(false);
 	let loading: boolean = $state(true);
 	let { children } = $props();
 
 	onMount(async () => {
 		orgData = await GetCurrentOrganization();
+		if (orgData != null) {
+			signedIn = true
+		}
 		loading = false;
 	});
 
@@ -20,7 +24,7 @@
 
 	{#if loading}
 	<p>loading...</p>
-	{:else}
+	{:else if signedIn}
 	<button class="pfp-holder" onclick={pfpClick}>
 		<!-- svelte-ignore a11y_missing_attribute -->
 		<img class="pfp" src={orgData?.Profile_picture} />

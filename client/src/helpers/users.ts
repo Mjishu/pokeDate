@@ -93,20 +93,16 @@ export async function LogoutUser() {
       }
 }
 
-export async function GetTokens(): Promise<void> {
+export async function GetTokens(): Promise<{statusCode: number}> {
+      const refresh_token = localStorage.getItem('token')
+      if (refresh_token ==null) return {statusCode: 400} 
       console.log("get tokenscalled")
       try {
-            const refreshToken = localStorage.getItem('refresh_token');
-            const bearerToken = 'Bearer ' + refreshToken;
-            if (!refreshToken) {
-                  console.log('i dont have a refresh token. log in');
-                  return;
-            }
             const fetchParams = {
                   method: 'POST',
                   headers: {
                         'Content-Type': 'application/json',
-                        "Authorization": bearerToken
+                        "Authorization": `Bearer ${refresh_token}`
                   }
             };
 
@@ -115,22 +111,22 @@ export async function GetTokens(): Promise<void> {
             if (data.token) {
                   localStorage.setItem('token', data.token);
             }
+            return {statusCode: 200}
       } catch (error) {
             console.error(`error fetching tokens ${error}`);
-            return;
+            return {statusCode : 400};
       }
 }
 
 export async function GetCurrentUser(): Promise<incomingUser | null> {
-      await GetTokens()
+      const refreshStatus = await GetTokens()
+      if (refreshStatus.statusCode == 400) return null
       try {
-            const token = localStorage.getItem('token');
-            const bearerToken = 'Bearer ' + token;
             const fetchParams = {
                   method: 'POST',
                   headers: {
                         'Content-Type': 'application/json',
-                        "Authorization": bearerToken
+                        "Authorization": `Bearer ${localStorage.getItem('token')}`
                   }
             };
             const response = await fetch('/api/users/current', fetchParams);

@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/mjishu/pokeDate/auth"
@@ -67,7 +68,7 @@ func MainAnimalOperations(w http.ResponseWriter, r *http.Request, pool *pgxpool.
 	}
 }
 
-func AnimalController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
+func AnimalController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret, s3Bucket string, s3Client *s3.Client) {
 	SetHeader(w)
 
 	switch r.URL.Path {
@@ -76,12 +77,12 @@ func AnimalController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool
 	case "/animals/delete":
 		switch r.Method {
 		case http.MethodDelete:
-			DeleteAnimal(w, r, pool, jwtSecret)
+			DeleteAnimal(w, r, pool, jwtSecret, s3Bucket, s3Client)
 		}
 	}
 }
 
-func DeleteAnimal(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
+func DeleteAnimal(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret, s3Bucket string, s3Client *s3.Client) {
 	SetHeader(w)
 
 	token, err := auth.GetBearerToken(r.Header)
@@ -102,8 +103,32 @@ func DeleteAnimal(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jw
 		return
 	}
 
-	database.DeleteAnimal(pool, id)
-	fmt.Fprintf(w, "Animal was removed successfully")
+	storedAnimal, err := database.GetAnimal(pool, id)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not get stored animal from database", err)
+		return
+	}
+
+	//!! TURN BACK ON WHEN WE CAN DELETE S3 OBJECT PROPERLY
+	// err = database.DeleteAnimal(pool, id)
+	// if err != nil {
+	// 	respondWithError(w, http.StatusInternalServerError, "could not delete animal", err)
+	// 	return
+	// }
+	//! ----------------------------------------------------
+
+	fmt.Printf("the stored animal is %v\n", *storedAnimal.Image_src)
+	if storedAnimal.Image_src != nil || *storedAnimal.Image_src != "" {
+		fmt.Println("found an image to delete")
+		err = DeleteS3Object(w, r, s3Bucket, *storedAnimal.Image_src, s3Client)
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, "could not delete image in s3", err)
+			return
+		}
+	}
+	fmt.Println("did not find an image to delete")
+
+	respondWithJSON(w, http.StatusOK, nil)
 }
 
 func GetFrontendURL() string {

@@ -1,11 +1,16 @@
+# TODO
+
+- MAKE SURE TO CALL GETTOKENS IN FUNCTIONS WHERE TOKENS ARE NEEDED (AWAIT)
+
+## Format
+- DESCRIPTION | PRIORITY LEVEL(1 being highest, 5 being lowest)
+
 ## General
-- [ ] when creating animals, create image for them
 
 ## Frontend
-- [ ] where to call GetTokens so that each time the page is rerendered(or switch from / to /profile) it refreshes token? or something else
-- [x] turn the species select into a dropdown when creating an animal
- - [ ] styling has werid margin and not full height
+-  when calling GetTokens inside funciton calls(getcurrentanimals) it doesn't seem to properly await the function? it says invalid token even though its an await?
 
 ## Backend
 
-- [ ] Compress images given from frontend
+- Compress images given from frontend | 3
+- When an animal is deleted, delete its image entry from AWS - current | 1

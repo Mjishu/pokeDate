@@ -6,6 +6,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"io"
 	"mime"
 	"net/http"
@@ -131,4 +132,22 @@ func CreateImage(w http.ResponseWriter, r *http.Request, image_key, temp_file st
 		return "", "", nil, err
 	}
 	return mimeType, extension, tempFile, nil
+}
+
+// ! ISSUE: doesn't properly delete the OBJECT, the objects get stored as key + extension so "a34scjpeg" instead of "a34sc.jpeg"
+func DeleteS3Object(w http.ResponseWriter, r *http.Request, s3Bucket, url string, s3Client *s3.Client) error {
+	keySplit := strings.Split(url, "/")
+	key := keySplit[len(keySplit)-1]
+	fmt.Printf("the key is %v\n", key)
+
+	input := &s3.DeleteObjectInput{
+		Bucket: &s3Bucket,
+		Key:    &key,
+	}
+
+	_, err := s3Client.DeleteObject(context.TODO(), input)
+	if err != nil {
+		return err
+	}
+	return nil
 }
