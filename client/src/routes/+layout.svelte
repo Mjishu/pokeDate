@@ -11,7 +11,13 @@
 
 	onMount(async () => {
 		userData = await GetCurrentUser();
-		if (userData != null) signedIn = true;
+		if (userData != null) {
+			signedIn = true
+		} else if (userData == null) {
+			if (window.location.pathname != "/login" && window.location.pathname != "/signup") {
+				goto("/login")
+			}
+		}
 		loading = false;
 	});
 

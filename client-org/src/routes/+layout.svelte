@@ -13,6 +13,10 @@
 		orgData = await GetCurrentOrganization();
 		if (orgData != null) {
 			signedIn = true
+		} else if (orgData == null) {
+			if (window.location.pathname != "/login" && window.location.pathname != "/signup") {
+				goto("/login")
+			}
 		}
 		loading = false;
 	});
