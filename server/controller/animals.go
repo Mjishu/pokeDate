@@ -109,24 +109,19 @@ func DeleteAnimal(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jw
 		return
 	}
 
-	//!! TURN BACK ON WHEN WE CAN DELETE S3 OBJECT PROPERLY
-	// err = database.DeleteAnimal(pool, id)
-	// if err != nil {
-	// 	respondWithError(w, http.StatusInternalServerError, "could not delete animal", err)
-	// 	return
-	// }
-	//! ----------------------------------------------------
+	err = database.DeleteAnimal(pool, id)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "could not delete animal", err)
+		return
+	}
 
-	fmt.Printf("the stored animal is %v\n", *storedAnimal.Image_src)
 	if storedAnimal.Image_src != nil || *storedAnimal.Image_src != "" {
-		fmt.Println("found an image to delete")
-		err = DeleteS3Object(w, r, s3Bucket, *storedAnimal.Image_src, s3Client)
+		err = DeleteS3Object(w, r, s3Bucket, *storedAnimal.Image_src, "animals", s3Client) //! Issue with the key (image_src)
 		if err != nil {
 			respondWithError(w, http.StatusInternalServerError, "could not delete image in s3", err)
 			return
 		}
 	}
-	fmt.Println("did not find an image to delete")
 
 	respondWithJSON(w, http.StatusOK, nil)
 }

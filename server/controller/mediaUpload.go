@@ -14,6 +14,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -43,7 +44,7 @@ func HandleUserImageUpload(w http.ResponseWriter, r *http.Request, pool *pgxpool
 	}
 
 	//* temp file creation
-	mimeType, extension, tempFile, err := CreateImage(w, r, "profile_image", "profile_picture_src")
+	mimeType, _, tempFile, err := CreateImage(w, r, "profile_image", "profile_picture_src")
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "error creating Image", err)
 		return
@@ -65,7 +66,7 @@ func HandleUserImageUpload(w http.ResponseWriter, r *http.Request, pool *pgxpool
 		return
 	}
 	folder_path := "profile_pictures"
-	key := path.Join(folder_path, base64.RawURLEncoding.EncodeToString(newByte)+extension)
+	key := path.Join(folder_path, base64.RawURLEncoding.EncodeToString(newByte))
 
 	tempFile.Seek(0, io.SeekStart)
 
@@ -135,19 +136,24 @@ func CreateImage(w http.ResponseWriter, r *http.Request, image_key, temp_file st
 }
 
 // ! ISSUE: doesn't properly delete the OBJECT, the objects get stored as key + extension so "a34scjpeg" instead of "a34sc.jpeg"
-func DeleteS3Object(w http.ResponseWriter, r *http.Request, s3Bucket, url string, s3Client *s3.Client) error {
+func DeleteS3Object(w http.ResponseWriter, r *http.Request, s3Bucket, url, prefix string, s3Client *s3.Client) error {
+	fmt.Printf("url recieved is %v\n", url)
 	keySplit := strings.Split(url, "/")
 	key := keySplit[len(keySplit)-1]
-	fmt.Printf("the key is %v\n", key)
 
+	key = prefix + "/" + key
+
+	fmt.Printf("the key is %v\n", key)
 	input := &s3.DeleteObjectInput{
-		Bucket: &s3Bucket,
-		Key:    &key,
+		Bucket: aws.String(s3Bucket),
+		Key:    aws.String(key),
 	}
+	fmt.Printf("input is %v\n %v\n", *input.Bucket, *input.Key)
 
 	_, err := s3Client.DeleteObject(context.TODO(), input)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }

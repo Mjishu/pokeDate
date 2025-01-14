@@ -18,7 +18,6 @@ const config = {
 			precompress: false,
 			strict: true
 		}),
-		ssr:false
 	}
 };
 

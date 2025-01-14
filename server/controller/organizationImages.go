@@ -57,7 +57,7 @@ func UploadAnimalImage(w http.ResponseWriter, r *http.Request, pool *pgxpool.Poo
 	}
 
 	folder_path := "animals"
-	key := path.Join(folder_path, base64.RawURLEncoding.EncodeToString(newByte)+extension)
+	key := path.Join(folder_path, base64.RawURLEncoding.EncodeToString(newByte)+"_"+extension)
 
 	tempFile.Seek(0, io.SeekStart)
 
