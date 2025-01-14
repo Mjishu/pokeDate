@@ -84,7 +84,7 @@ export async function createAnimal(animal: NewAnimal) { //? this needs to respon
 }
 
 export async function getOrganizationAnimals() {
-      GetTokens()
+      await GetTokens()
       try {
             const fetchParams = {
                   method: "POST",
@@ -143,7 +143,7 @@ export async function updateAnimalById(id: string, updatedAnimal: UpdatedAnimal)
 }
 
 export async function DeleteAnimalById(id: string): Promise<void> {
-      GetTokens()
+      await GetTokens()
       const fetchParams = {
             method: "DELETE",
             headers: {

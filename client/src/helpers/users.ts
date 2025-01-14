@@ -96,9 +96,10 @@ export async function LogoutUser() {
 
 export async function GetTokens(): Promise<{statusCode: number}> {
       const refresh_token = localStorage.getItem('refresh_token')
-      console.log(`refresh token is ${refresh_token}`)
+
       if (refresh_token ==null) return {statusCode: 400} 
       console.log("get tokenscalled")
+      
       try {
             const fetchParams = {
                   method: 'POST',
@@ -122,25 +123,29 @@ export async function GetTokens(): Promise<{statusCode: number}> {
 
 export async function GetCurrentUser(): Promise<incomingUser | null> {
       const refreshStatus = await GetTokens()
-      if (refreshStatus.statusCode == 400) return null
-      try {
-            const fetchParams = {
-                  method: 'POST',
-                  headers: {
-                        'Content-Type': 'application/json',
-                        "Authorization": `Bearer ${localStorage.getItem('token')}`
+      if (refreshStatus.statusCode == 400) {
+            return null
+      } else {
+
+            try {
+                  const fetchParams = {
+                        method: 'POST',
+                        headers: {
+                              'Content-Type': 'application/json',
+                              "Authorization": `Bearer ${localStorage.getItem('token')}`
+                        }
+                  };
+                  const response = await fetch('/api/users/current', fetchParams);
+                  const data = await response.json();
+                  if (response.status == 200) {
+                        return data;
+                  } else {
+                        return null;
                   }
-            };
-            const response = await fetch('/api/users/current', fetchParams);
-            const data = await response.json();
-            if (response.status == 200) {
-                  return data;
-            } else {
+            } catch (err) {
+                  console.error(`error fetching curernt user data ${err}`);
                   return null;
             }
-      } catch (err) {
-            console.error(`error fetching curernt user data ${err}`);
-            return null;
       }
 }
 
