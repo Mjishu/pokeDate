@@ -130,3 +130,16 @@ func CreateOrganizationAnimal(pool *pgxpool.Pool, orgId, animalId uuid.UUID) (bo
 
 	return true, nil
 }
+
+func AddAnimalImage(pool *pgxpool.Pool, imageURL string, animalId uuid.UUID, priority int) error {
+	sql := `
+		INSERT INTO animal_images (animal_id, image_src, priority) VALUES ($1,$2,$3)
+	`
+
+	_, err := pool.Exec(context.TODO(), sql, animalId, imageURL, priority)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

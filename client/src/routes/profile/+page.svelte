@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { incomingUser } from '../../helpers/users';
-	import { GetCurrentUser, UpdateUser } from '../../helpers/users';
+	import { GetCurrentUser, LogoutUser, UpdateUser } from '../../helpers/users';
 	import { onMount } from 'svelte';
 	import { formatISO } from 'date-fns';
 	import Navbar from '../../components/Navbar.svelte';
@@ -82,6 +82,8 @@
 			</div>
 
 			<button onclick={() => (options.showEdit = !options.showEdit)}>Edit</button>
+			<button onclick={LogoutUser}>Logout</button>
+
 			{#if options.showEdit}
 				<form onsubmit={submitForm} autocomplete="off">
 					<div class="inputs">

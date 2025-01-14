@@ -35,14 +35,16 @@
 				Next_due: formatISO(new Date(shot.Next_due))
 			}))
 		};
-		await createAnimal(formattedAnimal);
+		let animal_id = await createAnimal(formattedAnimal);
+		console.log(`animal id is ${animal_id}`)
 		showNewAnimal = false;
+
 
 		if (Image_src != undefined) {
 			const formData = new FormData();
 			formData.append('animal_image', Image_src[0]);
 			try {
-				const response = await fetch(`/api/animals/images`, {
+				const response = await fetch(`/api/animals/images/${animal_id}`, {
 					method: 'POST',
 					headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
 					body: formData

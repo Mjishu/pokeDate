@@ -5,6 +5,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/base64"
+	"errors"
 	"io"
 	"mime"
 	"net/http"
@@ -23,7 +24,7 @@ func HandleUserImageUpload(w http.ResponseWriter, r *http.Request, pool *pgxpool
 	userIdString := r.PathValue("userID")
 	userId, err := uuid.Parse(userIdString)
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "could not find animal id ", err)
+		respondWithError(w, http.StatusBadRequest, "could not find user id ", err)
 		return
 	}
 
@@ -40,51 +41,14 @@ func HandleUserImageUpload(w http.ResponseWriter, r *http.Request, pool *pgxpool
 		return
 	}
 
-	const maxMemory = 10 << 20
-	r.ParseMultipartForm(maxMemory)
-
-	file, header, err := r.FormFile("profile_image")
+	//* temp file creation
+	mimeType, extension, tempFile, err := CreateImage(w, r, "profile_image", "profile_picture_src")
 	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "unable to parse form file", err)
-		return
-	}
-	defer file.Close()
-
-	mediaType := header.Header.Get("Content-Type")
-	mimeType, _, err := mime.ParseMediaType(mediaType)
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "unable to get mimeType from header", err)
-		return
-	}
-	if !(mimeType == "image/jpeg" || mimeType == "image/jpg" || mimeType == "image/webp" || mimeType == "image/png") { //* add more MIMETYPE here if i need
-		respondWithError(w, http.StatusBadRequest, "invalid mime type", err)
-		return
-	}
-
-	extensionArr := strings.Split(mediaType, "/")
-	extension := extensionArr[len(extensionArr)-1]
-
-	// create temp file here
-	tempFile, err := os.CreateTemp("", "profile-pic-upload."+extension)
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "could not create temp file", err)
+		respondWithError(w, http.StatusBadRequest, "error creating Image", err)
 		return
 	}
 	defer os.Remove(tempFile.Name())
 	defer tempFile.Close()
-
-	fileData, err := io.ReadAll(file)
-	if err != nil {
-		respondWithError(w, http.StatusBadRequest, "unable to read image data", err)
-		return
-	}
-
-	//copy data
-	_, err = io.Copy(tempFile, bytes.NewReader(fileData))
-	if err != nil {
-		respondWithError(w, http.StatusInternalServerError, "could not copy data", err)
-		return
-	}
 
 	userData, err := database.GetUserById(pool, userId)
 	if err != nil {
@@ -125,4 +89,46 @@ func HandleUserImageUpload(w http.ResponseWriter, r *http.Request, pool *pgxpool
 	}
 
 	respondWithJSON(w, http.StatusOK, userData)
+}
+
+func CreateImage(w http.ResponseWriter, r *http.Request, image_key, temp_file string) (string, string, *os.File, error) {
+	// reusable
+	const maxMemory = 10 << 20
+	r.ParseMultipartForm(maxMemory)
+
+	file, header, err := r.FormFile(image_key)
+	if err != nil {
+		return "", "", nil, err
+	}
+	defer file.Close()
+
+	mediaType := header.Header.Get("Content-Type")
+	mimeType, _, err := mime.ParseMediaType(mediaType)
+	if err != nil {
+		return "", "", nil, err
+	}
+	if !(mimeType == "image/jpeg" || mimeType == "image/jpg" || mimeType == "image/webp" || mimeType == "image/png") { //* add more MIMETYPE here if i need
+		return "", "", nil, errors.New("mimetype does not match")
+	}
+
+	extensionArr := strings.Split(mediaType, "/")
+	extension := extensionArr[len(extensionArr)-1]
+
+	// create temp file here
+	tempFile, err := os.CreateTemp("", temp_file+"."+extension)
+	if err != nil {
+		return "", "", nil, err
+	}
+
+	fileData, err := io.ReadAll(file)
+	if err != nil {
+		return "", "", nil, err
+	}
+
+	//copy data
+	_, err = io.Copy(tempFile, bytes.NewReader(fileData))
+	if err != nil {
+		return "", "", nil, err
+	}
+	return mimeType, extension, tempFile, nil
 }

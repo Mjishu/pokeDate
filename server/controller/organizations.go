@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -83,7 +82,10 @@ func CreateNewAnimal(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool,
 		return
 	}
 
-	fmt.Fprintf(w, "Body does not have an id!")
+	response := map[string]interface{}{
+		"Animal_id": storedAnimalId,
+	}
+	respondWithJSON(w, http.StatusOK, response)
 
 }
 

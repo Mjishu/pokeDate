@@ -1,4 +1,3 @@
-import { formatISO } from "date-fns";
 import { GetTokens } from "./auth";
 
 export type Animal = {
@@ -57,9 +56,7 @@ export type UpdatedAnimal = {
       Shots: NewShot[];
 }
 
-export async function createAnimal(animal: NewAnimal) {
-      //! Switch date_birth to be in the 2024-10-09T00:00:00Z format
-      console.log(animal)
+export async function createAnimal(animal: NewAnimal) { //? this needs to respond the created animals id
       if (animal == undefined) {
             console.error("cannot make an empty animal")
             return
@@ -72,14 +69,14 @@ export async function createAnimal(animal: NewAnimal) {
             },
             body: JSON.stringify({ ...animal })
       }
-      console.log(fetchParams.body)
       try {
             const response = await fetch("/api/organizations/animals/create", fetchParams)
             if (!response.ok) {
                   throw new Error(`issue uploading animal: ${response.statusText}`)
             }
             const data = await response.json()
-            // createAnimalImage(image, data.animal.Id, true)
+            console.log(data)
+            return data.Animal_id
       } catch (error) {
             console.error(`Error trying to create animal: ${error}`)
             return
@@ -146,17 +143,19 @@ export async function updateAnimalById(id: string, updatedAnimal: UpdatedAnimal)
 }
 
 export async function DeleteAnimalById(id: string): Promise<void> {
+      GetTokens()
       const fetchParams = {
             method: "DELETE",
             headers: {
-                  "Content-Type": "application/json"
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${localStorage.getItem("token")}`
             },
             body: JSON.stringify({ id })
       }
       try {
-            const response = await fetch("/api/animals", fetchParams)
+            const response = await fetch("/api/animals/delete", fetchParams)
             const data = await response.json()
-            return data
+            return data            
       } catch (error) {
             console.error(`error trying to delete animal: ${error}`)
             return

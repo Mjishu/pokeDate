@@ -11,6 +11,7 @@ import (
 
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
+	"github.com/mjishu/pokeDate/auth"
 	"github.com/mjishu/pokeDate/database"
 )
 
@@ -21,31 +22,32 @@ func GetImagePublicId(image_url string) string {
 	return finalString[0]
 }
 
+func CreateAnimal(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool) {
+	w.Header().Set("Content-Type", "application/json")
+	fmt.Println("The else in method post was called")
+
+	animal := GetAnimalFromBody(w, r)
+
+	database.InsertAnimal(pool, animal)
+
+	animal_id := database.GetAnimalByName(pool, animal.Name)
+
+	for _, values := range animal.Shots {
+		newShot := database.NewAnimalShot{Animal_id: animal_id, Shot_id: values.Shot_id, Date_given: values.Date_given, Date_due: values.Date_due}
+		database.InsertAnimalShots(pool, newShot)
+	}
+
+	response := map[string]interface{}{
+		"Animal_id": animal_id,
+	}
+
+	respondWithJSON(w, http.StatusOK, response)
+}
+
 func MainAnimalOperations(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool) {
 	switch r.Method {
 	case http.MethodPost:
-		w.Header().Set("Content-Type", "application/json")
-		fmt.Println("The else in method post was called")
-
-		animal := GetAnimalFromBody(w, r)
-
-		// if animal.Image_src != "" {
-		// 	animal_public_id := GetImagePublicId(animal.Image_src)
-		// 	fmt.Printf("iamge public id %v\n and animal url is %v\n", animal_public_id, animal.Image_src)
-		// 	database.UploadImage(cld, ctx, animal.Image_src)
-		// 	return //! get rid of this to make everything else work
-		// }
-
-		database.InsertAnimal(pool, animal)
-
-		animal_id := database.GetAnimalByName(pool, animal.Name)
-
-		for _, values := range animal.Shots {
-			newShot := database.NewAnimalShot{Animal_id: animal_id, Shot_id: values.Shot_id, Date_given: values.Date_given, Date_due: values.Date_due}
-			database.InsertAnimalShots(pool, newShot)
-		}
-
-		fmt.Fprintf(w, "Animal created Successfully!: %v\n", animal)
+		CreateAnimal(w, r, pool)
 	case http.MethodPut:
 		w.Header().Set("Content-Type", "application/json")
 
@@ -62,54 +64,46 @@ func MainAnimalOperations(w http.ResponseWriter, r *http.Request, pool *pgxpool.
 		database.UpdateAnimal2(pool, updatedAnimal) //TODO UPDATE THIS TO USE UPDATEANIMAL NOT 2
 		//!!
 		fmt.Fprintf(w, "Animal updated successfully")
-	case http.MethodDelete:
-		w.Header().Set("Content-Type", "application/json")
-
-		hasId, id := checkForBodyItem("id", w, r)
-
-		if hasId {
-			database.DeleteAnimal(pool, id)
-			fmt.Fprintf(w, "Animal was removed successfully")
-			return
-		}
-		fmt.Fprintf(w, "Id was not found in body!")
 	}
 }
 
-func AnimalController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool) {
+func AnimalController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
 	SetHeader(w)
 
-	if r.URL.Path == "/animals" {
+	switch r.URL.Path {
+	case "/animals":
 		MainAnimalOperations(w, r, pool)
-	} else if r.URL.Path == "/animals/images" {
-		AnimalImageOperations(w, r)
+	case "/animals/delete":
+		switch r.Method {
+		case http.MethodDelete:
+			DeleteAnimal(w, r, pool, jwtSecret)
+		}
 	}
 }
 
-func AnimalImageOperations(w http.ResponseWriter, r *http.Request) {
-	switch r.Method {
-	case http.MethodPost:
-		err := r.ParseMultipartForm(10 << 20)
-		if err != nil {
-			http.Error(w, "unable to parse form data", http.StatusBadRequest)
-			return
-		}
+func DeleteAnimal(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
+	SetHeader(w)
 
-		file, handler, err := r.FormFile("Image_src")
-		if err != nil {
-			http.Error(w, "error trying to form file", http.StatusBadRequest)
-			return
-		}
-		defer file.Close()
-
-		filePath := fmt.Sprintf("./uploads/%s", handler.Filename)
-		if filePath == "" {
-			return
-		}
-
-		// _, image_data := checkForBodyItem("FormData", w, r)
-		// database.UploadImage(cld, ctx, image_data)
+	token, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not find JWT", err)
+		return
 	}
+
+	_, err = auth.ValidateJWT(token, jwtSecret)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "could not validate JWT", err)
+		return
+	}
+
+	hasId, id := checkForBodyItem("id", w, r)
+	if !hasId {
+		respondWithError(w, http.StatusBadRequest, "could not find id in body", err)
+		return
+	}
+
+	database.DeleteAnimal(pool, id)
+	fmt.Fprintf(w, "Animal was removed successfully")
 }
 
 func GetFrontendURL() string {

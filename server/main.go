@@ -87,6 +87,13 @@ func main() {
 		controller.HandleUserImageUpload(w, r, pool, config.jwt_secret, config.s3Bucket, config.s3Region, config.s3Client)
 	})
 
+	mux.HandleFunc("/organizations/", func(w http.ResponseWriter, r *http.Request) {
+		controller.OrganizationController(w, r, pool, config.jwt_secret, s3Bucket, s3Region)
+	})
+	mux.HandleFunc("POST /animals/images/{animalID}", func(w http.ResponseWriter, r *http.Request) {
+		controller.UploadAnimalImage(w, r, pool, config.jwt_secret, config.s3Bucket, config.s3Region, config.s3Client)
+	})
+
 	mux.HandleFunc("/cards", func(w http.ResponseWriter, r *http.Request) {
 		_, err := auth.UserValid(r.Header, config.jwt_secret)
 		if err != nil {
@@ -98,11 +105,9 @@ func main() {
 		controller.CardsController(w, r, pool)
 	})
 	mux.HandleFunc("/animals/", func(w http.ResponseWriter, r *http.Request) {
-		controller.AnimalController(w, r, pool)
+		controller.AnimalController(w, r, pool, jwt_secret)
 	})
-	mux.HandleFunc("/organizations/", func(w http.ResponseWriter, r *http.Request) {
-		controller.OrganizationController(w, r, pool, config.jwt_secret, s3Bucket, s3Region)
-	})
+
 	mux.HandleFunc("/shots", func(w http.ResponseWriter, r *http.Request) {
 		controller.ShotController(w, r, pool)
 	})

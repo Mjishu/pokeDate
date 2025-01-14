@@ -1,5 +1,5 @@
 ## General
-
+- [ ] when creating animals, create image for them
 
 ## Frontend
 - [ ] where to call GetTokens so that each time the page is rerendered(or switch from / to /profile) it refreshes token? or something else

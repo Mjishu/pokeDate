@@ -34,6 +34,7 @@
             currentId = undefined;
             showDeleteForm = false;
             await DeleteAnimalById(id);
+            location.reload()
       }
 </script>
 
