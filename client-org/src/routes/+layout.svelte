@@ -13,6 +13,9 @@
 		orgData = await GetCurrentOrganization();
 		if (orgData != null) {
 			signedIn = true
+			if (window.location.pathname == "/login" || window.location.pathname == "/signup") {
+				goto("/")
+			}
 		} else if (orgData == null) {
 			if (window.location.pathname != "/login" && window.location.pathname != "/signup") {
 				goto("/login")

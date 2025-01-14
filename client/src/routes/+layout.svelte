@@ -13,6 +13,9 @@
 		userData = await GetCurrentUser();
 		if (userData != null) {
 			signedIn = true
+			if (window.location.pathname == "/login" || window.location.pathname == "/signup") {
+				goto("/")
+			}
 		} else if (userData == null) {
 			if (window.location.pathname != "/login" && window.location.pathname != "/signup") {
 				goto("/login")

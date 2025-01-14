@@ -8,8 +8,6 @@
 ## General
 
 ## Frontend
-- if user is NOT signed in should redirect them to login page 
-- if user IS logged in, they should not be able to go to the sign in or login pages.
 -  when calling GetTokens inside funciton calls(getcurrentanimals) it doesn't seem to properly await the function? it says invalid token even though its an await?
 
 ## Backend

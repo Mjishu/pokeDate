@@ -60,6 +60,7 @@ export async function loginUser(formData: userData): Promise<boolean> {
                   console.log("status 200")
                   localStorage.setItem("refresh_token", data.refresh_token)
                   localStorage.setItem("token", data.token)
+                  return true
             }
       } catch (error) {
             console.error('There was an error creating user: ' + error);
@@ -94,7 +95,8 @@ export async function LogoutUser() {
 }
 
 export async function GetTokens(): Promise<{statusCode: number}> {
-      const refresh_token = localStorage.getItem('token')
+      const refresh_token = localStorage.getItem('refresh_token')
+      console.log(`refresh token is ${refresh_token}`)
       if (refresh_token ==null) return {statusCode: 400} 
       console.log("get tokenscalled")
       try {
