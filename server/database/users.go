@@ -19,13 +19,15 @@ type User struct {
 	Email           string
 	Profile_picture *string
 	Date_of_birth   time.Time
+	Is_organization bool
 }
 
 type NewUser struct {
-	Id       uuid.UUID
-	Username string `json:"Username"`
-	Password string `json:"Password"`
-	Email    string `json:"Email"`
+	Id              uuid.UUID
+	Username        string `json:"Username"`
+	Password        string `json:"Password"`
+	Email           string `json:"Email"`
+	Is_organization bool   `json:"Is_organization"`
 	// Date_of_birth time.Time `json:"Date_of_birth"`
 }
 
@@ -75,10 +77,10 @@ func CreateUser(pool *pgxpool.Pool, user User) (uuid.UUID, error) {
 	if exists {
 		return uuid.UUID{}, errors.New("user already exists")
 	}
-	sql := `INSERT INTO users(username,password,email,profile_picture_src) VALUES ($1,$2, $3, $4) RETURNING id`
+	sql := `INSERT INTO users(username,password,email,profile_picture_src, is_organization) VALUES ($1,$2, $3, $4, $5) RETURNING id`
 
 	var storedId uuid.UUID
-	pool.QueryRow(context.TODO(), sql, user.Username, user.HashPassword, user.Email, user.Profile_picture).Scan(&storedId) //add other options for new user like dob and email
+	pool.QueryRow(context.TODO(), sql, user.Username, user.HashPassword, user.Email, user.Profile_picture, user.Is_organization).Scan(&storedId) //add other options for new user like dob and email
 	if (storedId == uuid.UUID{}) {
 		return uuid.UUID{}, errors.New("users Stored Id came out as empty")
 	}

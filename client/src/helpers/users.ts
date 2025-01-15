@@ -1,8 +1,10 @@
-export type userData = {
+//? userData and incomingUser can be the same type, just add ? option param
+export type userData = { 
       Username: string;
       Password: string;
       Email?: string;
       C_password?: string;
+      Is_organization?: boolean;
 }
 
 export type incomingUser = {
@@ -10,10 +12,19 @@ export type incomingUser = {
       Username: string;
       Email: string;
       Profile_picture: string;
+      Date_of_birth?: string;
+      Is_organization: boolean
+}
+
+type updatedUser = {
+      Username: string;
+      Email: string;
       Date_of_birth: string;
+      Id: string;
 }
 
 export async function CreateUser(formData: userData): Promise<boolean> {
+      console.log(formData)
       if (formData.Password != formData.C_password) {
             alert("passwords do not match")
             return false
@@ -23,7 +34,7 @@ export async function CreateUser(formData: userData): Promise<boolean> {
             headers: {
                   'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ Username: formData.Username, Email: formData.Email, Password: formData.Password })
+            body: JSON.stringify({ Username: formData.Username, Email: formData.Email, Password: formData.Password, Is_organization: formData.Is_organization})
       };
 
       try {
@@ -99,7 +110,7 @@ export async function GetTokens(): Promise<{statusCode: number}> {
 
       if (refresh_token ==null) return {statusCode: 400} 
       console.log("get tokenscalled")
-      
+
       try {
             const fetchParams = {
                   method: 'POST',
@@ -149,12 +160,7 @@ export async function GetCurrentUser(): Promise<incomingUser | null> {
       }
 }
 
-type updatedUser = {
-      Username: string;
-      Email: string;
-      Date_of_birth: string;
-      Id: string;
-}
+
 
 export async function UpdateUser(userBody: updatedUser): Promise<number> {
       try {

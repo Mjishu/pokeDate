@@ -6,7 +6,8 @@
 		Username: '',
 		Email: '',
 		Password: '',
-		C_password: ''
+		C_password: '',
+		Is_organizaiton: false
 	};
 
 	async function submitForm(e: Event) {
@@ -42,6 +43,10 @@
 					id="confirm-password"
 					name="confirm-password"
 				/>
+			</div>
+			<div class="input-paren">
+				<label for="is_org">Are you an Organization?</label>
+				<input type="checkbox" name="is_org" id="is_org" bind:checked={formData.Is_organizaiton}>
 			</div>
 		</div>
 
