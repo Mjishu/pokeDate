@@ -49,9 +49,9 @@ func GetUserById(pool *pgxpool.Pool, id uuid.UUID) (User, error) {
 	var user User
 	var dateOfBirth pgtype.Date
 
-	rows := pool.QueryRow(context.TODO(), "SELECT id,username,email, profile_picture_src, date_of_birth FROM users WHERE id = $1", id)
+	rows := pool.QueryRow(context.TODO(), "SELECT id,username,email, profile_picture_src, date_of_birth, is_organization FROM users WHERE id = $1", id)
 	err := rows.Scan(
-		&user.Id, &user.Username, &user.Email, &user.Profile_picture, &dateOfBirth,
+		&user.Id, &user.Username, &user.Email, &user.Profile_picture, &dateOfBirth, &user.Is_organization,
 	)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Query row failed in GetUserById %v\n", err)

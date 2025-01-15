@@ -109,42 +109,41 @@ func CreateUser(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtS
 
 	// creates user
 	user.HashPassword = hashedPassword
-	fmt.Printf("New User is %v\n", user)
-	// storedId, err := database.CreateUser(pool, user)
-	// if err != nil {
-	// 	respondWithError(w, http.StatusBadRequest, "could not create user", err)
-	// 	return
-	// }
+	storedId, err := database.CreateUser(pool, user)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not create user", err)
+		return
+	}
 
-	// //* Token information
-	// expiresIn := time.Duration(15 * time.Minute)
+	//* Token information
+	expiresIn := time.Duration(15 * time.Minute)
 
-	// token, err := auth.MakeJWT(storedId, jwtSecret, expiresIn)
-	// if err != nil {
-	// 	respondWithError(w, http.StatusBadRequest, "could not create JWT", err)
-	// 	return
-	// }
+	token, err := auth.MakeJWT(storedId, jwtSecret, expiresIn)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not create JWT", err)
+		return
+	}
 
-	// refresh_token, err := auth.MakeRefreshToken()
-	// if err != nil {
-	// 	respondWithError(w, http.StatusBadRequest, "could not create refresh token", err)
-	// 	return
-	// }
-	// _, err = database.CreateRefreshToken(pool, refresh_token, storedId)
-	// if err != nil {
-	// 	respondWithError(w, http.StatusInternalServerError, "could not store refresh token", err)
-	// 	return
-	// }
+	refresh_token, err := auth.MakeRefreshToken()
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not create refresh token", err)
+		return
+	}
+	_, err = database.CreateRefreshToken(pool, refresh_token, storedId)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "could not store refresh token", err)
+		return
+	}
 
-	// response := map[string]interface{}{
-	// 	"username":      user.Username,
-	// 	"id":            user.Id,
-	// 	"status":        http.StatusOK,
-	// 	"token":         token,
-	// 	"refresh_token": refresh_token,
-	// }
+	response := map[string]interface{}{
+		"username":      user.Username,
+		"id":            user.Id,
+		"status":        http.StatusOK,
+		"token":         token,
+		"refresh_token": refresh_token,
+	}
 
-	// respondWithJSON(w, http.StatusOK, response)
+	respondWithJSON(w, http.StatusOK, response)
 }
 
 func GetCurrentUser(w http.ResponseWriter, header http.Header, pool *pgxpool.Pool, jwtSecret, s3Bucket, s3Region string) {

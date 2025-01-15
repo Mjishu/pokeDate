@@ -32,7 +32,7 @@
 			Next_due: ''
 		});
 	}
-	onMount(async () => {
+	onMount(async () => { //! Not calling correct route!
 		shotData = await GetAllShots();
 		animal = await getAnimalById(currentId);
 

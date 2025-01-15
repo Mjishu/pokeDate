@@ -44,6 +44,7 @@ export type NewAnimal = {
 
 type NewShot = {
       Id: number;
+      Name?: string;
       Date_given: string;
       Next_due: string;
 }
@@ -106,12 +107,13 @@ export async function getAnimalById(id: string) {
       const fetchParams = { //causes error on backend bc it thinks its getting a new animal to create
             method: "POST",
             headers: {
-                  "Content-Type": "application/json"
+                  "Content-Type": "application/json",
+                  "Authorization": `Bearer ${localStorage.getItem("token")}`
             },
-            body: JSON.stringify({ id: id })
       }
       try {
-            const response = await fetch("/api/organizations/animals", fetchParams)
+            const response = await fetch(`/api/animals/animals/${id}`, fetchParams) //! calls wrong route, gets array of animals instead of just 1?
+            console.log("awaiting response", id)
             const data = await response.json()
             return data
       } catch (error) {

@@ -68,6 +68,31 @@ func MainAnimalOperations(w http.ResponseWriter, r *http.Request, pool *pgxpool.
 	}
 }
 
+func GetAnimal(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
+	animalId := r.PathValue("animalID")
+	fmt.Printf("get animal was called, animal id is %v\n", animalId)
+
+	token, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not find JWT", err)
+		return
+	}
+
+	_, err = auth.ValidateJWT(token, jwtSecret)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "not the correct JWT", err)
+		return
+	}
+
+	animal, err := database.GetAnimal(pool, animalId)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not find animals of this org", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, animal)
+}
+
 func AnimalController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret, s3Bucket string, s3Client *s3.Client) {
 	SetHeader(w)
 

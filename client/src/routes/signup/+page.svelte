@@ -7,7 +7,7 @@
 		Email: '',
 		Password: '',
 		C_password: '',
-		Is_organizaiton: false
+		Is_organization: false
 	};
 
 	async function submitForm(e: Event) {
@@ -46,7 +46,7 @@
 			</div>
 			<div class="input-paren">
 				<label for="is_org">Are you an Organization?</label>
-				<input type="checkbox" name="is_org" id="is_org" bind:checked={formData.Is_organizaiton}>
+				<input type="checkbox" name="is_org" id="is_org" bind:checked={formData.Is_organization}>
 			</div>
 		</div>
 

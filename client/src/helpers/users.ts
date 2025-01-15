@@ -34,8 +34,15 @@ export async function CreateUser(formData: userData): Promise<boolean> {
             headers: {
                   'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ Username: formData.Username, Email: formData.Email, Password: formData.Password, Is_organization: formData.Is_organization})
+            body: JSON.stringify({ 
+                  Username: formData.Username, 
+                  Email: formData.Email, 
+                  Password: formData.Password, 
+                  Is_organization: formData.Is_organization
+            })
       };
+
+      console.log(fetchParams.body)
 
       try {
             const response = await fetch('/api/users/create', fetchParams);
