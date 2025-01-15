@@ -112,7 +112,7 @@ export async function getAnimalById(id: string) {
             },
       }
       try {
-            const response = await fetch(`/api/animals/animals/${id}`, fetchParams) //! calls wrong route, gets array of animals instead of just 1?
+            const response = await fetch(`/api/animals/${id}`, fetchParams) //! calls wrong route, gets array of animals instead of just 1?
             console.log("awaiting response", id)
             const data = await response.json()
             return data

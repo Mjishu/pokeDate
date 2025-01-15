@@ -92,8 +92,8 @@ func main() {
 	mux.HandleFunc("/organizations/", func(w http.ResponseWriter, r *http.Request) {
 		controller.OrganizationController(w, r, pool, config.jwt_secret, s3Bucket, s3Region)
 	})
-	mux.HandleFunc("POST /animals/animals/{animalID}", func(w http.ResponseWriter, r *http.Request) {
-		controller.GetCurrentOrganizationAnimals(w, r, pool, config.jwt_secret)
+	mux.HandleFunc("POST /animals/{animalID}", func(w http.ResponseWriter, r *http.Request) {
+		controller.GetAnimal(w, r, pool, config.jwt_secret)
 	})
 	mux.HandleFunc("POST /animals/images/{animalID}", func(w http.ResponseWriter, r *http.Request) {
 		controller.UploadAnimalImage(w, r, pool, config.jwt_secret, config.s3Bucket, config.s3Region, config.s3Client)

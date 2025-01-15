@@ -70,7 +70,6 @@ func MainAnimalOperations(w http.ResponseWriter, r *http.Request, pool *pgxpool.
 
 func GetAnimal(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
 	animalId := r.PathValue("animalID")
-	fmt.Printf("get animal was called, animal id is %v\n", animalId)
 
 	token, err := auth.GetBearerToken(r.Header)
 	if err != nil {
