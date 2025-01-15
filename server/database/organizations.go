@@ -3,7 +3,6 @@ package database
 import (
 	"context"
 	"errors"
-	"fmt"
 
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -15,60 +14,6 @@ type Organization struct {
 	Password        string    `json:"Password"`
 	Email           *string   `json:"Email"`
 	Profile_picture string
-}
-
-func CreateOrganization(pool *pgxpool.Pool, org Organization) (uuid.UUID, error) {
-	sql := `
-		INSERT INTO users (username,password,email, is_organization, profile_picture_src) VALUES ($1, $2, $3, true, $4) RETURNING id
-	`
-
-	//* checks if org with same name exists
-	var orgExists string
-	row := pool.QueryRow(context.TODO(), "SELECT * FROM users WHERE username = $1 AND is_organization = true", org.Name)
-	err := row.Scan(&orgExists)
-	if err == nil {
-		return uuid.UUID{}, errors.New("an organization with that name already exists")
-	}
-
-	var orgId uuid.UUID
-	pool.QueryRow(context.TODO(), sql, org.Name, org.Password, org.Email, org.Profile_picture).Scan(&orgId)
-	if (orgId == uuid.UUID{}) {
-		return uuid.UUID{}, errors.New("new organization id is empty")
-	}
-	return orgId, nil
-}
-
-func GetOrganization(pool *pgxpool.Pool, id uuid.UUID) Organization {
-	sql := `
-		select id, username, email, profile_picture_src from users where id = $1 AND is_organization = true
-	`
-
-	var organization Organization
-	pool.QueryRow(context.TODO(), sql, id).Scan(&organization.Id, &organization.Name, &organization.Email, &organization.Profile_picture)
-	return organization
-}
-
-// * this returns nil nil
-func GetOrganizationByName(pool *pgxpool.Pool, name string) Organization { //* should be fixed, got 4 items instead of 3 so maybe
-	sql := `
-		SELECT id, username FROM users WHERE username = $1 AND is_organization = true
-	`
-	var organization Organization
-	pool.QueryRow(context.TODO(), sql, name).Scan(&organization.Id, &organization.Name)
-
-	fmt.Printf("stored organization is %v\n", organization) // this gives big null error?
-	return organization
-}
-
-func UpdateOrganization(pool *pgxpool.Pool, org Organization) error {
-	sql := `
-		UPDATE users SET username = $1, email = $2 WHERE id = $3 AND is_organization = true
-	`
-	_, err := pool.Exec(context.TODO(), sql, org.Name, org.Email, org.Id)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func GetOrganizationAnimals(pool *pgxpool.Pool, id uuid.UUID) ([]Animal, error) {

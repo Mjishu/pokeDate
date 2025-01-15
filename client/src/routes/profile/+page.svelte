@@ -95,6 +95,7 @@
 							<label for="email">Email</label>
 							<input type="text" placeholder="email" bind:value={updatedUserData.Email} />
 						</div>
+						{#if !userData.Is_organization}
 						<div class="input-holder">
 							<label for="dob">Date of Birth</label>
 							<input
@@ -103,6 +104,7 @@
 								bind:value={updatedUserData.Date_of_birth}
 							/>
 						</div>
+						{/if}
 						<div class="input-holder">
 							<label for="profile-picture">Profile Picture</label>
 							<input

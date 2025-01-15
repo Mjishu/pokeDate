@@ -106,6 +106,7 @@ export async function LogoutUser() {
 
             localStorage.removeItem("token")
             localStorage.removeItem("refresh_token")
+            location.reload()
       } catch (error) {
             console.error(`error trying to sign you out ${error}`)
             return

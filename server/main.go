@@ -106,7 +106,6 @@ func main() {
 			return
 		}
 
-		//* CONTROLLER
 		controller.CardsController(w, r, pool)
 	})
 	mux.HandleFunc("/animals/", func(w http.ResponseWriter, r *http.Request) {
