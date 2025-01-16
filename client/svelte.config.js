@@ -18,6 +18,7 @@ const config = {
 			precompress: false,
 			strict: true
 		}),
+		preprocess: vitePreprocess
 	}
 };
 
