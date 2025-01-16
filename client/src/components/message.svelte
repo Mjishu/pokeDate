@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { GetMessage } from '../helpers/messages';
-	import type { Messages } from '../helpers/messages';
+	import type { Messages,Conversation } from '../helpers/messages';
 
 	let { id } = $props();
 
-	let MessageData: Messages | null = $state(null);
+	let MessageData: Conversation | null = $state(null);
 	let NewMessage: string = $state('');
 
 	// let id = "grab something from message called, this will probably be props"
@@ -21,7 +21,7 @@
 </script>
 
 {#if MessageData !== null}
-	{#each MessageData.message as data}
+	{#each MessageData.Messages as data}
 		<p>data.content</p>
 	{/each}
 {/if}

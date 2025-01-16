@@ -12,8 +12,8 @@ import (
 type Conversation struct {
 	Id                uuid.UUID
 	Conversation_name string
-	// Members           []Conversation_member
-	// Messages          []Messages
+	Members           []Conversation_member
+	Messages          []Messages
 }
 
 type Messages struct {
@@ -123,6 +123,7 @@ func GetConversation(pool *pgxpool.Pool, conversationId uuid.UUID) (Messages, er
 		messages m ON c.id  = m.conversation_id
 		WHERE c.id = $1
 	` // select all the stuff from messages, instead of *
+	// this should call GetMessages and getMessageUsers
 
 	var messages Messages
 	pool.QueryRow(context.TODO(), sql, conversationId).Scan() // scan into messages all stuff from sql query
