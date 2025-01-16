@@ -31,7 +31,7 @@ func Database(pool *pgxpool.Pool) {
 	// defer pool.Close()
 
 	// callSchemas(context.TODO(), pool)
-	PopulateDB(context.TODO(), pool)
+	// PopulateDB(context.TODO(), pool)
 	// getLocations(context.TODO(), pool)
 }
 

@@ -120,6 +120,15 @@ func main() {
 		controller.RevokeToken(w, r, pool)
 	})
 
+	//* Messages
+	mux.HandleFunc("POST /messages", func(w http.ResponseWriter, r *http.Request) {
+		controller.CurrentUserMessages(w, r, pool, config.jwt_secret)
+	})
+
+	mux.HandleFunc("POST /messages/{messageID}", func(w http.ResponseWriter, r *http.Request) {
+		controller.GetMessage(w, r, pool, config.jwt_secret)
+	})
+
 	database.Database(pool)
 
 	port := ":8080"

@@ -9,15 +9,19 @@ import (
 )
 
 func callSchemas(ctx context.Context, pool *pgxpool.Pool) {
-	createLocations(ctx, pool)
-	createUsers(ctx, pool)
-	// createOrganization(ctx, pool)
-	createShots(ctx, pool)
-	createAnimals(ctx, pool)
-	createAnimalImages(ctx, pool)
-	createAnimalShots(ctx, pool)
-	createOrganizationAnimals(ctx, pool)
-	createUserAnimals(ctx, pool)
+	// createLocations(ctx, pool)
+	// createUsers(ctx, pool)
+	// // createOrganization(ctx, pool)
+	// createShots(ctx, pool)
+	// createAnimals(ctx, pool)
+	// createAnimalImages(ctx, pool)
+	// createAnimalShots(ctx, pool)
+	// createOrganizationAnimals(ctx, pool)
+	// createUserAnimals(ctx, pool)
+
+	createConverstaion(pool)
+	createConversationMember(pool)
+	createMessages(pool)
 }
 
 // * DONE SO FAR: locations, users, organizations, shots
@@ -175,6 +179,47 @@ func createRefreshTokens(ctx context.Context, pool *pgxpool.Pool) {
 	`
 	_, err := pool.Exec(ctx, sql)
 	queryFail(err, "refresh tokens")
+}
+
+func createConverstaion(pool *pgxpool.Pool) {
+	sql := `
+		CREATE TABLE IF NOT EXISTS conversation (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+			conversation_name VARCHAR(90)
+		)
+	`
+
+	_, err := pool.Exec(context.TODO(), sql)
+	queryFail(err, "createConversations")
+}
+
+func createConversationMember(pool *pgxpool.Pool) {
+	sql := `
+		CREATE TABLE IF NOT EXISTS conversation_member (
+			member_id UUID REFERENCES users(id) NOT NULL,
+			conversation_id UUID REFERENCES conversation(id) NOT NULL,
+			joined_datetime TIMESTAMPTZ DEFAULT now() NOT NULL,
+			left_datetime TIMESTAMPTZ 
+		)
+	`
+
+	_, err := pool.Exec(context.TODO(), sql)
+	queryFail(err, "conversation_member")
+}
+
+func createMessages(pool *pgxpool.Pool) {
+	sql := `
+		CREATE TABLE IF NOT EXISTS messages (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+			from_id UUID REFERENCES users(id) NOT NULL,
+			message_text text NOT NULL,
+			sent_datetime TIMESTAMPTZ DEFAULT now() NOT NULL,
+			conversation_id UUID references conversation(id)
+		)
+	`
+
+	_, err := pool.Exec(context.TODO(), sql)
+	queryFail(err, "createMessages")
 }
 
 // ! todo: add messages, conversation, conversation_member
