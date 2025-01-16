@@ -124,6 +124,13 @@ func main() {
 	mux.HandleFunc("POST /messages", func(w http.ResponseWriter, r *http.Request) {
 		controller.CurrentUserMessages(w, r, pool, config.jwt_secret)
 	})
+	mux.HandleFunc("POST /messages/create", func(w http.ResponseWriter, r *http.Request) {
+		controller.CreateConversation(w, r, pool, config.jwt_secret)
+	})
+
+	mux.HandleFunc("POST /messages/send", func(w http.ResponseWriter, r *http.Request) {
+		controller.CreateMessage(w, r, pool, config.jwt_secret)
+	})
 
 	mux.HandleFunc("POST /messages/{messageID}", func(w http.ResponseWriter, r *http.Request) {
 		controller.GetMessage(w, r, pool, config.jwt_secret)

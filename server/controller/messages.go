@@ -65,3 +65,61 @@ func GetMessage(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, JWTS
 
 	respondWithJSON(w, http.StatusOK, message)
 }
+
+func CreateConversation(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
+	token, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not find JWT", err)
+		return
+	}
+
+	userId, err := auth.ValidateJWT(token, jwtSecret)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "unabled to validate JWT", err)
+		return
+	}
+
+	var bodyId uuid.UUID //? not sure if this should be animals id and then find the org based on the animal or the org id
+	err = checkBody(w, r, bodyId)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "did not find recipeint or animal id in body", err)
+	}
+
+	conversationId, err := database.CreateConversation(pool, userId, bodyId)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "could not create conversation", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, conversationId)
+}
+
+func CreateMessage(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
+	token, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not find JWT", err)
+		return
+	}
+
+	userId, err := auth.ValidateJWT(token, jwtSecret)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "unabled to validate JWT", err)
+		return
+	}
+
+	var messageBody database.Messages
+	err = checkBody(w, r, messageBody)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "did not find message body", err)
+	}
+
+	//todo: check if user is a conversation member of this conversation if not return error
+
+	err = database.CreateMessage(pool, userId, messageBody)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not create message", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, nil)
+}

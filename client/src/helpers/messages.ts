@@ -68,3 +68,28 @@ export async function GetMessage(id: string): Promise<Conversation | null> {
             return null
       }
 }
+
+export async function CreateMessage(): Promise<string | null> {
+      await GetTokens()
+      try{
+            const fetchParams = {
+                  method:"POST",
+                  headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${localStorage.getItem("token")}`
+                  }
+            }
+            const response = await fetch("/api/messages/create", fetchParams)
+            const data = await response.json()
+            console.log(data)
+            if(!response.ok) {
+                  console.error("response not ok")
+                  return null
+            }
+            return data.id
+      }catch(error) {
+            console.error("error trying to create new message", error)
+            return null
+      }
+
+}

@@ -2,10 +2,12 @@ package database
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/jackc/pgx/pgtype"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -52,15 +54,23 @@ func GetMessageUsers(pool *pgxpool.Pool, conversationId uuid.UUID) ([]Conversati
 	`
 
 	var members []Conversation_member
+
 	rows, err := pool.Query(context.TODO(), sql, conversationId)
 	if err != nil {
 		return []Conversation_member{}, err
 	}
 	for rows.Next() {
 		var member Conversation_member
-		err := rows.Scan(&member.Member_id, &member.Conversation_id, &member.Joined_datetime, &member.Left_datetime)
+		var left_date pgtype.Date
+
+		err := rows.Scan(&member.Member_id, &member.Conversation_id, &member.Joined_datetime, &left_date)
 		if err != nil {
 			return []Conversation_member{}, err
+		}
+		if left_date.Status == pgtype.Present {
+			member.Left_datetime = left_date.Time
+		} else {
+			member.Left_datetime = time.Time{} //! sets time to time.Nil , make sure to properly check for this later
 		}
 		members = append(members, member)
 	}
@@ -110,14 +120,29 @@ func GetConversations(pool *pgxpool.Pool, userId uuid.UUID) ([]Conversation, err
 		if err != nil {
 			return []Conversation{}, err
 		}
+		users, err := GetMessageUsers(pool, conversation.Id)
+		if err != nil {
+			fmt.Println("2")
+			return []Conversation{}, err
+		}
+
+		messages, err := GetMessages(pool, conversation.Id)
+		if err != nil {
+			return []Conversation{}, err
+		}
+
+		conversation.Members = users
+		conversation.Messages = messages
+
 		conversationSlice = append(conversationSlice, conversation)
 	}
+
 	fmt.Printf("the items are %v\n", conversationSlice)
 	return conversationSlice, nil
 }
 
 // * fix the sql query to properly store the resposes
-func GetConversation(pool *pgxpool.Pool, conversationId uuid.UUID) (Messages, error) {
+func GetConversation(pool *pgxpool.Pool, conversationId uuid.UUID) (Conversation, error) {
 	sql := `
 		SELECT c.conversation_name, m.id, m.from_id, m.message_text, m.sent_datetime FROM conversation c LEFT JOIN
 		messages m ON c.id  = m.conversation_id
@@ -125,8 +150,50 @@ func GetConversation(pool *pgxpool.Pool, conversationId uuid.UUID) (Messages, er
 	` // select all the stuff from messages, instead of *
 	// this should call GetMessages and getMessageUsers
 
-	var messages Messages
+	var conversation Conversation
 	pool.QueryRow(context.TODO(), sql, conversationId).Scan() // scan into messages all stuff from sql query
 
-	return messages, nil
+	users, err := GetMessageUsers(pool, conversation.Id)
+	if err != nil {
+		fmt.Println("2")
+		return Conversation{}, err
+	}
+
+	messages, err := GetMessages(pool, conversation.Id)
+	if err != nil {
+		return Conversation{}, err
+	}
+
+	conversation.Members = users
+	conversation.Messages = messages
+
+	return conversation, nil
+}
+
+func CreateConversation(pool *pgxpool.Pool, userId uuid.UUID, recipientId uuid.UUID) (uuid.UUID, error) {
+	conversationSql := `INSERT INTO conversation (conversation_name) VALUES ('New Conversation') RETURNING id`
+	memberSql := `INSERT INTO conversation_member (member_id, conversation_id) VALUES ($1, $2)`
+
+	var conversationId uuid.UUID
+	pool.QueryRow(context.TODO(), conversationSql).Scan(&conversationId)
+	if (conversationId == uuid.UUID{}) {
+		return uuid.UUID{}, errors.New("conversation id is nil")
+	}
+
+	_, err := pool.Exec(context.TODO(), memberSql, userId, conversationId)
+	if err != nil {
+		return uuid.UUID{}, nil
+	}
+
+	_, err = pool.Exec(context.TODO(), memberSql, recipientId, conversationId)
+	if err != nil {
+		return uuid.UUID{}, nil
+	}
+
+	return conversationId, nil
+
+}
+
+func CreateMessage(pool *pgxpool.Pool, userId uuid.UUID, messageData Messages) error {
+	return nil
 }
