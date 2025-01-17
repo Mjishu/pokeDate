@@ -128,14 +128,13 @@ func main() {
 		controller.CreateConversation(w, r, pool, config.jwt_secret)
 	})
 
-	mux.HandleFunc("POST /messages/send", func(w http.ResponseWriter, r *http.Request) {
-		controller.CreateMessage(w, r, pool, config.jwt_secret)
-	})
-
 	mux.HandleFunc("POST /messages/{messageID}", func(w http.ResponseWriter, r *http.Request) {
 		controller.GetMessage(w, r, pool, config.jwt_secret)
 	})
 
+	mux.HandleFunc("POST /messages/{messageID}/send", func(w http.ResponseWriter, r *http.Request) {
+		controller.CreateMessage(w, r, pool, config.jwt_secret)
+	})
 	database.Database(pool)
 
 	port := ":8080"

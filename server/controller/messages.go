@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/google/uuid"
@@ -95,6 +96,13 @@ func CreateConversation(w http.ResponseWriter, r *http.Request, pool *pgxpool.Po
 }
 
 func CreateMessage(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
+	messageIdString := r.PathValue("messageID")
+	messageId, err := uuid.Parse(messageIdString)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not parse messageId to UUID", err)
+		return
+	}
+
 	token, err := auth.GetBearerToken(r.Header)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "could not find JWT", err)
@@ -108,13 +116,15 @@ func CreateMessage(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, j
 	}
 
 	var messageBody database.Messages
-	err = checkBody(w, r, messageBody)
+	err = checkBody(w, r, &messageBody) //! ends up as empty string in db?
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "did not find message body", err)
 	}
 
-	//todo: check if user is a conversation member of this conversation if not return error
+	messageBody.Conversation_id = messageId
+	messageBody.From_id = userId
 
+	fmt.Printf("the message body is %v\n", messageBody)
 	err = database.CreateMessage(pool, userId, messageBody)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "could not create message", err)

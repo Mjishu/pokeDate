@@ -22,8 +22,9 @@ type Messages struct {
 	Id              uuid.UUID
 	From_id         uuid.UUID //References users
 	Conversation_id uuid.UUID
-	Message_text    string
+	Message_text    string `json:"message"`
 	Sent_datetime   time.Time
+	From_user       User
 }
 
 type Conversation_member struct {
@@ -31,6 +32,7 @@ type Conversation_member struct {
 	Conversation_id uuid.UUID // References Conversation
 	Joined_datetime time.Time
 	Left_datetime   time.Time
+	User            User
 }
 
 /*
@@ -72,6 +74,13 @@ func GetMessageUsers(pool *pgxpool.Pool, conversationId uuid.UUID) ([]Conversati
 		} else {
 			member.Left_datetime = time.Time{} //! sets time to time.Nil , make sure to properly check for this later
 		}
+
+		user, err := GetUserById(pool, member.Member_id)
+		if err != nil {
+			return []Conversation_member{}, err
+		}
+		member.User = user
+
 		members = append(members, member)
 	}
 	return members, nil
@@ -95,6 +104,13 @@ func GetMessages(pool *pgxpool.Pool, conversationId uuid.UUID) ([]Messages, erro
 			return []Messages{}, err
 		}
 		message.Conversation_id = conversationId
+
+		user, err := GetUserById(pool, message.From_id)
+		if err != nil {
+			return []Messages{}, err
+		}
+		message.From_user = user
+
 		messageSlice = append(messageSlice, message)
 	}
 	return messageSlice, nil
@@ -137,21 +153,19 @@ func GetConversations(pool *pgxpool.Pool, userId uuid.UUID) ([]Conversation, err
 		conversationSlice = append(conversationSlice, conversation)
 	}
 
-	fmt.Printf("the items are %v\n", conversationSlice)
 	return conversationSlice, nil
 }
 
 // * fix the sql query to properly store the resposes
 func GetConversation(pool *pgxpool.Pool, conversationId uuid.UUID) (Conversation, error) {
+	fmt.Printf("conversation id is %v\n", conversationId)
 	sql := `
-		SELECT c.conversation_name, m.id, m.from_id, m.message_text, m.sent_datetime FROM conversation c LEFT JOIN
-		messages m ON c.id  = m.conversation_id
-		WHERE c.id = $1
+		SELECT conversation_name, id FROM conversation WHERE id = $1
 	` // select all the stuff from messages, instead of *
 	// this should call GetMessages and getMessageUsers
 
 	var conversation Conversation
-	pool.QueryRow(context.TODO(), sql, conversationId).Scan() // scan into messages all stuff from sql query
+	pool.QueryRow(context.TODO(), sql, conversationId).Scan(&conversation.Conversation_name, &conversation.Id) // scan into messages all stuff from sql query
 
 	users, err := GetMessageUsers(pool, conversation.Id)
 	if err != nil {
@@ -166,6 +180,8 @@ func GetConversation(pool *pgxpool.Pool, conversationId uuid.UUID) (Conversation
 
 	conversation.Members = users
 	conversation.Messages = messages
+
+	fmt.Printf("message is %v\n", messages)
 
 	return conversation, nil
 }
@@ -195,5 +211,32 @@ func CreateConversation(pool *pgxpool.Pool, userId uuid.UUID, recipientId uuid.U
 }
 
 func CreateMessage(pool *pgxpool.Pool, userId uuid.UUID, messageData Messages) error {
+	exists, err := UserMessageExists(pool, userId)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return errors.New("user")
+	}
+
+	sql := `INSERT INTO messages (from_id, message_text, conversation_id) VALUES ($1, $2, $3) `
+
+	_, err = pool.Exec(context.TODO(), sql, userId, messageData.Message_text, messageData.Conversation_id)
+	if err != nil {
+		return err
+	}
+
 	return nil
+}
+
+func UserMessageExists(pool *pgxpool.Pool, userId uuid.UUID) (bool, error) {
+	sql := `SELECT c.id FROM conversation_member cm LEFT JOIN conversation c ON cm.conversation_id = c.id WHERE cm.member_id = $1`
+
+	var id uuid.UUID
+	err := pool.QueryRow(context.TODO(), sql, userId).Scan(&id)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
 }
