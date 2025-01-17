@@ -2,11 +2,11 @@ package controller
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/mjishu/pokeDate/auth"
 	"github.com/mjishu/pokeDate/database"
 )
 
@@ -28,7 +28,7 @@ type Card struct {
 	Animal_info     Animal `json:"animal_info"`
 }
 
-func CardsController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool) {
+func CardsController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
 	if r.URL.Path != "/cards" {
 		http.NotFound(w, r)
 		return
@@ -50,34 +50,42 @@ func CardsController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool)
 		return
 	//* POST
 	case http.MethodPost:
-		w.Header().Set("Content-Type", "application/json")
-		id := GetIdFromBody("id", w, r)
 
-		animal, err := database.GetAnimal(pool, id)
-		if err != nil {
-			respondWithError(w, http.StatusBadRequest, "could not find animal", err)
-			return
-		}
-
-		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(animal); err != nil {
-			http.Error(w, "unable to encode response", http.StatusInternalServerError)
-		}
-		return
 	}
-	GetFromHeader("Authorization", r)
 }
 
-func GetFromHeader(key string, r *http.Request) string {
-	for name, values := range r.Header {
-		if name == key {
-			for _, value := range values {
-				fmt.Printf("%s: %s\n", name, value)
-				return value
-			}
-		}
+func UserCardResponse(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
+	/*todo
+	create message request with the organization who has this animal andour userId
+
+	*/
+	token, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not find JWT", err)
+		return
 	}
-	return ""
+
+	_, err = auth.ValidateJWT(token, jwtSecret)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "could not validate JWT", err)
+		return
+	}
+
+	SetHeader(w)
+	var card Card
+	err = checkBody(w, r, &card)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not find card id in body", err)
+		return
+	}
+
+	animal, err := database.GetAnimal(pool, card.Id)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not find animal", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, animal)
 }
 
 func GetIdFromBody(key string, w http.ResponseWriter, r *http.Request) string {

@@ -10,7 +10,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/joho/godotenv"
-	"github.com/mjishu/pokeDate/auth"
 	"github.com/mjishu/pokeDate/controller"
 	"github.com/mjishu/pokeDate/database"
 )
@@ -98,13 +97,7 @@ func main() {
 	})
 
 	mux.HandleFunc("/cards", func(w http.ResponseWriter, r *http.Request) {
-		_, err := auth.UserValid(r.Header, config.jwt_secret)
-		if err != nil {
-			http.Error(w, "unable to validate jwt", http.StatusBadRequest)
-			return
-		}
-
-		controller.CardsController(w, r, pool)
+		controller.CardsController(w, r, pool, config.jwt_secret)
 	})
 	mux.HandleFunc("/animals/", func(w http.ResponseWriter, r *http.Request) {
 		controller.AnimalController(w, r, pool, jwt_secret, config.s3Bucket, config.s3Client)
@@ -135,6 +128,16 @@ func main() {
 	mux.HandleFunc("POST /messages/{messageID}/send", func(w http.ResponseWriter, r *http.Request) {
 		controller.CreateMessage(w, r, pool, config.jwt_secret)
 	})
+
+	//* Notifications
+	mux.HandleFunc("POST /notifications/", func(w http.ResponseWriter, r *http.Request) {
+		controller.CreateNotification(w, r, pool, config.jwt_secret, "New message request", 1)
+	})
+
+	mux.HandleFunc("GET /notifications", func(w http.ResponseWriter, r *http.Request) {
+		controller.GetNotifications(w, r, pool, config.jwt_secret)
+	})
+
 	database.Database(pool)
 
 	port := ":8080"

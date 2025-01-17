@@ -267,6 +267,20 @@ func createNotifications(pool *pgxpool.Pool) {
 	queryFail(err, "create notifications")
 }
 
+func createAnimalGroups(pool *pgxpool.Pool) {
+	sql := `
+		CREATE TABLE IF NOT EXISTS animal_groups (
+			animal_id UUID REFERENCES animals(id),
+			notification_id UUID REFERENCES notifications(id),
+			message_id UUID REFERENCES messages(id),
+			date_created TIMESTAMPTZ DEFAULT now() NOT NULL,
+			date_updated TIMESTAMPTZ DEFAULT now() NOT NULL
+		)
+	`
+	_, err := pool.Exec(context.TODO(), sql)
+	queryFail(err, "create notifications")
+}
+
 func queryFail(err error, tableName string) {
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "QueryRow failed: %v\n", err)

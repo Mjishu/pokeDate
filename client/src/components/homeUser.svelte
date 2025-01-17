@@ -41,9 +41,6 @@
 	async function likedCard() {
 		isLiked = true;
 		let statusCode = await cardResponse(isLiked, '001');
-		if (statusCode == 400) {
-			goto('/login');
-		}
 		setTimeout(async () => {
 			cardDone = true;
 			await newCard();
@@ -53,9 +50,6 @@
 	async function dislikedCard() {
 		isLiked = false;
 		let statusCode = await cardResponse(isLiked, '001');
-		if (statusCode == 400) {
-			goto('/login');
-		}
 		setTimeout(async () => {
 			cardDone = true;
 			await newCard();
