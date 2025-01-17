@@ -22,6 +22,9 @@ func callSchemas(ctx context.Context, pool *pgxpool.Pool) {
 	createConverstaion(pool)
 	createConversationMember(pool)
 	createMessages(pool)
+	notification_enum(pool)
+	createNotificationTypes(pool)
+	createNotifications(pool)
 }
 
 // * DONE SO FAR: locations, users, organizations, shots
@@ -222,7 +225,47 @@ func createMessages(pool *pgxpool.Pool) {
 	queryFail(err, "createMessages")
 }
 
-// ! todo: add messages, conversation, conversation_member
+func notification_enum(pool *pgxpool.Pool) {
+	sql := `
+		DO $$ BEGIN
+			CREATE TYPE notification_status AS ENUM ('accepted', 'denied', 'unseen');
+		EXCEPTION
+			WHEN duplicate_object THEN null;
+		END $$;
+	`
+
+	_, err := pool.Exec(context.TODO(), sql)
+	queryFail(err, "notification_status")
+}
+
+// todo create a populate function that auto populates this with x notification types
+func createNotificationTypes(pool *pgxpool.Pool) {
+	sql := `
+		CREATE TABLE IF NOT EXISTS notification_types (
+			id SERIAL PRIMARY KEY,
+			name VARCHAR(50) NOT NULL
+		)
+	`
+	_, err := pool.Exec(context.TODO(), sql)
+	queryFail(err, "notification_types")
+}
+
+func createNotifications(pool *pgxpool.Pool) {
+	sql := `
+		CREATE TABLE IF NOT EXISTS notifications (
+			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+			actor UUID REFERENCES users(id) NOT NULL,
+			notifier UUID REFERENCES users(id) NOT NULL,
+			entity_text TEXT,
+			entity_type int REFERENCES notification_types(id), 
+			status notification_status,
+			date_created TIMESTAMPTZ DEFAULT now() NOT NULL,
+			date_seen TIMESTAMPTZ
+		)
+	`
+	_, err := pool.Exec(context.TODO(), sql)
+	queryFail(err, "create notifications")
+}
 
 func queryFail(err error, tableName string) {
 	if err != nil {

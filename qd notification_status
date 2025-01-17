@@ -1,0 +1,18 @@
+                            Table "public.notifications"
+    Column    |           Type           | Collation | Nullable |      Default       
+--------------+--------------------------+-----------+----------+--------------------
+ id           | uuid                     |           | not null | uuid_generate_v4()
+ actor        | uuid                     |           | not null | 
+ notifier     | uuid                     |           | not null | 
+ entity_text  | text                     |           |          | 
+ entity_type  | integer                  |           |          | 
+ status       | notification_status      |           |          | 
+ date_created | timestamp with time zone |           | not null | now()
+ date_seen    | timestamp with time zone |           |          | 
+Indexes:
+    "notifications_pkey" PRIMARY KEY, btree (id)
+Foreign-key constraints:
+    "notifications_actor_fkey" FOREIGN KEY (actor) REFERENCES users(id)
+    "notifications_entity_type_fkey" FOREIGN KEY (entity_type) REFERENCES notification_types(id)
+    "notifications_notifier_fkey" FOREIGN KEY (notifier) REFERENCES users(id)
+

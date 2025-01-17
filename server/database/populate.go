@@ -41,6 +41,7 @@ func PopulateDB(ctx context.Context, pool *pgxpool.Pool) {
 	// makeAnimals(ctx, pool)
 	// populateShots(ctx, pool)
 	// makeImage(ctx, pool)
+	// populateNotificationTypes(pool)
 }
 
 func makeAnimals(ctx context.Context, pool *pgxpool.Pool) {
@@ -89,6 +90,19 @@ func populateShots(ctx context.Context, pool *pgxpool.Pool) {
 
 	for _, query := range sql {
 		_, err := pool.Query(ctx, query)
+		queryFail(err, "populating shot data")
+	}
+}
+
+func populateNotificationTypes(pool *pgxpool.Pool) {
+	sql := []string{
+		`INSERT INTO notification_types(name) VALUES ('request')`,
+		`INSERT INTO notification_types(name) VALUES ('reply')`,
+		`INSERT INTO notification_types(name) VALUES ('alert')`,
+		`INSERT INTO notification_types(name) VALUES ('news')`,
+	}
+	for _, query := range sql {
+		_, err := pool.Query(context.TODO(), query)
 		queryFail(err, "populating shot data")
 	}
 }
