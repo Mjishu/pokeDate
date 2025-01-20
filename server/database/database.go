@@ -32,7 +32,6 @@ func Database(pool *pgxpool.Pool) {
 
 	// callSchemas(context.TODO(), pool)
 	// PopulateDB(context.TODO(), pool)
-	// getLocations(context.TODO(), pool)
 }
 
 func GetItemFromENV(key string) string {

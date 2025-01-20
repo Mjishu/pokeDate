@@ -9,15 +9,15 @@ import (
 )
 
 func callSchemas(ctx context.Context, pool *pgxpool.Pool) {
-	// createLocations(ctx, pool)
-	// createUsers(ctx, pool)
-	// // createOrganization(ctx, pool)
-	// createShots(ctx, pool)
-	// createAnimals(ctx, pool)
-	// createAnimalImages(ctx, pool)
-	// createAnimalShots(ctx, pool)
-	// createOrganizationAnimals(ctx, pool)
-	// createUserAnimals(ctx, pool)
+	createLocations(ctx, pool)
+	createUsers(ctx, pool)
+	createShots(ctx, pool)
+	createAnimals(ctx, pool)
+	createAnimalImages(ctx, pool)
+	createAnimalShots(ctx, pool)
+	createOrganizationAnimals(ctx, pool)
+	createUserAnimals(ctx, pool)
+	createRefreshTokens(ctx, pool)
 
 	createConverstaion(pool)
 	createConversationMember(pool)
@@ -25,6 +25,8 @@ func callSchemas(ctx context.Context, pool *pgxpool.Pool) {
 	notification_enum(pool)
 	createNotificationTypes(pool)
 	createNotifications(pool)
+	createAnimalGroups(pool)
+	createUserAnimalsSeen(pool)
 }
 
 // * DONE SO FAR: locations, users, organizations, shots
@@ -97,23 +99,6 @@ func createUsers(ctx context.Context, pool *pgxpool.Pool) {
 	_, err := pool.Exec(ctx, sql)
 	queryFail(err, "users")
 }
-
-// func createOrganization(ctx context.Context, pool *pgxpool.Pool) {
-// 	sql := `
-// 		CREATE TABLE IF NOT EXISTS organization (
-// 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-// 			name VARCHAR(50) NOT NULL,
-// 			email varchar(100),
-// 			password text NOT NULL,
-// 			country_id INT REFERENCES locations(id) ON DELETE SET NULL,
-// 			state_id INT REFERENCES locations(id) ON DELETE SET NULL,
-// 			city_id INT REFERENCES locations(id) ON DELETE SET NULL,
-// 			website_url text
-// 		)
-// 	`
-// 	_, err := pool.Exec(ctx, sql)
-// 	queryFail(err, "organization")
-// }
 
 func createAnimalImages(ctx context.Context, pool *pgxpool.Pool) {
 	sql := `

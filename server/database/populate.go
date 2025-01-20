@@ -38,10 +38,10 @@ type Animal struct {
 }
 
 func PopulateDB(ctx context.Context, pool *pgxpool.Pool) {
-	// makeAnimals(ctx, pool)
-	// populateShots(ctx, pool)
-	// makeImage(ctx, pool)
-	// populateNotificationTypes(pool)
+	makeAnimals(ctx, pool)
+	populateShots(ctx, pool)
+	makeImage(ctx, pool)
+	populateNotificationTypes(pool)
 }
 
 func makeAnimals(ctx context.Context, pool *pgxpool.Pool) {
