@@ -2,7 +2,7 @@
       import { onMount } from "svelte";
       // import CreateAnimal from './createAnimal.svelte'
       // import AllAnimals from './allAnimals.svelte'
-      import CreateAnimal from "../components/createAnimal.svelte"
+      import CreateAnimal from "./Actions/createAnimal.svelte"
       import AllAnimals from "../components/allAnimals.svelte"
       import Navbar from "./Navbar.svelte";
 

@@ -45,7 +45,8 @@ func CreateNotification(pool *pgxpool.Pool, notification Notification) error {
 
 func GetNotification(pool *pgxpool.Pool, idToGet uuid.UUID) ([]Notification, error) {
 	//* get or add from animal_groups
-	sql := `SELECT n.id,n.actor,n.notifier,n.entity_text,n.entity_type,n.status,n.date_created,n.date_seen, ag.animal_id FROM notifications n LEFT JOIN animal_groups ag ON n.id = ag.notification_id WHERE n.notifier = $1`
+	sql := `SELECT n.id,n.actor,n.notifier,n.entity_text,n.entity_type,n.status,n.date_created,n.date_seen, ag.animal_id 
+		FROM notifications n LEFT JOIN animal_groups ag ON n.id = ag.notification_id WHERE n.notifier = $1`
 
 	rows, err := pool.Query(context.TODO(), sql, idToGet)
 	if err != nil {

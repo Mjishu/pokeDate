@@ -1,8 +1,8 @@
 <!-- TODO  -->
 <!-- Iterate over each updatedAnimal.shots so that if we get info from the backend about a shot it will show the data -->
 <script lang="ts">
-	import { createAnimal, getAnimalById, updateAnimalById, GetAllShots } from '../helpers/animals';
-	import type { NewAnimal, UpdatedAnimal, Shot, Animal } from "../helpers/animals"
+	import { createAnimal, getAnimalById, updateAnimalById, GetAllShots } from '../../helpers/animals';
+	import type { NewAnimal, UpdatedAnimal, Shot, Animal } from "../../helpers/animals"
 	import { formatISO } from 'date-fns';
 	import { onMount } from 'svelte';
 

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { createAnimal, GetAllShots, createAnimalImage } from '../helpers/animals'
-	import type { NewAnimal, Shot } from '../helpers/animals'
+	import { createAnimal, GetAllShots, createAnimalImage } from '../../helpers/animals'
+	import type { NewAnimal, Shot } from '../../helpers/animals'
 	import { formatISO } from 'date-fns';
 
 	let { showNewAnimal = $bindable() } = $props();

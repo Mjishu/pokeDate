@@ -6,7 +6,7 @@
             DeleteAnimalById,
       } from "../helpers/animals";
       import { format } from "date-fns";
-      import EditAnimal from "./editAnimal.svelte";
+      import EditAnimal from "./Actions/editAnimal.svelte";
 
       let animalsData = $state();
       let isLoading = $state(true);
