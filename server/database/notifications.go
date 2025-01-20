@@ -24,7 +24,7 @@ type Notification struct {
 func CreateNotification(pool *pgxpool.Pool, notification Notification) error {
 	//* get or add from animal_groups, add the notification_id thats created here to it with the animal id provided
 	sql := `
-		INSERT INTO notifications (actor, notifier, entity_text, entity_type, status) VALLUES ($1,$2,$3,$4,$5) RETURNING id
+		INSERT INTO notifications (actor, notifier, entity_text, entity_type, status) VALUES ($1,$2,$3,$4,$5) RETURNING id
 	`
 
 	var notification_id uuid.UUID

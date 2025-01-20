@@ -12,7 +12,7 @@
       });
 
       async function OpenMessage(id: string) {
-            goto(`/messages/${id}`)
+            window.location.href = `/messages/${id}` // maybe goto but how to get page to get messages properly
       }
 </script>
 

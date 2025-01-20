@@ -25,9 +25,6 @@
 
 	async function newCard() {
 		let randomCardInfo = await getRandomCard();
-		if (randomCardInfo.statusCode == 400) {
-			goto('/login');
-		}
 		cardInfo = randomCardInfo.data;
 		isLoading = false;
 		isLiked = undefined;
@@ -39,8 +36,11 @@
 	});
 
 	async function likedCard() {
+		console.log($state.snapshot(cardInfo))
 		isLiked = true;
-		let statusCode = await cardResponse(isLiked, '001');
+		if (cardInfo?.Id) {
+			let statusCode = await cardResponse(isLiked, cardInfo?.Id);
+		} else {alert("animal does not have an id!")}
 		setTimeout(async () => {
 			cardDone = true;
 			await newCard();
@@ -49,12 +49,15 @@
 
 	async function dislikedCard() {
 		isLiked = false;
-		let statusCode = await cardResponse(isLiked, '001');
+		if (cardInfo?.Id) {
+			let statusCode = await cardResponse(isLiked, cardInfo?.Id);
+		} else {alert("animal does not have an id!")}
 		setTimeout(async () => {
 			cardDone = true;
 			await newCard();
 		}, 1300);
 	}
+
 </script>
 
 {#if isLoading}

@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -21,11 +22,8 @@ type Animal struct {
 }
 
 type Card struct {
-	Id              string `json:"id"`
-	Animal_id       string `josn:"animal_id"`
-	Organization_id string `json:"organization_id"`
-	Liked           bool   `json:"liked"`
-	Animal_info     Animal `json:"animal_info"`
+	Animal_id string `josn:"Animal_id"`
+	Liked     bool   `json:"Liked"`
 }
 
 func CardsController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
@@ -36,7 +34,6 @@ func CardsController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool,
 
 	SetHeader(w)
 	switch r.Method {
-
 	//* GET
 	case http.MethodGet:
 		w.Header().Set("Content-Type", "application/json")
@@ -50,7 +47,7 @@ func CardsController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool,
 		return
 	//* POST
 	case http.MethodPost:
-
+		UserCardResponse(w, r, pool, jwtSecret)
 	}
 }
 
@@ -65,7 +62,7 @@ func UserCardResponse(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool
 		return
 	}
 
-	_, err = auth.ValidateJWT(token, jwtSecret)
+	userId, err := auth.ValidateJWT(token, jwtSecret)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "could not validate JWT", err)
 		return
@@ -79,9 +76,31 @@ func UserCardResponse(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool
 		return
 	}
 
-	animal, err := database.GetAnimal(pool, card.Id)
+	fmt.Printf("animal id from body is %v\n", card.Animal_id)
+	animal, err := database.GetAnimal(pool, card.Animal_id)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "could not find animal", err)
+		return
+	}
+
+	fmt.Printf("animal id recieved is %v\n", animal.Id)
+	animalsOrganizationId, err := database.GetAnimalOrganization(pool, animal.Id)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "could not get organizations id from Animal", err)
+		return
+	}
+
+	var notification database.Notification
+	notification.Actor = userId
+	notification.Notifier = animalsOrganizationId
+	notification.Animal_id = animal.Id
+	notification.Entity_text = "New message request"
+	notification.Entity_type = 1
+	notification.Status = "unseen"
+
+	err = database.CreateNotification(pool, notification)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "issue creating notification", err)
 		return
 	}
 
@@ -102,5 +121,5 @@ func GetIdFromBody(key string, w http.ResponseWriter, r *http.Request) string {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return ""
 	}
-	return card.Id
+	return card.Animal_id
 }
