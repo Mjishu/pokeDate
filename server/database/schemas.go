@@ -272,7 +272,7 @@ func createAnimalGroups(pool *pgxpool.Pool) {
 		CREATE TABLE IF NOT EXISTS animal_groups (
 			animal_id UUID REFERENCES animals(id) ON DELETE CASCADE,
 			notification_id UUID REFERENCES notifications(id) ON DELETE CASCADE,
-			message_id UUID REFERENCES messages(id) ON DELETE CASCADE,
+			conversation_id UUID REFERENCES messages(id) ON DELETE CASCADE,
 			date_created TIMESTAMPTZ DEFAULT now() NOT NULL,
 			date_updated TIMESTAMPTZ DEFAULT now() NOT NULL
 		)

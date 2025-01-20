@@ -186,7 +186,7 @@ func GetConversation(pool *pgxpool.Pool, conversationId uuid.UUID) (Conversation
 	return conversation, nil
 }
 
-func CreateConversation(pool *pgxpool.Pool, userId uuid.UUID, recipientId uuid.UUID) (uuid.UUID, error) {
+func CreateConversation(pool *pgxpool.Pool, orgId uuid.UUID, userId uuid.UUID) (uuid.UUID, error) {
 	conversationSql := `INSERT INTO conversation (conversation_name) VALUES ('New Conversation') RETURNING id`
 	memberSql := `INSERT INTO conversation_member (member_id, conversation_id) VALUES ($1, $2)`
 
@@ -198,13 +198,18 @@ func CreateConversation(pool *pgxpool.Pool, userId uuid.UUID, recipientId uuid.U
 
 	_, err := pool.Exec(context.TODO(), memberSql, userId, conversationId)
 	if err != nil {
-		return uuid.UUID{}, nil
+		return uuid.UUID{}, err
 	}
 
-	_, err = pool.Exec(context.TODO(), memberSql, recipientId, conversationId)
+	_, err = pool.Exec(context.TODO(), memberSql, orgId, conversationId)
 	if err != nil {
-		return uuid.UUID{}, nil
+		return uuid.UUID{}, err
 	}
+
+	// _, err = pool.Exec(context.TODO(), "INSERT INTO animal_groups ($1) = $1 WHERE notification_id = $1", conversationId)
+	// if err != nil {
+	// 	return uuid.UUID{}, err
+	// }
 
 	return conversationId, nil
 

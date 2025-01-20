@@ -102,7 +102,9 @@
 
 			<button onclick={() => (options.showEdit = !options.showEdit)}>Edit</button>
 			<button onclick={LogoutUser}>Logout</button>
-			<button onclick={resetCards}>Reset Cards</button>
+			{#if !userData.Is_organization}
+				<button onclick={resetCards}>Reset Cards</button>
+			{/if}
 
 			{#if options.showEdit}
 				<form onsubmit={submitForm} autocomplete="off">

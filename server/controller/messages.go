@@ -74,19 +74,20 @@ func CreateConversation(w http.ResponseWriter, r *http.Request, pool *pgxpool.Po
 		return
 	}
 
-	userId, err := auth.ValidateJWT(token, jwtSecret)
+	orgId, err := auth.ValidateJWT(token, jwtSecret)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "unabled to validate JWT", err)
 		return
 	}
 
-	var bodyId uuid.UUID //? not sure if this should be animals id and then find the org based on the animal or the org id
-	err = checkBody(w, r, bodyId)
+	var userId uuid.UUID // user Id because its the actor(the one who prompts the message request notification)
+	err = checkBody(w, r, &userId)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "did not find recipeint or animal id in body", err)
 	}
 
-	conversationId, err := database.CreateConversation(pool, userId, bodyId)
+	//* add message id to the animal_groups table
+	conversationId, err := database.CreateConversation(pool, orgId, userId)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "could not create conversation", err)
 		return
