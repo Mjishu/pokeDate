@@ -30,10 +30,13 @@ export async function getRandomCard() {
                   }
             }
             const response = await fetch("/api/cards", fetchParams)
+            if (!response.ok) {
+                  return null
+            }
             const data = await response.json()
             return { data, statusCode: response.status }
       } catch (error) {
             console.error(`error trying to get card: ${error}`)
-            return { statusCode: 400 }
+            return  null
       }
 }

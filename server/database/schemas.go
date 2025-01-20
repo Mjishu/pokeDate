@@ -199,8 +199,8 @@ func createConverstaion(pool *pgxpool.Pool) {
 func createConversationMember(pool *pgxpool.Pool) {
 	sql := `
 		CREATE TABLE IF NOT EXISTS conversation_member (
-			member_id UUID REFERENCES users(id) NOT NULL,
-			conversation_id UUID REFERENCES conversation(id) NOT NULL,
+			member_id UUID REFERENCES users(id) NOT NULL ON DELETE CASCADE,
+			conversation_id UUID REFERENCES conversation(id) NOT NULL ON DELETE CASCADE,
 			joined_datetime TIMESTAMPTZ DEFAULT now() NOT NULL,
 			left_datetime TIMESTAMPTZ 
 		)
@@ -214,10 +214,10 @@ func createMessages(pool *pgxpool.Pool) {
 	sql := `
 		CREATE TABLE IF NOT EXISTS messages (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			from_id UUID REFERENCES users(id) NOT NULL,
+			from_id UUID REFERENCES users(id) NOT NULL ON DELETE CASCADE,
 			message_text text NOT NULL,
 			sent_datetime TIMESTAMPTZ DEFAULT now() NOT NULL,
-			conversation_id UUID references conversation(id)
+			conversation_id UUID references conversation(id) ON DELETE CASCADE
 		)
 	`
 
@@ -254,10 +254,10 @@ func createNotifications(pool *pgxpool.Pool) {
 	sql := `
 		CREATE TABLE IF NOT EXISTS notifications (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			actor UUID REFERENCES users(id) NOT NULL,
-			notifier UUID REFERENCES users(id) NOT NULL,
+			actor UUID REFERENCES users(id) NOT NULL ON DELETE CASCADE,
+			notifier UUID REFERENCES users(id) NOT NULL ON DELETE CASCADE,
 			entity_text TEXT,
-			entity_type int REFERENCES notification_types(id), 
+			entity_type int REFERENCES notification_types(id) ON DELETE SET NULL, 
 			status notification_status,
 			date_created TIMESTAMPTZ DEFAULT now() NOT NULL,
 			date_seen TIMESTAMPTZ
@@ -270,15 +270,29 @@ func createNotifications(pool *pgxpool.Pool) {
 func createAnimalGroups(pool *pgxpool.Pool) {
 	sql := `
 		CREATE TABLE IF NOT EXISTS animal_groups (
-			animal_id UUID REFERENCES animals(id),
-			notification_id UUID REFERENCES notifications(id),
-			message_id UUID REFERENCES messages(id),
+			animal_id UUID REFERENCES animals(id) ON DELETE CASCADE,
+			notification_id UUID REFERENCES notifications(id) ON DELETE CASCADE,
+			message_id UUID REFERENCES messages(id) ON DELETE CASCADE,
 			date_created TIMESTAMPTZ DEFAULT now() NOT NULL,
 			date_updated TIMESTAMPTZ DEFAULT now() NOT NULL
 		)
 	`
 	_, err := pool.Exec(context.TODO(), sql)
 	queryFail(err, "create notifications")
+}
+
+func createUserAnimalsSeen(pool *pgxpool.Pool) {
+	sql := `
+		CREATE TABLE IF NOT EXISTS users_animals_seen (
+			user_id UUID REFERENCES users(id) NOT NULL ON DELETE CASCADE,
+			animal_id UUID REFERENCES animals(id) NOT NULL ON DELETE CASCADE,
+			liked BOOLEAN NOT NULL DEFAULT FALSE,
+			date_created TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+			date_updated TIMESTAMPTZ
+		)
+	`
+	_, err := pool.Exec(context.TODO(), sql)
+	queryFail(err, "create userAnimalsSeen")
 }
 
 func queryFail(err error, tableName string) {

@@ -36,19 +36,33 @@ func CardsController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool,
 	switch r.Method {
 	//* GET
 	case http.MethodGet:
-		w.Header().Set("Content-Type", "application/json")
-
-		animal := database.GetRandomAnimal(pool)
-
-		w.WriteHeader(http.StatusOK)
-		if err := json.NewEncoder(w).Encode(animal); err != nil {
-			http.Error(w, "unable to encode response", http.StatusInternalServerError)
-		}
-		return
+		GetRandomCard(w, r, pool, jwtSecret)
 	//* POST
 	case http.MethodPost:
 		UserCardResponse(w, r, pool, jwtSecret)
 	}
+}
+
+func GetRandomCard(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
+	token, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not find JWT", err)
+		return
+	}
+
+	userId, err := auth.ValidateJWT(token, jwtSecret)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "could not validate JWT", err)
+		return
+	}
+
+	animal, err := database.GetRandomAnimal(pool, userId)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not get random animal", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, animal)
 }
 
 func UserCardResponse(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
@@ -104,6 +118,12 @@ func UserCardResponse(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool
 		return
 	}
 
+	err = database.AddUserAnimalSeen(pool, userId, animal.Id, card.Liked)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "could not add to animals user has seen", err)
+		return
+	}
+
 	respondWithJSON(w, http.StatusOK, animal)
 }
 
@@ -122,4 +142,26 @@ func GetIdFromBody(key string, w http.ResponseWriter, r *http.Request) string {
 		return ""
 	}
 	return card.Animal_id
+}
+
+func ResetSeenProgress(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
+	token, err := auth.GetBearerToken(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not find JWT", err)
+		return
+	}
+
+	userId, err := auth.ValidateJWT(token, jwtSecret)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "could not validate JWT", err)
+		return
+	}
+
+	err = database.ResetSeenProgress(pool, userId)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not reset users card progress", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, nil)
 }

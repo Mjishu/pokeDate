@@ -25,7 +25,11 @@
 
 	async function newCard() {
 		let randomCardInfo = await getRandomCard();
-		cardInfo = randomCardInfo.data;
+		if (randomCardInfo === null )  {
+			cardInfo =  undefined
+		} else {
+			cardInfo = randomCardInfo.data;
+		}
 		isLoading = false;
 		isLiked = undefined;
 		cardDone = false;
@@ -39,7 +43,7 @@
 		console.log($state.snapshot(cardInfo))
 		isLiked = true;
 		if (cardInfo?.Id) {
-			let statusCode = await cardResponse(isLiked, cardInfo?.Id);
+			var statusCode = await cardResponse(isLiked, cardInfo?.Id);
 		} else {alert("animal does not have an id!")}
 		setTimeout(async () => {
 			cardDone = true;
@@ -50,7 +54,7 @@
 	async function dislikedCard() {
 		isLiked = false;
 		if (cardInfo?.Id) {
-			let statusCode = await cardResponse(isLiked, cardInfo?.Id);
+			var statusCode = await cardResponse(isLiked, cardInfo?.Id);
 		} else {alert("animal does not have an id!")}
 		setTimeout(async () => {
 			cardDone = true;
@@ -62,6 +66,11 @@
 
 {#if isLoading}
 	<div>Loading...</div>
+{:else if cardInfo === undefined} 
+<main>
+	<Navbar />
+	<h2>Could not find any new Cards!</h2>
+</main>
 {:else}
 	<main>
 		<Navbar />

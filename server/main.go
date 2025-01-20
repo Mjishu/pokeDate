@@ -85,6 +85,9 @@ func main() {
 	mux.HandleFunc("POST /users/profile_pictures/{userID}", func(w http.ResponseWriter, r *http.Request) {
 		controller.HandleUserImageUpload(w, r, pool, config.jwt_secret, config.s3Bucket, config.s3Region, config.s3Client)
 	})
+	mux.HandleFunc("POST /users/progress/reset", func(w http.ResponseWriter, r *http.Request) {
+		controller.ResetSeenProgress(w, r, pool, config.jwt_secret)
+	})
 
 	mux.HandleFunc("/organizations/", func(w http.ResponseWriter, r *http.Request) {
 		controller.OrganizationController(w, r, pool, config.jwt_secret, s3Bucket, s3Region)

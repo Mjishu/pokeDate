@@ -29,6 +29,25 @@
 		loading = false;
 	});
 
+	async function resetCards() { //todo put this in settings page instead
+		const fetchParams = {
+			method:"POST",
+			headers: {
+				"Content-Type": "application/json",
+				"Authorization" : `Bearer ${localStorage.getItem("token")}`
+			}
+		}
+		try {
+			const response = await fetch("/api/users/progress/reset", fetchParams)
+			const data = await response.json()
+			if (!response.ok){
+				alert("error resetting cards")
+			}
+		} catch(error) {
+			console.error(`error trying to reset cards: ${error}`)
+		}
+	}
+
 	async function submitForm(e: Event) {
 		e.preventDefault();
 		const formattedUser = {
@@ -83,6 +102,7 @@
 
 			<button onclick={() => (options.showEdit = !options.showEdit)}>Edit</button>
 			<button onclick={LogoutUser}>Logout</button>
+			<button onclick={resetCards}>Reset Cards</button>
 
 			{#if options.showEdit}
 				<form onsubmit={submitForm} autocomplete="off">

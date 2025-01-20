@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -49,14 +50,25 @@ func GetAnimalByName(pool *pgxpool.Pool, animal_name string) string {
 	return id
 }
 
-func GetRandomAnimal(pool *pgxpool.Pool) Animal {
+func GetRandomAnimal(pool *pgxpool.Pool, userId uuid.UUID) (Animal, error) {
+	// where a.id a
+	sql := `
+        SELECT a.*, ai.image_src 
+        FROM animals AS a 
+        LEFT JOIN animal_images AS ai ON a.id = ai.animal_id
+        LEFT JOIN users_animals_seen AS uas ON a.id = uas.animal_id AND uas.user_id = $1
+        WHERE uas.animal_id IS NULL
+        ORDER BY RANDOM() 
+        LIMIT 1
+    `
+
 	var animal Animal
-	err := pool.QueryRow(context.TODO(), "SELECT a.*, ai.image_src FROM  animals AS a LEFT JOIN  animal_images AS ai ON  a.id = ai.animal_id ORDER BY  RANDOM() LIMIT 1;").Scan(
+	err := pool.QueryRow(context.TODO(), sql, userId).Scan(
 		&animal.Id, &animal.Name, &animal.Species, &animal.Date_of_birth, &animal.Sex, &animal.Price,
 		&animal.Available, &animal.Breed, &animal.Image_src,
 	)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "QueryRow failed!: %v\n", err)
+		return Animal{}, err
 	}
 	SelectShots(&animal, pool)
 	// err = pool.QueryRow(ctx, "SELECT image_src FROM animal_images WHERE animal_id = $1;", animal.Id).Scan(&animal.Image_src)
@@ -64,7 +76,7 @@ func GetRandomAnimal(pool *pgxpool.Pool) Animal {
 	// 	fmt.Fprintf(os.Stderr, "QueryRow failed!: %v\n", err)
 	// }
 
-	return animal
+	return animal, nil
 }
 
 // * CREATE NEW FUNCTION THAT GETS SHOTS AND ADDS IT TO ANIMAL

@@ -20,3 +20,23 @@ func GetAnimalOrganization(pool *pgxpool.Pool, animal_id uuid.UUID) (uuid.UUID, 
 	}
 	return organizationId, nil
 }
+
+func AddUserAnimalSeen(pool *pgxpool.Pool, user_id, animal_id uuid.UUID, liked bool) error {
+	sql := `INSERT INTO users_animals_seen (user_id, animal_id, liked) VALUES ($1,$2,$3)`
+
+	_, err := pool.Exec(context.TODO(), sql, user_id, animal_id, liked)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func ResetSeenProgress(pool *pgxpool.Pool, user_id uuid.UUID) error {
+	sql := `DELETE FROM users_animals_seen WHERE user_id = $1 AND liked = false`
+
+	_, err := pool.Exec(context.TODO(), sql, user_id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
