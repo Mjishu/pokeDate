@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { CurrentUserMessages } from '../../helpers/messages';
       import type {Messages, Conversation} from "../../helpers/messages"
+      import {format} from "date-fns"
 	import { goto } from '$app/navigation';
       let {children} = $props()
  
@@ -22,6 +23,7 @@
                   {#each AllMessages as message}
                         <button class="message" type="button" onclick={() => OpenMessage(message.Id)} aria-label="Open message">
                               <h4>{message.Conversation_name}</h4>
+                              <p>{format(message.Date_created, "MM dd yyyy")}</p>
                         </button>
                   {/each}
             {:else}

@@ -4,6 +4,7 @@ import type { incomingUser } from "./users";
 export type Conversation = {
 	Id:                string;
 	Conversation_name: string;
+      Date_created:     Date;
 	Members:           Conversation_member[];
 	Messages:          Messages[]
 }

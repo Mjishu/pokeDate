@@ -44,14 +44,14 @@
             notifications = await GetNotifications();
       })
 
-      async function CreateConversation(actor_id: string) { // takes in the user who SENT the message request
+      async function CreateConversation(actor_id: string, notification_id: string) { // takes in the user who SENT the message request
             const fetchParams = {
                   method: "POST",
                   headers:{
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${localStorage.getItem("token")}`
                   }, 
-                  body: JSON.stringify(actor_id)
+                  body: JSON.stringify({"User_id": actor_id, "Notification_id": notification_id})
             }
             try {
                   const response = await fetch("/api/messages/create", fetchParams)
@@ -59,6 +59,7 @@
                   if (!response.ok) {
                         console.error("issue creating message")
                   }
+                  location.reload()
             } catch(err){
                   console.error("could not create message ")
             }
@@ -76,7 +77,7 @@
                         <p>{notification.Entity_text}</p>
                         <p>{notification.Actor}</p>
                         {#if notification.Entity_type == 1}
-                        <button onclick={() => CreateConversation(notification.Actor)}>Start Message</button>
+                        <button onclick={() => CreateConversation(notification.Actor, notification.Id)}>Start Message</button>
                         {/if}
                   </div>
             {/each}

@@ -14,6 +14,7 @@ import (
 type Conversation struct {
 	Id                uuid.UUID
 	Conversation_name string
+	Date_created      time.Time
 	Members           []Conversation_member
 	Messages          []Messages
 }
@@ -121,7 +122,7 @@ func GetConversations(pool *pgxpool.Pool, userId uuid.UUID) ([]Conversation, err
 	fmt.Println("i was called")
 	// make sure that this gets more than 1 conversation
 	sql := `
-		SELECT c.id, c.conversation_name  from conversation_member cm LEFT JOIN conversation c on cm.conversation_id = c.id WHERE cm.member_id = $1
+		SELECT c.id, c.conversation_name, c.date_created  from conversation_member cm LEFT JOIN conversation c on cm.conversation_id = c.id WHERE cm.member_id = $1
 	`
 
 	var conversationSlice []Conversation
@@ -132,7 +133,7 @@ func GetConversations(pool *pgxpool.Pool, userId uuid.UUID) ([]Conversation, err
 
 	for rows.Next() {
 		var conversation Conversation
-		err := rows.Scan(&conversation.Id, &conversation.Conversation_name)
+		err := rows.Scan(&conversation.Id, &conversation.Conversation_name, &conversation.Date_created)
 		if err != nil {
 			return []Conversation{}, err
 		}
@@ -186,7 +187,7 @@ func GetConversation(pool *pgxpool.Pool, conversationId uuid.UUID) (Conversation
 	return conversation, nil
 }
 
-func CreateConversation(pool *pgxpool.Pool, orgId uuid.UUID, userId uuid.UUID) (uuid.UUID, error) {
+func CreateConversation(pool *pgxpool.Pool, orgId, userId, notificationId uuid.UUID) (uuid.UUID, error) {
 	conversationSql := `INSERT INTO conversation (conversation_name) VALUES ('New Conversation') RETURNING id`
 	memberSql := `INSERT INTO conversation_member (member_id, conversation_id) VALUES ($1, $2)`
 
@@ -206,10 +207,15 @@ func CreateConversation(pool *pgxpool.Pool, orgId uuid.UUID, userId uuid.UUID) (
 		return uuid.UUID{}, err
 	}
 
-	// _, err = pool.Exec(context.TODO(), "INSERT INTO animal_groups ($1) = $1 WHERE notification_id = $1", conversationId)
+	// _, err = pool.Exec(context.TODO(), "UPDATE animal_groups SET conversation_id = $1, date_updated = now() where notification_id = $2", conversationId)
 	// if err != nil {
 	// 	return uuid.UUID{}, err
 	// }
+
+	err = NotificationSeen(pool, notificationId, "accepted")
+	if err != nil {
+		return uuid.UUID{}, err
+	}
 
 	return conversationId, nil
 

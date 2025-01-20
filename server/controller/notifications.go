@@ -70,7 +70,7 @@ func GetNotifications(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool
 	respondWithJSON(w, http.StatusOK, notifications)
 }
 
-func UpdateNotifications(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
+func DeclineNotifications(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
 	token, err := auth.GetBearerToken(r.Header)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "could not get JWT", err)
@@ -84,10 +84,7 @@ func UpdateNotifications(w http.ResponseWriter, r *http.Request, pool *pgxpool.P
 	}
 	fmt.Printf("id %v\n", currentId)
 	/*
-		check if notification type is request
-		body should have accepted or declined when this is called
-		if declined then update the status in notifications to declined
-		if accepted create a new message with the actor and notifier
-		send the original actor a notification saying they have new message
+		get notification_id from body or from r.pathvalue
+		call NotificationsSeen and pass it the status value of declined
 	*/
 }

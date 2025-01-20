@@ -188,7 +188,8 @@ func createConverstaion(pool *pgxpool.Pool) {
 	sql := `
 		CREATE TABLE IF NOT EXISTS conversation (
 			id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-			conversation_name VARCHAR(90)
+			conversation_name VARCHAR(90),
+			date_created TIMESTAMPTZ DEFAULT NOW() NOT NULL
 		)
 	`
 

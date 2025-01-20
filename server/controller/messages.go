@@ -10,6 +10,11 @@ import (
 	"github.com/mjishu/pokeDate/database"
 )
 
+type NewMessage struct {
+	UserId         uuid.UUID `json:"User_id"`
+	NotificationId uuid.UUID `json:"Notification_id"`
+}
+
 func CurrentUserMessages(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, JWTSecret string) {
 	token, err := auth.GetBearerToken(r.Header)
 	if err != nil {
@@ -80,14 +85,14 @@ func CreateConversation(w http.ResponseWriter, r *http.Request, pool *pgxpool.Po
 		return
 	}
 
-	var userId uuid.UUID // user Id because its the actor(the one who prompts the message request notification)
-	err = checkBody(w, r, &userId)
+	var ids NewMessage // user Id because its the actor(the one who prompts the message request notification)
+	err = checkBody(w, r, &ids)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "did not find recipeint or animal id in body", err)
 	}
 
 	//* add message id to the animal_groups table
-	conversationId, err := database.CreateConversation(pool, orgId, userId)
+	conversationId, err := database.CreateConversation(pool, orgId, ids.UserId, ids.NotificationId)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "could not create conversation", err)
 		return
