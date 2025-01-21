@@ -10,10 +10,3 @@ command = "npm run build"
 
 # The Node.js version you want to use (22.13 in your case)
 node_version = "22.13.0"
-
-[[plugins]]
-package = "@netlify/plugin-functions-installation"
-
-
-[[plugins]]
-package = "netlify-plugin-vite"
