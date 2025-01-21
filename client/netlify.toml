@@ -3,7 +3,7 @@
 publish = "build"
 
 # The base build directory, typically the root of your project
-base = "/"
+base = "client"
 
 # The command to build your app
 command = "npm run build"
