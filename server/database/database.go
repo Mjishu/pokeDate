@@ -41,7 +41,7 @@ func GetItemFromENV(key string) string {
 		if err != nil {
 			err = godotenv.Load(".env")
 			if err != nil {
-				log.Fatal("ERror loading .env file")
+				fmt.Printf("could not load .env")
 			}
 		}
 	}

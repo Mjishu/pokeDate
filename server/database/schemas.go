@@ -132,7 +132,7 @@ func createAnimalShots(ctx context.Context, pool *pgxpool.Pool) {
 func createOrganizationAnimals(ctx context.Context, pool *pgxpool.Pool) {
 	sql := `
 		CREATE TABLE IF NOT EXISTS organization_animals (
-			organization_id UUID REFERENCES organization(id) ON DELETE CASCADE NOT NULL,
+			organization_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
 			animal_id UUID REFERENCES animals(id) ON DELETE CASCADE NOT NULL,
 			PRIMARY KEY (organization_id, animal_id)
 		);
