@@ -23,6 +23,7 @@ type updatedUser = {
       Id: string;
 }
 
+
 export async function CreateUser(formData: userData): Promise<boolean> {
       console.log(formData)
       if (formData.Password != formData.C_password) {
