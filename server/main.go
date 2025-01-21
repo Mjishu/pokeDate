@@ -143,9 +143,14 @@ func main() {
 
 	database.Database(pool)
 
-	port := ":8080"
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 
 	fmt.Println("listening on port " + port)
-	err = http.ListenAndServe(port, mux)
-	log.Fatal(err)
+	err = http.ListenAndServe(":"+port, mux)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
