@@ -1,12 +1,7 @@
 [build]
-# The directory to deploy, can be set to the folder where your app builds
-publish = "build"
-
-# The base build directory, typically the root of your project
+publish = "client/build"
 base = "client"
+command = "npm install && npm run build"
 
-# The command to build your app
-command = "npm run build"
-
-# The Node.js version you want to use (22.13 in your case)
-node_version = "22.13.0"
+[context.production.environment]
+NODE_VERSION = "22.13.0"
