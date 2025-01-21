@@ -1,0 +1,23 @@
+[build]
+# The directory to deploy, can be set to the folder where your app builds
+publish = "build"
+
+# The base build directory, typically the root of your project
+base = "/"
+
+# The command to build your app
+command = "npm run build"
+
+# The Node.js version you want to use (22.13 in your case)
+node_version = "22.13.0"
+
+[build.environment]
+# Environment variables to pass to the build process
+NODE_ENV = "production"
+
+[[plugins]]
+package = "@netlify/plugin-functions-installation"
+
+
+[[plugins]]
+package = "netlify-plugin-vite"
