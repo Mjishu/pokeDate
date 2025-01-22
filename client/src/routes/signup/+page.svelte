@@ -19,42 +19,28 @@
 
 	async function submitForm(e: Event) {
 		e.preventDefault();
-		if (await CreateUser(formData)) {
-			goto('/');
+		if (!invalidPassword) {
+			if (await CreateUser(formData)) {
+				goto('/');
+			}
+		} else {
+			alert("password is invalid")
 		}
 	}
 
 	function checkPassword(password: string) {
-		for(const pass of Object.values(ValidatePassword(password))) {
-			if (pass === false) {
-				console.log(`${pass} is false`)
-				invalidPassword = true
+		let falseValues = []
+		for(const [key, value] of Object.entries(ValidatePassword(password))) {
+			if (value == false) {
+				falseValues.push(key)
 			} 
+			//@ts-ignore
+			passwordChecker[key] = value
 		}
-		invalidPassword = false
+		invalidPassword = falseValues.length > 0
 	}
 </script>
 
-<!-- how to get classes to update each time passwordChcker changes -->
-<div class="invalid-password-container"> 
-	<li>
-		<ol class="lowercase">
-			<div class:valid-option={passwordChecker.lowercase} class:invalid-option={!passwordChecker.lowercase}></div> 
-			Password has lowercase characters</ol>
-		<ol class="uppercase">
-			<div class:valid-option={passwordChecker.uppercase} class:invalid-option={!passwordChecker.uppercase}></div>
-			Password has uppercase characters</ol>
-		<ol class="numbers">
-			<div  class:valid-option={passwordChecker.number} class:invalid-option={!passwordChecker.number}></div>
-			Password has numbers</ol>
-		<ol class="special">
-			<div  class:valid-option={passwordChecker.symbol} class:invalid-option={!passwordChecker.symbol}></div>
-			Password has special characters </ol>
-		<ol class="length">
-			<div  class:valid-option={passwordChecker.length >= 6} class:invalid-option={passwordChecker.length < 6}></div>
-			Password is atleast 6 characters</ol>
-	</li>
-</div>
 
 <main>
 	<h2>Create Account</h2>
@@ -82,10 +68,31 @@
 					</button>
 				</div>
 			</div>
+			{#if formData.Password.length > 0}
+				<div class="invalid-password-container"> 
+					<li>
+						<ol class="lowercase">
+							<div class:valid-option={passwordChecker.lowercase} class:invalid-option={!passwordChecker.lowercase}></div> 
+							Lowercase characters</ol>
+						<ol class="uppercase">
+							<div class:valid-option={passwordChecker.uppercase} class:invalid-option={!passwordChecker.uppercase}></div>
+							Uppercase characters</ol>
+						<ol class="numbers">
+							<div  class:valid-option={passwordChecker.number} class:invalid-option={!passwordChecker.number}></div>
+							Numeral Characters</ol>
+						<ol class="special">
+							<div  class:valid-option={passwordChecker.symbol} class:invalid-option={!passwordChecker.symbol}></div>
+							Special characters </ol>
+						<ol class="length">
+							<div  class:valid-option={passwordChecker.length >= 6} class:invalid-option={passwordChecker.length < 6}></div>
+							Atleast 6 characters</ol>
+					</li>
+				</div>
+			{/if}
 			<div class="input-parent">
 				<label for="confirm-password">Confirm Password</label>
 				<div class="password-box">
-					<input bind:value={formData.C_password} type={!showCPassword ? "password" : "text"} id="confirm-password" name="confirm-password" onchange={() => checkPassword(formData.C_password)}/>
+					<input bind:value={formData.C_password} type={!showCPassword ? "password" : "text"} id="confirm-password" name="confirm-password" />
 					<button type="button" onclick={() => showCPassword = !showCPassword}>
 						{#if !showCPassword} 
 						<img width="24" height="24" src="https://img.icons8.com/material-outlined/24/visible--v1.png" alt="show"/>
@@ -194,6 +201,7 @@
 		flex-direction: row;
 		justify-content: space-between;
 		position: relative;
+		width:22rem;
 	}
 
 	.password-box button {
@@ -204,6 +212,7 @@
 		position: absolute;
 		right: 1rem;
 		top: .5rem;
+
 	}
 
 	h2 {
@@ -231,13 +240,22 @@
 		font-size: 2rem;
 		font-weight: 100;
 	}
+	.invalid-password-container {
+		display: flex;
+		align-items: center;
+		position: relative;
+		right: 5rem;
+	}
 
 	.invalid-password-container li {
 		display: grid;
-		grid-template-columns: 20rem 20rem;
-		grid-template-rows:5rem 5rem;
+		/* border: hotpink 1px solid; */
+		padding: 0;
+		margin: 0;
+		grid-template-columns: 15rem 15rem;
+		grid-template-rows:2rem 3rem;
 		align-items: center;
-
+		text-align: left;
 	}
 	.invalid-password-container li ol {
 		display: flex;
@@ -245,6 +263,15 @@
 		align-items: center;
 		text-align: center;
 		gap: .5rem;
+		margin: 0;
+		pad: 0;
+		/* border: green 1px solid; */
+		font-size: 16px;
+	}
+
+	.invalid-password-container li ol:last-child {
+		position: relative;
+		left: 7.5rem;
 	}
 	.invalid-password-container li ol div {
 		width: .5rem;
