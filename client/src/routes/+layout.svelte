@@ -40,9 +40,9 @@
 		<!-- svelte-ignore a11y_missing_attribute -->
 		<img class="pfp" src={userData?.Profile_picture} />
 	</button>
+	<button class="notification-button" onclick={() => showNotifications = !showNotifications}><img class="notification-bell" src="/icons/notification_bell.svg" alt="notification"></button>
 {/if}
 
-<button class="notification-button" onclick={() => showNotifications = !showNotifications}><img class="notification-bell" src="/icons/notification_bell.svg" alt="notification"></button>
 
 {#if showNotifications}
 <div class="notification">

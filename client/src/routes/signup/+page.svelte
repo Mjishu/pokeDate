@@ -1,14 +1,21 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
 	import { CreateUser } from '../../helpers/users';
+	import {ValidatePassword} from "../../helpers/validation"
+	import type {StrongPassword} from "../../helpers/validation"
 
-	let formData = {
+	let invalidPassword: boolean = $state(false)
+	let showPassword: boolean = $state(false)
+	let showCPassword: boolean = $state(false)
+	
+	let formData = $state({
 		Username: '',
 		Email: '',
 		Password: '',
 		C_password: '',
 		Is_organization: false
-	};
+	});
+	let passwordChecker: StrongPassword = $state({symbol:false, uppercase:false,lowercase:false, length: formData.Password.length, isLength: false, number:false})
 
 	async function submitForm(e: Event) {
 		e.preventDefault();
@@ -16,7 +23,38 @@
 			goto('/');
 		}
 	}
+
+	function checkPassword(password: string) {
+		for(const pass of Object.values(ValidatePassword(password))) {
+			if (pass === false) {
+				console.log(`${pass} is false`)
+				invalidPassword = true
+			} 
+		}
+		invalidPassword = false
+	}
 </script>
+
+<!-- how to get classes to update each time passwordChcker changes -->
+<div class="invalid-password-container"> 
+	<li>
+		<ol class="lowercase">
+			<div class:valid-option={passwordChecker.lowercase} class:invalid-option={!passwordChecker.lowercase}></div> 
+			Password has lowercase characters</ol>
+		<ol class="uppercase">
+			<div class:valid-option={passwordChecker.uppercase} class:invalid-option={!passwordChecker.uppercase}></div>
+			Password has uppercase characters</ol>
+		<ol class="numbers">
+			<div  class:valid-option={passwordChecker.number} class:invalid-option={!passwordChecker.number}></div>
+			Password has numbers</ol>
+		<ol class="special">
+			<div  class:valid-option={passwordChecker.symbol} class:invalid-option={!passwordChecker.symbol}></div>
+			Password has special characters </ol>
+		<ol class="length">
+			<div  class:valid-option={passwordChecker.length >= 6} class:invalid-option={passwordChecker.length < 6}></div>
+			Password is atleast 6 characters</ol>
+	</li>
+</div>
 
 <main>
 	<h2>Create Account</h2>
@@ -33,16 +71,29 @@
 			</div>
 			<div class="input-parent">
 				<label for="password">Password</label>
-				<input bind:value={formData.Password} type="password" id="password" name="password" />
+				<div class="password-box">
+					<input bind:value={formData.Password} type={!showPassword ? "password" : "text"} id="password" name="password" onchange={() => checkPassword(formData.Password)}/>
+					<button type="button" onclick={() => showPassword = !showPassword}>
+						{#if !showPassword} 
+						<img width="24" height="24" src="https://img.icons8.com/material-outlined/24/visible--v1.png" alt="show"/>
+						{:else}
+						<img width="24" height="24" src="https://img.icons8.com/material-outlined/24/hide.png" alt="hide"/>
+						{/if}
+					</button>
+				</div>
 			</div>
 			<div class="input-parent">
 				<label for="confirm-password">Confirm Password</label>
-				<input
-					bind:value={formData.C_password}
-					type="password"
-					id="confirm-password"
-					name="confirm-password"
-				/>
+				<div class="password-box">
+					<input bind:value={formData.C_password} type={!showCPassword ? "password" : "text"} id="confirm-password" name="confirm-password" onchange={() => checkPassword(formData.C_password)}/>
+					<button type="button" onclick={() => showCPassword = !showCPassword}>
+						{#if !showCPassword} 
+						<img width="24" height="24" src="https://img.icons8.com/material-outlined/24/visible--v1.png" alt="show"/>
+						{:else}
+						<img width="24" height="24" src="https://img.icons8.com/material-outlined/24/hide.png" alt="hide"/>
+						{/if}
+					</button>
+				</div>
 			</div>
 			<div class="input-paren">
 				<label for="is_org">Are you an Organization?</label>
@@ -138,6 +189,23 @@
 		border-bottom: 1px solid #747caf;
 	}
 
+	.password-box{
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		position: relative;
+	}
+
+	.password-box button {
+		border: none;
+		background: transparent;
+		width: fit-content;
+		height: fit-content;
+		position: absolute;
+		right: 1rem;
+		top: .5rem;
+	}
+
 	h2 {
 		font-size: 4rem;
 		letter-spacing: 10%;
@@ -162,5 +230,33 @@
 	p {
 		font-size: 2rem;
 		font-weight: 100;
+	}
+
+	.invalid-password-container li {
+		display: grid;
+		grid-template-columns: 20rem 20rem;
+		grid-template-rows:5rem 5rem;
+		align-items: center;
+
+	}
+	.invalid-password-container li ol {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		text-align: center;
+		gap: .5rem;
+	}
+	.invalid-password-container li ol div {
+		width: .5rem;
+		height: .5rem;
+		border-radius: 50%;
+		border: none;
+		background: rgb(75, 75, 75);
+	}
+	.invalid-option {
+		background-color: rgb(165, 54, 47) !important;
+	}	
+	.valid-option {
+		background-color: rgb(86, 179, 86) !important;
 	}
 </style>
