@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -14,6 +15,43 @@ import (
 	"github.com/mjishu/pokeDate/auth"
 	"github.com/mjishu/pokeDate/database"
 )
+
+func AnimalController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret, s3Bucket string, s3Client *s3.Client) {
+	SetHeader(w)
+
+	switch r.Method {
+	case http.MethodPost:
+		CreateAnimal(w, r, pool)
+	case http.MethodPut: //* Update animal area
+		UpdateAnimal(w, r, pool)
+	case http.MethodDelete:
+		DeleteAnimal(w, r, pool, jwtSecret, s3Bucket, s3Client)
+	}
+}
+
+func ShotController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
+	switch r.Method {
+	case http.MethodGet:
+		w.Header().Set("Content-Type", "application/json")
+		if err := json.NewEncoder(w).Encode(database.GetAllShots(pool)); err != nil {
+			http.Error(w, "unable to encode response", http.StatusInternalServerError)
+		}
+	case http.MethodDelete:
+		var shot database.NewAnimalShot
+		err := checkBody(w, r, &shot)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, "could not find shot in body", err)
+			return
+		}
+
+		err = database.DeleteAnimalShots(pool, shot)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, "could not delete shot", err)
+			return
+		}
+		respondWithJSON(w, http.StatusOK, nil)
+	}
+}
 
 func GetImagePublicId(image_url string) string {
 	splitString := strings.Split(image_url, "\\")
@@ -48,32 +86,24 @@ func CreateAnimal(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool) {
 
 	respondWithJSON(w, http.StatusOK, response)
 }
+func UpdateAnimal(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool) {
+	SetHeader(w)
 
-func MainAnimalOperations(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool) {
-	switch r.Method {
-	case http.MethodPost:
-		CreateAnimal(w, r, pool)
-	case http.MethodPut: //* Update animal area
-		SetHeader(w)
-
-		var updatedAnimal database.Animal
-		err := checkBody(w, r, &updatedAnimal)
-		if err != nil {
-			respondWithError(w, http.StatusBadRequest, "could not find animal in body", err)
-			return
-		}
-
-		for i, values := range updatedAnimal.Shots {
-			fmt.Printf("Shot number: %v\n", i)
-			newShot := database.NewAnimalShot{Animal_id: updatedAnimal.Id, Shot_id: values.Id, Date_given: values.Date_given, Date_due: values.Next_due}
-			fmt.Printf("the new shot is: %v\n", newShot)
-			database.InsertAnimalShots(pool, newShot)
-		}
-		fmt.Printf("the animal given is %v\n", updatedAnimal)
-		//!!
-		database.UpdateAnimal(pool, updatedAnimal) //TODO UPDATE THIS TO USE UPDATEANIMAL NOT 2
-		//!!
-		fmt.Fprintf(w, "Animal updated successfully")
+	var updatedAnimal database.Animal
+	err := checkBody(w, r, &updatedAnimal)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not find animal in body", err)
+		return
+	}
+	fmt.Printf("updated animal is %v\n", updatedAnimal)
+	for _, values := range updatedAnimal.Shots {
+		newShot := database.NewAnimalShot{Animal_id: updatedAnimal.Id, Shot_id: values.Id, Date_given: values.Date_given, Date_due: values.Next_due}
+		database.InsertAnimalShots(pool, newShot)
+	}
+	err = database.UpdateAnimal(pool, updatedAnimal)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "cannot update animal", err)
+		return
 	}
 }
 
@@ -99,20 +129,6 @@ func GetAnimal(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSe
 	}
 
 	respondWithJSON(w, http.StatusOK, animal)
-}
-
-func AnimalController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret, s3Bucket string, s3Client *s3.Client) {
-	SetHeader(w)
-
-	switch r.URL.Path {
-	case "/animals":
-		MainAnimalOperations(w, r, pool)
-	case "/animals/delete":
-		switch r.Method {
-		case http.MethodDelete:
-			DeleteAnimal(w, r, pool, jwtSecret, s3Bucket, s3Client)
-		}
-	}
 }
 
 func DeleteAnimal(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret, s3Bucket string, s3Client *s3.Client) {

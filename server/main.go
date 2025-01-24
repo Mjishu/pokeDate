@@ -102,12 +102,15 @@ func main() {
 	mux.HandleFunc("/cards", func(w http.ResponseWriter, r *http.Request) {
 		controller.CardsController(w, r, pool, config.jwt_secret)
 	})
-	mux.HandleFunc("/animals/", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/animals", func(w http.ResponseWriter, r *http.Request) {
 		controller.AnimalController(w, r, pool, jwt_secret, config.s3Bucket, config.s3Client)
+	})
+	mux.HandleFunc("/shots/animals", func(w http.ResponseWriter, r *http.Request) {
+
 	})
 
 	mux.HandleFunc("/shots", func(w http.ResponseWriter, r *http.Request) {
-		controller.ShotController(w, r, pool)
+		controller.ShotController(w, r, pool, config.jwt_secret)
 	})
 	mux.HandleFunc("/refresh", func(w http.ResponseWriter, r *http.Request) {
 		controller.RefreshToken(w, r, pool, config.jwt_secret)

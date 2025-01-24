@@ -99,19 +99,16 @@ func InsertAnimal(pool *pgxpool.Pool, animal Animal) {
 	inserQueryFail(err, "inserting animal")
 }
 
-func InsertAnimalShots(pool *pgxpool.Pool, shot NewAnimalShot) {
+func InsertAnimalShots(pool *pgxpool.Pool, shot NewAnimalShot) { //* work on this to insert new shot when editing.
 
-	//! This isn't working properly to check if shot exists, i create new shot and it goes to the isShot if statement
 	_, isShot := GetShot(pool, shot.Animal_id, shot.Shot_id)
 	if isShot {
-		fmt.Println("is shot is true")
 		_, err := pool.Exec(context.TODO(), `UPDATE animal_shots SET next_due = $1, date_given = $2 WHERE animal_id = $3 AND shots_id = $4 `, shot.Date_due, shot.Date_given, shot.Animal_id, shot.Shot_id)
 		inserQueryFail(err, "Updating shot")
 		return
 	}
 
 	//* CREATE NEW
-	fmt.Println("isShot was false")
 	sql := `
 		INSERT INTO animal_shots(animal_id, shots_id, date_given, next_due) VALUES ($1, $2, $3, $4)
 		`
@@ -119,13 +116,35 @@ func InsertAnimalShots(pool *pgxpool.Pool, shot NewAnimalShot) {
 	inserQueryFail(err, "Inserting shot")
 }
 
-func UpdateAnimal(pool *pgxpool.Pool, animal Animal) error {
+func DeleteAnimalShots(pool *pgxpool.Pool, shot NewAnimalShot) error {
 	sql := `
-		UPDATE animals set name = $1, date_of_birth = $2, price = $3, available = $4, image_src = $5 WHERE id = $5
+	DELETE FROM animal_shots WHERE animal_id=$1 AND shots_id=$2`
+
+	_, err := pool.Exec(context.TODO(), sql, shot.Animal_id, shot.Shot_id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+func UpdateAnimalImage(pool *pgxpool.Pool, animalId uuid.UUID, imageSrc string) error {
+	sql := `UPDATE animals SET image_src = $1 WHERE id = $2`
+
+	_, err := pool.Exec(context.TODO(), sql, animalId, imageSrc)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func UpdateAnimal(pool *pgxpool.Pool, animal Animal) error {
+	fmt.Printf("animal recieved is %v\n", animal)
+	sql := `
+		UPDATE animals set name = $1, date_of_birth = $2, price = $3, available = $4 WHERE id = $5
 	`
 
-	_, err := pool.Exec(context.TODO(), sql, animal.Name, animal.Date_of_birth, animal.Price, animal.Available, animal.Image_src, animal.Id)
+	_, err := pool.Exec(context.TODO(), sql, animal.Name, animal.Date_of_birth, animal.Price, animal.Available, animal.Id)
 	if err != nil {
+		fmt.Println("error!")
 		return err
 	}
 	return nil

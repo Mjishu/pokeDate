@@ -65,9 +65,13 @@
 			}))
 		};
 
-		// await updateAnimalById(currentId, formattedAnimal);
+		await updateAnimalById(currentId, formattedAnimal);
 		console.log(formattedAnimal);
 		closeForm();
+	}
+
+	async function RemoveShot() {
+		console.log("removing shot")
 	}
 </script>
 
@@ -134,12 +138,13 @@
 						<label for="shot-due">Next Due</label>
 						<input type="date" name="shot-due" bind:value={updatedAnimal.Shots[i].Next_due} />
 					</div>
+					<button class="delete-shot" type="button" onclick={RemoveShot}>Remove</button>
 				</div>
 			{/each}
 			<button type="button" onclick={addNewShot}>+</button>
 		</div>
 		<hr />
-		<button type="submit">Create</button>
+		<button type="submit">Edit</button>
 		<button type="button" onclick={closeForm}>Cancel</button>
 	</form>
 </main>

@@ -155,7 +155,7 @@ export async function DeleteAnimalById(id: string): Promise<void> {
             body: JSON.stringify({ id })
       }
       try {
-            const response = await fetch("/api/animals/delete", fetchParams)
+            const response = await fetch("/api/animals", fetchParams)
             const data = await response.json()
             return data            
       } catch (error) {
