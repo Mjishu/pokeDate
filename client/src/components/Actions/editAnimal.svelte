@@ -65,7 +65,7 @@
 			}))
 		};
 
-		await updateAnimalById(currentId, formattedAnimal);
+		// await updateAnimalById(currentId, formattedAnimal);
 		console.log(formattedAnimal);
 		closeForm();
 	}

@@ -1,15 +1,14 @@
 package controller
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/joho/godotenv"
 	"github.com/mjishu/pokeDate/auth"
@@ -27,14 +26,19 @@ func CreateAnimal(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool) {
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Println("The else in method post was called")
 
-	animal := GetAnimalFromBody(w, r)
+	var animal database.Animal
+	err := checkBody(w, r, &animal)
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "could not find animal in body", err)
+		return
+	}
 
 	database.InsertAnimal(pool, animal)
 
 	animal_id := database.GetAnimalByName(pool, animal.Name)
 
 	for _, values := range animal.Shots {
-		newShot := database.NewAnimalShot{Animal_id: animal_id, Shot_id: values.Shot_id, Date_given: values.Date_given, Date_due: values.Date_due}
+		newShot := database.NewAnimalShot{Animal_id: animal_id, Shot_id: values.Id, Date_given: values.Date_given, Date_due: values.Next_due}
 		database.InsertAnimalShots(pool, newShot)
 	}
 
@@ -49,20 +53,25 @@ func MainAnimalOperations(w http.ResponseWriter, r *http.Request, pool *pgxpool.
 	switch r.Method {
 	case http.MethodPost:
 		CreateAnimal(w, r, pool)
-	case http.MethodPut:
-		w.Header().Set("Content-Type", "application/json")
+	case http.MethodPut: //* Update animal area
+		SetHeader(w)
 
-		updatedAnimal := GetUpdatedAnimalFromBody(w, r)
+		var updatedAnimal database.Animal
+		err := checkBody(w, r, &updatedAnimal)
+		if err != nil {
+			respondWithError(w, http.StatusBadRequest, "could not find animal in body", err)
+			return
+		}
 
 		for i, values := range updatedAnimal.Shots {
 			fmt.Printf("Shot number: %v\n", i)
-			newShot := database.NewAnimalShot{Animal_id: updatedAnimal.Id, Shot_id: values.Shot_id, Date_given: values.Date_given, Date_due: values.Date_due}
+			newShot := database.NewAnimalShot{Animal_id: updatedAnimal.Id, Shot_id: values.Id, Date_given: values.Date_given, Date_due: values.Next_due}
 			fmt.Printf("the new shot is: %v\n", newShot)
 			database.InsertAnimalShots(pool, newShot)
 		}
 		fmt.Printf("the animal given is %v\n", updatedAnimal)
 		//!!
-		database.UpdateAnimal2(pool, updatedAnimal) //TODO UPDATE THIS TO USE UPDATEANIMAL NOT 2
+		database.UpdateAnimal(pool, updatedAnimal) //TODO UPDATE THIS TO USE UPDATEANIMAL NOT 2
 		//!!
 		fmt.Fprintf(w, "Animal updated successfully")
 	}
@@ -121,8 +130,9 @@ func DeleteAnimal(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jw
 		return
 	}
 
-	hasId, id := checkForBodyItem("id", w, r)
-	if !hasId {
+	var id uuid.UUID // !changed this from checkbody might break?
+	err = checkBody(w, r, &id)
+	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "could not find id in body", err)
 		return
 	}
@@ -164,41 +174,4 @@ func GetFrontendURL() string {
 		log.Fatal("DATABASE_URL not set in .env")
 	}
 	return frontendURL
-}
-
-func GetAnimalFromBody(w http.ResponseWriter, r *http.Request) database.NewAnimal {
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		fmt.Printf("error trying to read body: %v\n", err)
-		http.Error(w, "unable to read body: %v\n", http.StatusInternalServerError)
-		return database.NewAnimal{}
-	}
-	defer r.Body.Close()
-
-	var animal database.NewAnimal
-	err = json.Unmarshal(body, &animal)
-	if err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
-		return database.NewAnimal{}
-	}
-
-	return animal
-}
-
-func GetUpdatedAnimalFromBody(w http.ResponseWriter, r *http.Request) database.UpdateAnimalStruct {
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "unable to read body", http.StatusInternalServerError)
-		return database.UpdateAnimalStruct{}
-	}
-	defer r.Body.Close()
-
-	var animal database.UpdateAnimalStruct
-	err = json.Unmarshal(body, &animal)
-	if err != nil {
-		http.Error(w, "Invalid JSON", http.StatusBadRequest)
-		return database.UpdateAnimalStruct{}
-	}
-	// fmt.Printf("Animal inside GAFB is %v\n", animal)
-	return animal
 }

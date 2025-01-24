@@ -5,9 +5,16 @@
       import CreateAnimal from "./Actions/createAnimal.svelte"
       import AllAnimals from "../components/allAnimals.svelte"
       import Navbar from "./Navbar.svelte";
+	import type { incomingUser, userData } from "../helpers/users";
+      import { GetCurrentUser } from "../helpers/users";
 
       let showNewAnimal = $state<boolean>(false);
       let searchTerm = $state<string>("Name");
+      let currentOrg: incomingUser | null = $state(null)
+
+      onMount(async() => {
+            currentOrg = await GetCurrentUser()
+      })
 </script>
 
 <!-- put createANimal behind a button  -->
@@ -15,7 +22,7 @@
       <Navbar />
       <div class="content">
             <div class="filter-section">
-                  <h1>Org Name</h1>
+                  <h1>{currentOrg?.Username}</h1>
                   <div class="operation-bar">
                         <div class="search-bar">
                               <div class="search-toggle">

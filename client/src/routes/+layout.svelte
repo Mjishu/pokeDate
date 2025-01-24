@@ -84,6 +84,7 @@
 		left: 50vh;
 		top: 50vh;
 		background: rgb(218, 160, 189);
+		z-index: 10;
 		width: 20rem;
 		height: 25rem;
 		border-radius: 10px;

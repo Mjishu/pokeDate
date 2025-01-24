@@ -174,7 +174,3 @@ export async function GetAllShots(): Promise<Shot[]> {
             return []
       }
 }
-
-export async function createAnimalImage() {
-      console.log("create animal image")
-}

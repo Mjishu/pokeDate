@@ -6,6 +6,7 @@
 		Username: '',
 		Password: ''
 	});
+	let showPassword:boolean = $state(false)
 
 	let logos = [
 		{ name: 'google', path: '/icons/Google.svg' },
@@ -32,8 +33,16 @@
 			</div>
 
 			<div class="input-parent">
-				<label for="password">Password</label>
-				<input bind:value={formData.Password} type="password" id="password" name="password" />
+				<div class="password-box">
+					<input bind:value={formData.Password} type={!showPassword ? "password" : "text"} id="password" name="password"/>
+					<button type="button" onclick={() => showPassword = !showPassword}>
+						{#if !showPassword} 
+						<img width="24" height="24" src="https://img.icons8.com/material-outlined/24/visible--v1.png" alt="show"/>
+						{:else}
+						<img width="24" height="24" src="https://img.icons8.com/material-outlined/24/hide.png" alt="hide"/>
+						{/if}
+					</button>
+				</div>
 			</div>
 		</div>
 
@@ -135,5 +144,32 @@
 	p {
 		font-size: 2rem;
 		font-weight: 100;
+	}
+
+	.password-box{
+		display: flex;
+		flex-direction: row;
+		justify-content: space-between;
+		position: relative;
+		width:22rem;
+	
+	}
+
+	.password-box button {
+		border: none;
+
+		background: transparent;
+		width: fit-content;
+		height: fit-content;
+		position: absolute;
+		right: 1rem;
+		top: .5rem;
+	}
+
+	.password-box button img {
+		width: 2rem;
+		height: 2rem;
+		position: relative;
+		top: .25rem;
 	}
 </style>

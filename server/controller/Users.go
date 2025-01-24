@@ -39,7 +39,7 @@ func UserController(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, 
 			UpdateUser(w, r, pool, jwtSecret)
 		}
 		return
-	default: // ! THIS WONT CHANGE FROM A GET REQ?
+	default:
 		fmt.Println("This is the default path")
 		return
 	}

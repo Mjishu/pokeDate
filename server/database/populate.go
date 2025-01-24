@@ -2,40 +2,11 @@ package database
 
 import (
 	"context"
-	"time"
 
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 // shot needs name description and id
-
-type Shot struct {
-	Id          int
-	Description string
-	Name        string
-}
-
-type AnimalShot struct {
-	Id          int
-	Description string
-	Name        string
-	Next_due    time.Time
-	Date_given  time.Time
-}
-
-type Animal struct {
-	Id            uuid.UUID
-	Name          string
-	Species       string
-	Date_of_birth time.Time
-	Sex           string
-	Price         *float32
-	Available     bool
-	Breed         string
-	Image_src     *string
-	Shots         []AnimalShot
-}
 
 func PopulateDB(ctx context.Context, pool *pgxpool.Pool) {
 	makeAnimals(ctx, pool)
