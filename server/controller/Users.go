@@ -211,6 +211,7 @@ func checkBody(w http.ResponseWriter, r *http.Request, user interface{}) error {
 	if err != nil {
 		http.Error(w, "unable to unmarshal json", http.StatusInternalServerError)
 	}
+	fmt.Printf("checkBody info is %v\n", user)
 	return err
 }
 

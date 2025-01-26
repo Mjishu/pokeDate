@@ -88,10 +88,10 @@ func main() {
 	mux.HandleFunc("POST /users/progress/reset", func(w http.ResponseWriter, r *http.Request) {
 		controller.ResetSeenProgress(w, r, pool, config.jwt_secret)
 	})
-
 	mux.HandleFunc("/organizations/", func(w http.ResponseWriter, r *http.Request) {
 		controller.OrganizationController(w, r, pool, config.jwt_secret, s3Bucket, s3Region)
 	})
+
 	mux.HandleFunc("POST /animals/{animalID}", func(w http.ResponseWriter, r *http.Request) {
 		controller.GetAnimal(w, r, pool, config.jwt_secret)
 	})

@@ -99,13 +99,14 @@ func InsertAnimal(pool *pgxpool.Pool, animal Animal) {
 	inserQueryFail(err, "inserting animal")
 }
 
-func InsertAnimalShots(pool *pgxpool.Pool, shot NewAnimalShot) { //* work on this to insert new shot when editing.
+func InsertAnimalShots(pool *pgxpool.Pool, shot NewAnimalShot) error { //* work on this to insert new shot when editing.
 
 	_, isShot := GetShot(pool, shot.Animal_id, shot.Shot_id)
 	if isShot {
 		_, err := pool.Exec(context.TODO(), `UPDATE animal_shots SET next_due = $1, date_given = $2 WHERE animal_id = $3 AND shots_id = $4 `, shot.Date_due, shot.Date_given, shot.Animal_id, shot.Shot_id)
-		inserQueryFail(err, "Updating shot")
-		return
+		if err != nil {
+			return err
+		}
 	}
 
 	//* CREATE NEW
@@ -113,7 +114,10 @@ func InsertAnimalShots(pool *pgxpool.Pool, shot NewAnimalShot) { //* work on thi
 		INSERT INTO animal_shots(animal_id, shots_id, date_given, next_due) VALUES ($1, $2, $3, $4)
 		`
 	_, err := pool.Exec(context.TODO(), sql, shot.Animal_id, shot.Shot_id, shot.Date_given, shot.Date_due)
-	inserQueryFail(err, "Inserting shot")
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func DeleteAnimalShots(pool *pgxpool.Pool, shot NewAnimalShot) error {

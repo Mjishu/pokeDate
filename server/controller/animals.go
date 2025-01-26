@@ -75,17 +75,13 @@ func CreateAnimal(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool) {
 
 	animal_id := database.GetAnimalByName(pool, animal.Name)
 
-	for _, values := range animal.Shots {
-		newShot := database.NewAnimalShot{Animal_id: animal_id, Shot_id: values.Id, Date_given: values.Date_given, Date_due: values.Next_due}
-		database.InsertAnimalShots(pool, newShot)
-	}
-
 	response := map[string]interface{}{
 		"Animal_id": animal_id,
 	}
 
 	respondWithJSON(w, http.StatusOK, response)
 }
+
 func UpdateAnimal(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool) {
 	SetHeader(w)
 
@@ -131,6 +127,10 @@ func GetAnimal(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSe
 	respondWithJSON(w, http.StatusOK, animal)
 }
 
+type AnimalId struct {
+	Id uuid.UUID `json:"id"`
+}
+
 func DeleteAnimal(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret, s3Bucket string, s3Client *s3.Client) {
 	SetHeader(w)
 
@@ -146,20 +146,20 @@ func DeleteAnimal(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jw
 		return
 	}
 
-	var id uuid.UUID // !changed this from checkbody might break?
-	err = checkBody(w, r, &id)
+	var animalId AnimalId // !changed this from checkbody might break?
+	err = checkBody(w, r, &animalId)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "could not find id in body", err)
 		return
 	}
 
-	storedAnimal, err := database.GetAnimal(pool, id)
+	storedAnimal, err := database.GetAnimal(pool, animalId.Id)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "could not get stored animal from database", err)
 		return
 	}
 
-	err = database.DeleteAnimal(pool, id)
+	err = database.DeleteAnimal(pool, animalId.Id)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "could not delete animal", err)
 		return

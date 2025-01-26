@@ -34,7 +34,7 @@
             currentId = undefined;
             showDeleteForm = false;
             await DeleteAnimalById(id);
-            location.reload()
+            // location.reload()
       }
 </script>
 
@@ -103,6 +103,7 @@
                         >
                         <button
                               onclick={async () => await deleteEntry(currentId)}
+                              type="button"
                               >Delete</button
                         >
                   </div>

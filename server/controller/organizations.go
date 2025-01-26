@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -20,12 +21,12 @@ func OrganizationController(w http.ResponseWriter, r *http.Request, pool *pgxpoo
 	case "/organizations/animals/create":
 		switch r.Method {
 		case http.MethodPost:
-			CreateNewAnimal(w, r, pool, jwtSecret)
+			CreateOrganizationAnimal(w, r, pool, jwtSecret)
 		}
 	}
 }
 
-func CreateNewAnimal(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
+func CreateOrganizationAnimal(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jwtSecret string) {
 	SetHeader(w)
 
 	token, err := auth.GetBearerToken(r.Header)
@@ -57,6 +58,18 @@ func CreateNewAnimal(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool,
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "could not create organization animal link", err)
 		return
+	}
+
+	fmt.Printf("animal shots are %v\n", incomingAnimal.Shots)
+
+	for _, values := range incomingAnimal.Shots {
+		fmt.Printf("adding this shot %v\n", values.Name)
+		newShot := database.NewAnimalShot{Animal_id: storedAnimalId, Shot_id: values.Id, Date_given: values.Date_given, Date_due: values.Next_due}
+		err = database.InsertAnimalShots(pool, newShot)
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, "could not create shot", err)
+			return
+		}
 	}
 
 	response := map[string]interface{}{

@@ -61,7 +61,8 @@ export async function createAnimal(animal: NewAnimal) { //? this needs to respon
       if (animal == undefined) {
             console.error("cannot make an empty animal")
             return
-      }
+      } 
+      console.log(animal)
       const fetchParams = {
             method: "POST",
             headers: {
@@ -146,6 +147,7 @@ export async function updateAnimalById(id: string, updatedAnimal: UpdatedAnimal)
 
 export async function DeleteAnimalById(id: string): Promise<void> {
       await GetTokens()
+
       const fetchParams = {
             method: "DELETE",
             headers: {
@@ -154,6 +156,8 @@ export async function DeleteAnimalById(id: string): Promise<void> {
             },
             body: JSON.stringify({ id })
       }
+      console.log(fetchParams.body)
+
       try {
             const response = await fetch("/api/animals", fetchParams)
             const data = await response.json()
