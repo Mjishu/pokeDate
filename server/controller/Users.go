@@ -210,9 +210,9 @@ func checkBody(w http.ResponseWriter, r *http.Request, user interface{}) error {
 	err = json.Unmarshal(body, user)
 	if err != nil {
 		http.Error(w, "unable to unmarshal json", http.StatusInternalServerError)
+		return err
 	}
-	fmt.Printf("checkBody info is %v\n", user)
-	return err
+	return nil
 }
 
 // Modify the existing functions to use the new checkUser function

@@ -148,6 +148,7 @@ func DeleteAnimal(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jw
 
 	var animalId AnimalId // !changed this from checkbody might break?
 	err = checkBody(w, r, &animalId)
+	fmt.Printf("animal id is %v\n", animalId.Id)
 	if err != nil {
 		respondWithError(w, http.StatusBadRequest, "could not find id in body", err)
 		return
@@ -165,7 +166,8 @@ func DeleteAnimal(w http.ResponseWriter, r *http.Request, pool *pgxpool.Pool, jw
 		return
 	}
 
-	if storedAnimal.Image_src != nil || *storedAnimal.Image_src != "" {
+	if storedAnimal.Image_src != nil {
+		fmt.Println("image src for deleted animal is not nil")
 		err = DeleteS3Object(w, r, s3Bucket, *storedAnimal.Image_src, "animals", s3Client) //! Issue with the key (image_src)
 		if err != nil {
 			respondWithError(w, http.StatusInternalServerError, "could not delete image in s3", err)

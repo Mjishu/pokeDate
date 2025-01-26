@@ -60,8 +60,6 @@ func CreateOrganizationAnimal(w http.ResponseWriter, r *http.Request, pool *pgxp
 		return
 	}
 
-	fmt.Printf("animal shots are %v\n", incomingAnimal.Shots)
-
 	for _, values := range incomingAnimal.Shots {
 		fmt.Printf("adding this shot %v\n", values.Name)
 		newShot := database.NewAnimalShot{Animal_id: storedAnimalId, Shot_id: values.Id, Date_given: values.Date_given, Date_due: values.Next_due}
