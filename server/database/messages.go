@@ -28,6 +28,12 @@ type Messages struct {
 	From_user       User
 }
 
+type WSMessage struct {
+	Body    string    `json:"body"`
+	Id      uuid.UUID `json:"id"`
+	User_id uuid.UUID `json:"user_id"`
+}
+
 type Conversation_member struct {
 	Member_id       uuid.UUID
 	Conversation_id uuid.UUID // References Conversation
@@ -237,6 +243,24 @@ func CreateMessage(pool *pgxpool.Pool, userId uuid.UUID, messageData Messages) e
 		return err
 	}
 
+	return nil
+}
+
+func CreateWSMessage(pool *pgxpool.Pool, data WSMessage) error {
+	exists, err := UserMessageExists(pool, data.User_id)
+	if err != nil {
+		return err
+	}
+	if !exists {
+		return errors.New("user message does not exist")
+	}
+
+	sql := `INSERT INTO messages(from_id, message_text, conversation_id) VALUES($1,$2,$3)`
+
+	_, err = pool.Exec(context.TODO(), sql, data.User_id, data.Body, data.Id)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 

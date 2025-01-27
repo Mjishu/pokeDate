@@ -10,6 +10,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/joho/godotenv"
+	"github.com/lxzan/gws"
 	"github.com/mjishu/pokeDate/controller"
 	"github.com/mjishu/pokeDate/database"
 )
@@ -78,6 +79,15 @@ func main() {
 
 	_, pool := database.CreateConnection()
 
+	handler := &Handler{pool: pool}
+
+	// web socket
+	upgrader := gws.NewUpgrader(handler, &gws.ServerOption{
+		ParallelEnabled:   true,
+		Recovery:          gws.Recovery,
+		PermessageDeflate: gws.PermessageDeflate{Enabled: true},
+	})
+
 	// user info
 	mux.HandleFunc("/users/", func(w http.ResponseWriter, r *http.Request) {
 		controller.UserController(w, r, pool, config.jwt_secret, config.s3Bucket, config.s3Region)
@@ -142,6 +152,18 @@ func main() {
 
 	mux.HandleFunc("GET /notifications", func(w http.ResponseWriter, r *http.Request) {
 		controller.GetNotifications(w, r, pool, config.jwt_secret)
+	})
+
+	//* WebSocket
+	mux.HandleFunc("/connect", func(w http.ResponseWriter, r *http.Request) {
+		socket, err := upgrader.Upgrade(w, r)
+		if err != nil {
+			return
+		}
+		go func() {
+			socket.ReadLoop()
+		}()
+		fmt.Println("connection was made")
 	})
 
 	database.Database(pool)

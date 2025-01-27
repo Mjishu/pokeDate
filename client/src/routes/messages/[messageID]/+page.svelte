@@ -4,21 +4,25 @@
 	import {page} from '$app/stores'
 	import { onMount } from 'svelte';
 	import Message from '../../../components/message.svelte';
+	import { GetCurrentUser } from '../../../helpers/users';
+	import type {incomingUser} from "../../../helpers/users"
 	
 	// const id = $page.params.messageID
-	let id: string;
-
+	var id: string;
 	$: id = $page.params.messageID;
 
-	onMount(() => {
-		console.log("message id is here")
-		console.log(id)
+    	let currentUser: incomingUser | null = null;
+
+	onMount(async () => {
+		currentUser = await GetCurrentUser()
 	})
 </script>
 
 <h1>Messages</h1>
 
-<Message {id} />
+{#if currentUser}
+	<Message {id} user_id={currentUser.Id} />
+{/if}
 
 <style>
 </style>

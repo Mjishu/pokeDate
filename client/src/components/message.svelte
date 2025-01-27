@@ -3,11 +3,31 @@
 	import { GetMessage, SendMessage } from '../helpers/messages';
 	import type { Messages,Conversation } from '../helpers/messages';
 
-	let { id } = $props();
+	let { id, user_id } = $props();
+	
+	type MessageWS = {
+		body: string;
+		id: string;
+		user_id: string;
+	}
 
 	let MessageData: Conversation | null = $state(null);
-	let NewMessage: string = $state('');
+	let NewMessage: MessageWS = $state({body: "", id: id, user_id: user_id});
 
+	var socketUrl = process.env.NODE_ENV === "production" ? "pokefind-server.fly.dev" : "localhost:8080";
+	var socket = new WebSocket("ws://" + socketUrl + "/connect")
+
+	socket.onopen = () =>  {
+		console.log("Status: Connected")
+	}
+
+	socket.onmessage = (e) => {
+		console.log(`message: ${e.data}\n`)
+	}
+
+	socket.onclose = () => {
+		console.log("Status: Disconnected")
+	} 
 
 	onMount(async () => {
 		MessageData = await GetMessage(id);
@@ -16,7 +36,9 @@
 
 	async function sendMessage(e: Event) {
 		e.preventDefault();
-		SendMessage(NewMessage, id)
+		socket.send(JSON.stringify(NewMessage))
+		console.log("sending message " + id )
+		// SendMessage(NewMessage, id)
 	}
 </script>
 
@@ -34,7 +56,7 @@
 	</div>
 	
 	<form onsubmit={sendMessage}>
-		<input type="text" placeholder="send a message..." bind:value={NewMessage} />
+		<input type="text" placeholder="send a message..." bind:value={NewMessage.body} />
 		<button type="submit"><img src="" alt="send message" /></button>
 	</form>
 </main>
